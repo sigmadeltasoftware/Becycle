@@ -29,6 +29,7 @@ import be.sigmadelta.becycle.address.ValidationViewState
 import be.sigmadelta.becycle.collections.CollectionsViewModel
 import be.sigmadelta.becycle.common.ui.util.ViewState
 import be.sigmadelta.becycle.home.Home
+import be.sigmadelta.becycle.settings.Settings
 import be.sigmadelta.common.util.AuthorizationKeyExpiredException
 import be.sigmadelta.common.util.SessionStorage
 import kotlinx.coroutines.*
@@ -137,7 +138,7 @@ fun Main(
     val streetsViewState by addressViewModel.streetsViewState.collectAsState()
     val validation by addressViewModel.validationViewState.collectAsState()
 
-    Crossfade(nav.current) { dest ->
+    Crossfade(nav.current, animation = tween(300)) { dest ->
         when (dest) {
             Destination.Home -> Home(
                 addresses,
@@ -160,6 +161,8 @@ fun Main(
                 onSearchStreet = addressViewModel::searchStreets,
                 onValidateAddress = addressViewModel::validateAddress
             )
+
+            Destination.Settings -> Settings()
         }
     }
 
