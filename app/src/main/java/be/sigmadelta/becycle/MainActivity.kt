@@ -29,10 +29,12 @@ import be.sigmadelta.becycle.address.ValidationViewState
 import be.sigmadelta.becycle.collections.CollectionsViewModel
 import be.sigmadelta.becycle.common.ui.util.ViewState
 import be.sigmadelta.becycle.home.Home
+import be.sigmadelta.becycle.notification.Notifications
 import be.sigmadelta.becycle.settings.Settings
 import be.sigmadelta.common.util.AuthorizationKeyExpiredException
 import be.sigmadelta.common.util.SessionStorage
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -64,9 +66,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
                     is ViewState.Error -> TODO("Failed to get new access token, try again later")
                 }
             }
+            addressViewModel.addressesViewState.observeForAutKeyErrors { accessTokenViewModel.getAccessToken() }
+            collectionsViewModel.collectionsViewState.observeForAutKeyErrors { accessTokenViewModel.getAccessToken() }
         }
-        addressViewModel.addressesViewState.value.observeForAutKeyErrors { accessTokenViewModel.getAccessToken() }
-        collectionsViewModel.collectionsViewState.value.observeForAutKeyErrors { accessTokenViewModel.getAccessToken() }
 
         setContent {
             BecycleTheme {
@@ -110,7 +112,7 @@ fun MainLayout(
                             onClick = { actions.goTo(Destination.Home) })
                         BottomNavigationItem(
                             icon = { Icon(asset = vectorResource(id = R.drawable.ic_settings)) },
-                            selected = nav.current == Destination.Settings,
+                            selected = nav.current.toString().contains("Settings"),
                             onClick = { actions.goTo(Destination.Settings) })
                         BottomNavigationItem(
                             icon = { Icon(asset = vectorResource(id = R.drawable.ic_web)) },
@@ -162,7 +164,9 @@ fun Main(
                 onValidateAddress = addressViewModel::validateAddress
             )
 
-            Destination.Settings -> Settings()
+            Destination.Settings -> Settings(actions.goTo)
+
+            Destination.SettingsNotifications -> Notifications(addresses)
         }
     }
 
@@ -219,8 +223,10 @@ private fun resetViewStates(addressViewModel: AddressViewModel) = addressViewMod
     streetsViewState.value = ListViewState.Empty()
 }
 
-fun <T> ListViewState<T>.observeForAutKeyErrors(getAccessToken: () -> Unit) {
-    if (this is ListViewState.Error && error is AuthorizationKeyExpiredException) {
-        getAccessToken()
+@ExperimentalCoroutinesApi
+suspend fun <T> MutableStateFlow<ListViewState<T>>.observeForAutKeyErrors(getAccessToken: () -> Unit) =
+    collect {
+        if (it is ListViewState.Error && it.error is AuthorizationKeyExpiredException) {
+            getAccessToken()
+        }
     }
-}

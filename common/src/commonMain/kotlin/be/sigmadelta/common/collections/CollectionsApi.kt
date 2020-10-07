@@ -19,7 +19,6 @@ class CollectionsApi(
         fromDate: String,
         untilDate: String
     ) = client.getApi<SearchQueryResult<Collection>> {
-        println("getCollections(): streetId = ${address.street.id}")
         url("$baseUrl/$COLLECTIONS_API")
         val houseNumber = Random.nextInt(1, 200) // TODO: Housenumber seems to be irrelevant in Recycle API
         sessionStorage.attachHeaders(this)

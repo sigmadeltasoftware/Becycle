@@ -17,12 +17,10 @@ import androidx.compose.ui.focus.ExperimentalFocus
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.setContent
 import be.sigmadelta.becycle.common.ui.util.ViewState
-import be.sigmadelta.becycle.di.recycleModule
 import be.sigmadelta.becycle.common.ui.theme.BecycleTheme
 import be.sigmadelta.becycle.accesstoken.AccessTokenViewModel
 import be.sigmadelta.becycle.baseheaders.BaseHeadersViewModel
 import be.sigmadelta.becycle.baseheaders.BaseHeadersViewState
-import be.sigmadelta.becycle.di.collectionsModule
 import be.sigmadelta.common.util.SessionStorage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -31,7 +29,6 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.koin.core.context.loadKoinModules
 
 @ExperimentalFocus
 @ExperimentalCoroutinesApi
@@ -45,8 +42,6 @@ class SplashScreenActivity : AppCompatActivity(), CoroutineScope by MainScope() 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        loadKoinModules(recycleModule(sessionStorage))
-        loadKoinModules(collectionsModule(sessionStorage))
 
         launch {
             baseHeadersViewModel.baseHeadersViewState.collect { viewState ->

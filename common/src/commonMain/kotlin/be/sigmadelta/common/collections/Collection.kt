@@ -11,6 +11,7 @@ data class Collection (
     val timestamp: String,
     val type: String,
     val fraction: CollectionFraction,
+    val addressId: String? = null
 ): Metadata
 
 @Serializable
