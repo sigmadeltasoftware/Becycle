@@ -1,0 +1,5 @@
+
+target 'Becycle' do
+    pod 'common', :path => '../../common'
+end
+
