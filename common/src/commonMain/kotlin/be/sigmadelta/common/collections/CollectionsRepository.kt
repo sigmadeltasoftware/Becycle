@@ -20,10 +20,8 @@ class CollectionsRepository(private val db: DB, private val collectionsApi: Coll
         query = { db.find<Collection>().all().useModels { it.toList() } },
         fetch = { collectionsApi.getCollections(address, fromDate, untilDate) },
         saveFetchResult = { result -> when(result) {
-            is ApiResponse.Success -> {
-                insertCollections(result.body.items)
-            }
-            is ApiResponse.Error -> Unit
+            is ApiResponse.Success -> insertCollections(result.body.items.map { it.copy(addressId = address.id) })
+            is ApiResponse.Error -> Response.Error<List<Collection>>(result.error)
         }}
     )
 

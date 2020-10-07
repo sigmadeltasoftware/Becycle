@@ -1,4 +1,4 @@
-package be.sigmadelta.becycle.di
+package be.sigmadelta.becycle.util
 
 import be.sigmadelta.becycle.baseheaders.BaseHeadersViewModel
 import be.sigmadelta.becycle.address.AddressViewModel
@@ -50,17 +50,17 @@ val baseHeadersModule = module {
     viewModel { BaseHeadersViewModel(get()) }
 }
 
-fun recycleModule(sessionStorage: SessionStorage) = module {
-    single { AccessTokenApi(RECYCLE_BASE_URL, get(), sessionStorage) }
-    single { AddressApi(RECYCLE_BASE_URL, get(), sessionStorage) }
+val recycleModule = module {
+    single { AccessTokenApi(RECYCLE_BASE_URL, get(), get()) }
+    single { AddressApi(RECYCLE_BASE_URL, get(), get()) }
     single { AccessTokenRepository(get()) }
     single { AddressRepository(get(), get()) }
     viewModel { AddressViewModel(get()) }
     viewModel { AccessTokenViewModel(get()) }
 }
 
-fun collectionsModule(sessionStorage: SessionStorage) = module {
-    single { CollectionsApi(RECYCLE_BASE_URL, get(), sessionStorage) }
+val collectionsModule = module {
+    single { CollectionsApi(RECYCLE_BASE_URL, get(), get()) }
     single { CollectionsRepository(get(), get()) }
     viewModel { CollectionsViewModel(get()) }
 }

@@ -19,6 +19,12 @@ sealed class Destination: Parcelable {
 
     @Parcelize
     object Settings: Destination()
+
+    @Parcelize
+    object SettingsNotifications: Destination()
+
+    @Parcelize
+    object SettingsAddresses: Destination()
 }
 
 class Actions(private val nav: Navigator<Destination>) {
@@ -27,7 +33,14 @@ class Actions(private val nav: Navigator<Destination>) {
         nav.back()
     }
 
-    val goTo = { destination: Destination -> nav.navigate(destination) }
+    val goTo = { destination: Destination ->
+        if (nav.current != destination) {
+            if (destination == Destination.Home) { // Don't keep a backstack when going Home
+                 nav.clearBackStack()
+            }
+            nav.navigate(destination)
+        }
+    }
 
     fun goToRecycleWebsite(context: Context) {
         context.startActivity(Intent(Intent.ACTION_VIEW).apply {

@@ -38,6 +38,8 @@ class Navigator<T : Parcelable> private constructor(
         backCallback.isEnabled = canGoBack()
     }
 
+    fun clearBackStack() = backStack.clear()
+
     private fun canGoBack(): Boolean = backStack.size > 1
 
     companion object {

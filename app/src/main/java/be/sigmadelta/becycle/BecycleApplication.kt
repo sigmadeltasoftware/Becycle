@@ -1,9 +1,7 @@
 package be.sigmadelta.becycle
 
 import android.app.Application
-import be.sigmadelta.becycle.di.baseHeadersModule
-import be.sigmadelta.becycle.di.dbModule
-import be.sigmadelta.becycle.di.sessionStorage
+import be.sigmadelta.becycle.util.*
 import be.sigmadelta.common.db.appCtx
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -25,6 +23,8 @@ class BecycleApplication : Application() {
                 dbModule,
                 sessionStorage,
                 baseHeadersModule,
+                recycleModule,
+                collectionsModule
             )
         }
     }
