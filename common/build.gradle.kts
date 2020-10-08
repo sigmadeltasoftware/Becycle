@@ -67,6 +67,7 @@ kotlin {
                 // Kotlin
                 api(Kotlin.coroutines)
                 api(Kotlin.serialization)
+                api(Kotlin.datetime)
 
                 // Ktor
                 api(Ktor.core)

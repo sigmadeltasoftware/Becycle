@@ -19,9 +19,8 @@ class CollectionsViewModel(private val collectionsRepository: CollectionsReposit
 
     fun searchCollections(
         address: Address,
-        currentMonth: Int
     ) = viewModelScope.launch {
-        collectionsRepository.searchCollections(address, currentMonth).collect {
+        collectionsRepository.searchUpcomingCollections(address).collect {
             collectionsViewState.value = it.toViewState()
         }
     }

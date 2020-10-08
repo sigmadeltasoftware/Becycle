@@ -15,6 +15,7 @@ import be.sigmadelta.common.accesstoken.AccessTokenRepository
 import be.sigmadelta.common.collections.CollectionsApi
 import be.sigmadelta.common.collections.CollectionsRepository
 import be.sigmadelta.common.util.AuthorizationKeyExpiredException
+import be.sigmadelta.common.util.InvalidAddressException
 import be.sigmadelta.common.util.SessionStorage
 import io.ktor.client.*
 import io.ktor.client.features.*
@@ -54,7 +55,7 @@ val recycleModule = module {
     single { AccessTokenApi(RECYCLE_BASE_URL, get(), get()) }
     single { AddressApi(RECYCLE_BASE_URL, get(), get()) }
     single { AccessTokenRepository(get()) }
-    single { AddressRepository(get(), get()) }
+    single { AddressRepository(get(), get(), get()) }
     viewModel { AddressViewModel(get()) }
     viewModel { AccessTokenViewModel(get()) }
 }
@@ -80,6 +81,7 @@ private val client = HttpClient {
             val statusCode = response.status.value
             when (statusCode) {
                 in 300..399 -> throw RedirectResponseException(response)
+                500 -> throw InvalidAddressException(response)
                 401 -> throw AuthorizationKeyExpiredException(response)
                 in 400..499 -> throw ClientRequestException(response)
                 in 500..599 -> throw ServerResponseException(response)

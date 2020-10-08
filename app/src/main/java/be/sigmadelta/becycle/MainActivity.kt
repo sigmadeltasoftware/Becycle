@@ -147,12 +147,7 @@ fun Main(
                 collections,
                 actions.goTo,
                 { addressViewModel.clearAddresses() },
-                { address, currentMonth ->
-                    collectionsViewModel.searchCollections(
-                        address,
-                        currentMonth
-                    )
-                }
+                { address -> collectionsViewModel.searchCollections(address,) }
             )
 
             Destination.AddressInput -> AddressInput(
@@ -182,10 +177,7 @@ fun ValidationSnackbar(
         when (it) {
             ValidationViewState.Empty -> Unit
 
-            ValidationViewState.Loading -> Snackbar(backgroundColor = Color.DarkGray) {
-                Text(text = "Validating Address...", color = Color.White)
-                CircularProgressIndicator()
-            }
+            ValidationViewState.Loading -> CircularProgressIndicator()
 
             is ValidationViewState.Success -> {
                 Snackbar(backgroundColor = Color(0xFF43A047)) {
@@ -212,6 +204,16 @@ fun ValidationSnackbar(
                     color = Color.White
                 )
             }
+            ValidationViewState.InvalidAddressSpecified -> Snackbar(backgroundColor = Color.Red) {
+                Text(
+                    text = "Invalid address specified. Please check your house number and try again",
+                    color = Color.White
+                )
+            }
+        }
+        MainScope().launch {
+            delay(4000)
+            addressViewModel.validationViewState.value = ValidationViewState.Empty
         }
     }
 }

@@ -6,4 +6,5 @@ import org.kodein.db.model.orm.Metadata
 @Serializable
 data class Address (override val id: String,
                     val zipCodeItem: ZipCodeItem,
-                    val street: Street): Metadata
+                    val street: Street,
+                    val houseNumber: Int): Metadata
