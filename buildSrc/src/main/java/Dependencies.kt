@@ -26,6 +26,7 @@ object Versions {
     const val kodein_db = "0.3.0-beta"
     const val slf4j = "1.7.30"
     const val datetime = "0.1.0"
+    const val settings_prefs = "0.6.2"
 }
 
 object Kotlin {
@@ -75,4 +76,6 @@ object Kodein_db {
 
 object Util {
     const val slf4j = "org.slf4j:slf4j-simple:${Versions.slf4j}"
+    const val prefs = "com.russhwolf:multiplatform-settings-no-arg:${Versions.settings_prefs}"
+
 }

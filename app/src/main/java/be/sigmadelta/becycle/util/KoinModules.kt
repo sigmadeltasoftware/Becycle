@@ -4,6 +4,7 @@ import be.sigmadelta.becycle.baseheaders.BaseHeadersViewModel
 import be.sigmadelta.becycle.address.AddressViewModel
 import be.sigmadelta.becycle.accesstoken.AccessTokenViewModel
 import be.sigmadelta.becycle.collections.CollectionsViewModel
+import be.sigmadelta.common.Preferences
 import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.db.getApplicationFilesDirectoryPath
 import be.sigmadelta.common.baseheader.BaseHeadersApi
@@ -36,8 +37,9 @@ private val db = DB.factory
         root<Address>()
     }, org.kodein.db.orm.kotlinx.KotlinxSerializer())
 
-val dbModule = module {
+val coreModule = module {
     single { db }
+    single { Preferences() }
 }
 
 val sessionStorage = module {

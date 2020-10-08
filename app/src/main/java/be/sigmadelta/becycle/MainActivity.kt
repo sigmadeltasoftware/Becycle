@@ -134,6 +134,7 @@ fun Main(
     addressViewModel: AddressViewModel,
     collectionsViewModel: CollectionsViewModel
 ) {
+
     val addresses by addressViewModel.addressesViewState.collectAsState()
     val collections by collectionsViewModel.collectionsViewState.collectAsState()
     val zipCodeItemsViewState by addressViewModel.zipCodeItemsViewState.collectAsState()

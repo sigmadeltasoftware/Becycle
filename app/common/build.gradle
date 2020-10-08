@@ -46,8 +46,6 @@ android {
     }
 }
 
-
-
 // Add against compose errors with kotlin compilers
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
     kotlinOptions {
@@ -73,6 +71,4 @@ dependencies {
     api(Compose.material)
     api(Compose.runtimeLiveData)
     api(Compose.compiler)
-
-    // COIL
 }
