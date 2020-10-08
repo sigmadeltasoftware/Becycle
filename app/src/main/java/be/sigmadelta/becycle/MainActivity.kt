@@ -147,11 +147,10 @@ fun Main(
                 collections,
                 actions.goTo,
                 { addressViewModel.clearAddresses() },
-                { address, fromDate, untilDate ->
+                { address, currentMonth ->
                     collectionsViewModel.searchCollections(
                         address,
-                        fromDate,
-                        untilDate
+                        currentMonth
                     )
                 }
             )

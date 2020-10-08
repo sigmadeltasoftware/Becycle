@@ -14,11 +14,18 @@ class CollectionsRepository(private val db: DB, private val collectionsApi: Coll
 
     suspend fun searchCollections(
         address: Address,
-        fromDate: String,
-        untilDate: String
+        currentMonth: Int
     ): Flow<Response<List<Collection>>> = networkBoundResource(
-        query = { db.find<Collection>().all().useModels { it.toList() } },
-        fetch = { collectionsApi.getCollections(address, fromDate, untilDate) },
+        shouldFetch = {
+            it.firstOrNull { it.timestamp.substringAfter("-").substringBefore("-").toInt() == currentMonth } == null
+        },
+        query = {
+            db.find<Collection>().all()
+            .useModels { it.toList() }
+        },
+        fetch = {
+            collectionsApi.getCollections(address, currentMonth)
+        },
         saveFetchResult = { result -> when(result) {
             is ApiResponse.Success -> insertCollections(result.body.items.map { it.copy(addressId = address.id) })
             is ApiResponse.Error -> Response.Error<List<Collection>>(result.error)

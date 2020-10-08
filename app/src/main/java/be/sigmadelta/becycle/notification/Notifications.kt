@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.sp
 import be.sigmadelta.becycle.R
 import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.common.address.Address
+import be.sigmadelta.common.util.addLeadingZeroBelow10
 
 @Composable
 fun Notifications(addresses: ListViewState<Address>) {
@@ -76,4 +77,3 @@ fun NotificationSettings(address: Address) {
     }
 }
 
-private fun addLeadingZeroBelow10(value: Int) = if (value < 10) "0$value" else value
