@@ -20,7 +20,7 @@ fun Home(
     collections: ListViewState<Collection>,
     onGoToAddressInput: (Destination.AddressInput) -> Unit,
     onClearAddresses: () -> Unit,
-    onLoadCollections: (Address, String, String) -> Unit
+    onLoadCollections: (Address) -> Unit
 ) {
     when (addresses) {
 
@@ -44,7 +44,7 @@ fun HomeLayout(
     collections: ListViewState<Collection>,
     addresses: List<Address>,
     onClearAddresses: () -> Unit,
-    onLoadCollections: (Address, String, String) -> Unit
+    onLoadCollections: (Address) -> Unit
 ) {
 
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
@@ -55,7 +55,7 @@ fun HomeLayout(
             Text("Clear Address(es)")
         }
         Button(
-            onClick = { onLoadCollections(addresses.first(), "2020-10-06", "2020-10-20") },
+            onClick = { onLoadCollections(addresses.first()) },
             modifier = Modifier.align(Alignment.CenterHorizontally).padding(16.dp)
         ) {
             Text("Load collections")

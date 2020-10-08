@@ -2,8 +2,6 @@ package be.sigmadelta.common.baseheader
 
 import be.sigmadelta.common.util.ApiResponse
 import be.sigmadelta.common.util.Response
-import be.sigmadelta.common.baseheader.BaseHeadersResponse
-import be.sigmadelta.common.baseheader.BaseHeadersApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow

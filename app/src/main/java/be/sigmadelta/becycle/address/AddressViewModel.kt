@@ -9,6 +9,7 @@ import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.address.AddressRepository
 import be.sigmadelta.common.address.Street
 import be.sigmadelta.common.address.ZipCodeItem
+import be.sigmadelta.common.util.InvalidAddressException
 import be.sigmadelta.common.util.Response
 import io.ktor.client.features.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -56,13 +57,14 @@ class AddressViewModel(private val addressRepository: AddressRepository) : ViewM
         }
     }
 
-    fun validateAddress(zipCodeItem: ZipCodeItem, street: Street) = viewModelScope.launch {
-        addressRepository.validateAddress(zipCodeItem, street).collect {
+    fun validateAddress(zipCodeItem: ZipCodeItem, street: Street, houseNumber: Int) = viewModelScope.launch {
+        addressRepository.validateAddress(zipCodeItem, street, houseNumber).collect {
             validationViewState.value = when (it) {
                 is Response.Loading -> ValidationViewState.Loading
                 is Response.Success -> ValidationViewState.Success(it.body)
                 is Response.Error -> when (it.error) {
                     is ClientRequestException -> ValidationViewState.InvalidCombination
+                    is InvalidAddressException -> ValidationViewState.InvalidAddressSpecified
                     else -> ValidationViewState.NetworkError
                 }
             }
@@ -79,5 +81,6 @@ sealed class ValidationViewState {
     object Loading: ValidationViewState()
     data class Success(val address: Address): ValidationViewState()
     object InvalidCombination: ValidationViewState()
+    object InvalidAddressSpecified: ValidationViewState()
     object NetworkError: ValidationViewState()
 }

@@ -25,11 +25,13 @@ object Versions {
     const val appcompat = "1.2.0"
     const val kodein_db = "0.3.0-beta"
     const val slf4j = "1.7.30"
+    const val datetime = "0.1.0"
 }
 
 object Kotlin {
     const val coroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.kotlinCoroutines}"
     const val serialization = "org.jetbrains.kotlinx:kotlinx-serialization-core:${Versions.kotlinxSerialization}"
+    const val datetime = "org.jetbrains.kotlinx:kotlinx-datetime:${Versions.datetime}"
 }
 
 object Ktor {
