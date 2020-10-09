@@ -31,6 +31,7 @@ import be.sigmadelta.becycle.common.ui.util.ViewState
 import be.sigmadelta.becycle.home.Home
 import be.sigmadelta.becycle.notification.Notifications
 import be.sigmadelta.becycle.settings.Settings
+import be.sigmadelta.common.Preferences
 import be.sigmadelta.common.util.AuthorizationKeyExpiredException
 import be.sigmadelta.common.util.SessionStorage
 import kotlinx.coroutines.*
@@ -45,6 +46,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
     private val accessTokenViewModel: AccessTokenViewModel by viewModel()
     private val sessionStorage: SessionStorage by inject()
+    private val preferences: Preferences by inject()
     private val addressViewModel: AddressViewModel by viewModel()
     private val collectionsViewModel: CollectionsViewModel by viewModel()
 
@@ -75,6 +77,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
                 MainLayout(
                     addressViewModel,
                     collectionsViewModel,
+                    preferences,
                     onBackPressedDispatcher
                 )
             }
@@ -87,6 +90,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 fun MainLayout(
     addressViewModel: AddressViewModel,
     collectionsViewModel: CollectionsViewModel,
+    preferences: Preferences,
     backPressedDispatcher: OnBackPressedDispatcher
 ) {
     val nav: Navigator<Destination> =
@@ -102,7 +106,7 @@ fun MainLayout(
                 topBar = {
                     TopAppBar(title = { Text("Becycle") })
                 },
-                bodyContent = { _ -> Main(nav, actions, addressViewModel, collectionsViewModel) },
+                bodyContent = { _ -> Main(nav, actions, preferences, addressViewModel, collectionsViewModel) },
                 bottomBar = {
                     val ctx = ContextAmbient.current
                     BottomNavigation() {
@@ -131,6 +135,7 @@ fun MainLayout(
 fun Main(
     nav: Navigator<Destination>,
     actions: Actions,
+    preferences: Preferences,
     addressViewModel: AddressViewModel,
     collectionsViewModel: CollectionsViewModel
 ) {
@@ -159,7 +164,13 @@ fun Main(
                 onValidateAddress = addressViewModel::validateAddress
             )
 
-            Destination.Settings -> Settings(actions.goTo)
+            Destination.Settings -> {
+                val notificationSwitchState = remember { mutableStateOf(preferences.notificationsEnabled) }
+                Settings(actions.goTo, notificationSwitchState) {
+                    preferences.notificationsEnabled = it
+                    notificationSwitchState.value = it
+                }
+            }
 
             Destination.SettingsNotifications -> Notifications(addresses)
         }
