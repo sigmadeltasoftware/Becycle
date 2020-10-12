@@ -93,6 +93,7 @@ kotlin {
         val androidMain by getting {
             dependencies {
                 api(Ktor.android)
+                api(Android.workmanager)
             }
         }
 

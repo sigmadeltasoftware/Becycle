@@ -13,8 +13,11 @@ import be.sigmadelta.common.address.AddressApi
 import be.sigmadelta.common.address.AddressRepository
 import be.sigmadelta.common.baseheader.BaseHeadersRepository
 import be.sigmadelta.common.accesstoken.AccessTokenRepository
+import be.sigmadelta.common.address.ZipCodeItem
 import be.sigmadelta.common.collections.CollectionsApi
 import be.sigmadelta.common.collections.CollectionsRepository
+import be.sigmadelta.common.notifications.NotificationProps
+import be.sigmadelta.common.notifications.NotificationRepo
 import be.sigmadelta.common.util.AuthorizationKeyExpiredException
 import be.sigmadelta.common.util.InvalidAddressException
 import be.sigmadelta.common.util.SessionStorage
@@ -27,6 +30,7 @@ import org.kodein.db.DB
 import org.kodein.db.TypeTable
 import org.kodein.db.impl.factory
 import org.kodein.db.inDir
+import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
@@ -35,6 +39,7 @@ private val db = DB.factory
     .inDir(getApplicationFilesDirectoryPath())
     .open("becycle_db", TypeTable {
         root<Address>()
+        root<NotificationProps>()
     }, org.kodein.db.orm.kotlinx.KotlinxSerializer())
 
 val coreModule = module {
@@ -66,6 +71,10 @@ val collectionsModule = module {
     single { CollectionsApi(RECYCLE_BASE_URL, get(), get()) }
     single { CollectionsRepository(get(), get()) }
     viewModel { CollectionsViewModel(get()) }
+}
+
+val notificationsModule = module {
+    single { NotificationRepo(androidContext()) }
 }
 
 private val client = HttpClient {
