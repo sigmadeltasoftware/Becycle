@@ -45,6 +45,7 @@ private val db = DB.factory
 val coreModule = module {
     single { db }
     single { Preferences() }
+    single { NotificationRepo(androidContext(), get()) }
 }
 
 val sessionStorage = module {
@@ -63,7 +64,7 @@ val recycleModule = module {
     single { AddressApi(RECYCLE_BASE_URL, get(), get()) }
     single { AccessTokenRepository(get()) }
     single { AddressRepository(get(), get(), get()) }
-    viewModel { AddressViewModel(get()) }
+    viewModel { AddressViewModel(get(), get()) }
     viewModel { AccessTokenViewModel(get()) }
 }
 
@@ -71,10 +72,6 @@ val collectionsModule = module {
     single { CollectionsApi(RECYCLE_BASE_URL, get(), get()) }
     single { CollectionsRepository(get(), get()) }
     viewModel { CollectionsViewModel(get()) }
-}
-
-val notificationsModule = module {
-    single { NotificationRepo(androidContext()) }
 }
 
 private val client = HttpClient {

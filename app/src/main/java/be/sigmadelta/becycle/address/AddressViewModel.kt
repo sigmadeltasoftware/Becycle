@@ -9,6 +9,7 @@ import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.address.AddressRepository
 import be.sigmadelta.common.address.Street
 import be.sigmadelta.common.address.ZipCodeItem
+import be.sigmadelta.common.notifications.NotificationRepo
 import be.sigmadelta.common.util.InvalidAddressException
 import be.sigmadelta.common.util.Response
 import io.ktor.client.features.*
@@ -18,7 +19,10 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @ExperimentalCoroutinesApi
-class AddressViewModel(private val addressRepository: AddressRepository) : ViewModel() {
+class AddressViewModel(
+    private val addressRepository: AddressRepository,
+    private val notificationRepo: NotificationRepo
+) : ViewModel() {
 
     val addressesViewState = MutableStateFlow<ListViewState<Address>>(ListViewState.Empty())
     val zipCodeItemsViewState = MutableStateFlow<ListViewState<ZipCodeItem>>(ListViewState.Empty())
@@ -31,6 +35,7 @@ class AddressViewModel(private val addressRepository: AddressRepository) : ViewM
 
     fun saveAddress(address: Address) = viewModelScope.launch {
         addressRepository.insertAddress(address)
+        createDefaultNotificationSettings(address)
         loadSavedAddresses()
     }
 
@@ -69,6 +74,10 @@ class AddressViewModel(private val addressRepository: AddressRepository) : ViewM
                 }
             }
         }
+    }
+
+    private fun createDefaultNotificationSettings(address: Address) {
+        notificationRepo.insertDefaultNotificationProps(address)
     }
 
     companion object {

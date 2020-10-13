@@ -18,9 +18,11 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.work.WorkManager
 import be.sigmadelta.becycle.R
 import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.common.address.Address
+import be.sigmadelta.common.notifications.NotificationRepo
 import be.sigmadelta.common.util.addLeadingZeroBelow10
 
 @Composable
@@ -50,6 +52,10 @@ fun Notifications(addresses: ListViewState<Address>) {
                 }
             }
         }
+
+        val notifWorker = WorkManager.getInstance(ContextAmbient.current).getWorkInfosByTag(NotificationRepo.WORK_NAME)
+        Text(text = "NotifWorker is cancelled: ${notifWorker.isCancelled}")
+        Text(text = "NotifWorker is done: ${notifWorker.isDone}")
     }
 }
 

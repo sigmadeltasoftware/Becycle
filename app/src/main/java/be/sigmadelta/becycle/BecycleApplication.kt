@@ -24,8 +24,7 @@ class BecycleApplication : Application() {
                 sessionStorage,
                 baseHeadersModule,
                 recycleModule,
-                collectionsModule,
-                notificationsModule
+                collectionsModule
             )
         }
     }
