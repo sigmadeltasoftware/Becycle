@@ -20,7 +20,7 @@ class BecycleApplication : Application() {
             EmptyLogger()
             androidContext(this@BecycleApplication)
             modules(
-                dbModule,
+                coreModule,
                 sessionStorage,
                 baseHeadersModule,
                 recycleModule,

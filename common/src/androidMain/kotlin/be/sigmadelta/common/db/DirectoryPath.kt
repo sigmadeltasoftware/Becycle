@@ -4,4 +4,4 @@ import android.content.Context
 
 lateinit var appCtx: Context
 
-actual fun getApplicationFilesDirectoryPath() = appCtx.filesDir.absolutePath
+actual fun getApplicationFilesDirectoryPath(): String = appCtx.filesDir.absolutePath

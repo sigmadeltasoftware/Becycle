@@ -6,9 +6,11 @@ import androidx.compose.foundation.Icon
 import androidx.compose.foundation.Text
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ContextAmbient
@@ -16,9 +18,11 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.work.WorkManager
 import be.sigmadelta.becycle.R
 import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.common.address.Address
+import be.sigmadelta.common.notifications.NotificationRepo
 import be.sigmadelta.common.util.addLeadingZeroBelow10
 
 @Composable
@@ -48,6 +52,10 @@ fun Notifications(addresses: ListViewState<Address>) {
                 }
             }
         }
+
+        val notifWorker = WorkManager.getInstance(ContextAmbient.current).getWorkInfosByTag(NotificationRepo.WORK_NAME)
+        Text(text = "NotifWorker is cancelled: ${notifWorker.isCancelled}")
+        Text(text = "NotifWorker is done: ${notifWorker.isDone}")
     }
 }
 
@@ -58,7 +66,8 @@ fun NotificationSettings(address: Address) {
 
     Text("Enable notifications for")
     Row(modifier = Modifier.padding(16.dp)) {
-        Text(text = "A day up front:")
+        Text(text = "A day up front:", modifier = Modifier.align(alignment = Alignment.CenterVertically))
+        Spacer(modifier = Modifier.weight(1f))
         Button(onClick = {
             TimePickerDialog(
                 ctx,
@@ -68,7 +77,7 @@ fun NotificationSettings(address: Address) {
                 notificationTime.substringBefore(":").toInt(),
                 notificationTime.substringAfter(":").toInt() ,
                 true).show()
-        }, modifier = Modifier.padding(8.dp)) {
+        }, modifier = Modifier.padding(16.dp).align(alignment = Alignment.CenterVertically)) {
             Row {
                 Icon(vectorResource(id = R.drawable.ic_notification))
                 Text(text = notificationTime, color = Color.White)

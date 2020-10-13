@@ -26,6 +26,8 @@ object Versions {
     const val kodein_db = "0.3.0-beta"
     const val slf4j = "1.7.30"
     const val datetime = "0.1.0"
+    const val settings_prefs = "0.6.2"
+    const val workmanager = "2.4.0"
 }
 
 object Kotlin {
@@ -60,6 +62,7 @@ object Android {
     const val material = "com.google.android.material:material:${Versions.material}"
     const val lifecycle_extensions = "androidx.lifecycle:lifecycle-extensions:${Versions.lifecycle}"
     const val lifecycle_viewmodel_ktx = "androidx.lifecycle:lifecycle-viewmodel-ktx:${Versions.lifecycle}"
+    const val workmanager = "androidx.work:work-runtime-ktx:${Versions.workmanager}"
 }
 
 object Koin {
@@ -75,4 +78,6 @@ object Kodein_db {
 
 object Util {
     const val slf4j = "org.slf4j:slf4j-simple:${Versions.slf4j}"
+    const val prefs = "com.russhwolf:multiplatform-settings-no-arg:${Versions.settings_prefs}"
+
 }

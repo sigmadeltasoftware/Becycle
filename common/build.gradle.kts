@@ -86,12 +86,14 @@ kotlin {
 
                 // Util
                 api (Util.slf4j) // Necessary for HttpClient logging
+                api (Util.prefs) // Multiplatform preferences
             }
         }
 
         val androidMain by getting {
             dependencies {
                 api(Ktor.android)
+                api(Android.workmanager)
             }
         }
 
