@@ -22,6 +22,7 @@ import be.sigmadelta.becycle.common.*
 import be.sigmadelta.becycle.common.ui.theme.BecycleTheme
 import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.becycle.address.AddressInput
+import be.sigmadelta.becycle.address.AddressOverview
 import be.sigmadelta.becycle.address.AddressViewModel
 import be.sigmadelta.becycle.address.ValidationViewState
 import be.sigmadelta.becycle.collections.CollectionsViewModel
@@ -175,6 +176,12 @@ fun Main(
             }
 
             Destination.SettingsNotifications -> Notifications(addresses)
+
+            Destination.SettingsAddresses -> AddressOverview(
+                addresses,
+                {},
+                { actions.goTo(Destination.AddressInput) }
+            )
         }
     }
 

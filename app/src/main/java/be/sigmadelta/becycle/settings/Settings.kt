@@ -47,11 +47,11 @@ fun SettingsMenuItem(
 ) {
     val ctx = ContextAmbient.current
     Row(Modifier.clickable(onClick = {
-        if (switchState?.value == true) {
+        if (switchState == null || switchState.value) {
             onClickAction()
         } else {
             Toast.makeText(ctx, "Enable switch to modify settings", Toast.LENGTH_SHORT).show()
-        }}, enabled = switchState?.value == true).background(color = if (switchState == null || switchState.value) MaterialTheme.colors.background else Color.LightGray))
+        }}, enabled = switchState == null || switchState.value).background(color = if (switchState == null || switchState.value) MaterialTheme.colors.background else Color.LightGray))
     {
         Icon(asset = vectorResource(id = icon), modifier = Modifier.padding(start = 16.dp).align(Alignment.CenterVertically).width(32.dp))
         Column {
