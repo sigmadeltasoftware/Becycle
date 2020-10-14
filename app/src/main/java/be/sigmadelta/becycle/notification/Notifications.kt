@@ -60,7 +60,7 @@ fun AddressSwitcher(
                     onTabSelected(ix)
                 }, modifier = Modifier.padding(16.dp)) {
                     Text(it.zipCodeItem.code, fontWeight = FontWeight.Bold)
-                    Text(it.street.names.nl, fontSize = 10.sp)
+                    Text("${it.street.names.nl} ${it.houseNumber}", fontSize = 10.sp)
                 }
             }
             is ListViewState.Error -> Text("Unable to retrieve address data", color = Color.Red)

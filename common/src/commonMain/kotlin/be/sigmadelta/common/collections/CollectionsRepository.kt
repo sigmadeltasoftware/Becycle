@@ -37,12 +37,12 @@ class CollectionsRepository(private val db: DB, private val collectionsApi: Coll
             } else list
         },
         fetch = {
-            val date = referenceDate.toLocalDateTime(TimeZone.currentSystemDefault())
-            val untilMonth = if (date.monthNumber == 12) 1 else date.monthNumber + 1
-            val untilYear = if (date.monthNumber == 12) date.year + 1 else date.year
-            val untilDate = LocalDateTime(untilYear, untilMonth, date.dayOfMonth, 0, 0, 0, 0).toYyyyMmDd()
+            val date = referenceDate.toLocalDateTime(TimeZone.currentSystemDefault()).toYyyyMmDd()
+            val untilDate = referenceDate.plus(DateTimePeriod(months = 1), TimeZone.currentSystemDefault())
+                .toLocalDateTime(TimeZone.currentSystemDefault())
+                .toYyyyMmDd()
 
-            collectionsApi.getCollections(address, date.toYyyyMmDd(), untilDate, 100)
+            collectionsApi.getCollections(address, date, untilDate, 100)
         },
         saveFetchResult = { result ->
             when (result) {

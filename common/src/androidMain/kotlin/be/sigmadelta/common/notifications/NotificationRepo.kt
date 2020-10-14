@@ -162,11 +162,13 @@ private fun List<Collection>.filterByEnabledNotifications(props: NotificationPro
     }
 
 private fun List<Collection>.filterByTommorrowsCollections(now: LocalDateTime) = filter {
-    val day = it.timestamp
-        .substringBefore("T")
-        .substringAfterLast("-").toInt()
-
-    day - now.dayOfMonth == 1
+    val date = it.timestamp.toInstant().plus(DateTimeUnit.DAY, TimeZone.currentSystemDefault())
+    val difference = date.minus(now.toInstant(TimeZone.currentSystemDefault()), TimeZone.currentSystemDefault())
+    (difference.days == 0 && difference.hours <= 23).apply {
+        if (this) {
+            Log.d(TAG, "filterByTommorrowsCollections() - candidate collection found (difference = ${difference.hours}h${difference.minutes}m): $it")
+        }
+    }
 }.apply {
     Log.d(TAG, "filterByTommorrowsCollections(): $this")
 }
