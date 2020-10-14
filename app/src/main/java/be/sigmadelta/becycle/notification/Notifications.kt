@@ -30,20 +30,7 @@ fun Notifications(addresses: ListViewState<Address>) {
     var selectedTabIx by remember { mutableStateOf(0) }
 
     Column {
-        TabRow(selectedTabIndex = selectedTabIx, divider = { Divider() }) {
-            when (addresses) {
-                is ListViewState.Loading -> CircularProgressIndicator(modifier = Modifier.padding(16.dp))
-                is ListViewState.Success -> addresses.payload.forEachIndexed { ix, it ->
-                    Tab(selected = selectedTabIx == ix, onClick = {
-                        selectedTabIx = ix
-                    }, modifier = Modifier.padding(16.dp)) {
-                        Text(it.zipCodeItem.code, fontWeight = FontWeight.Bold)
-                        Text(it.street.names.nl, fontSize = 10.sp)
-                    }
-                }
-                is ListViewState.Error -> Text("Unable to retrieve address data", color = Color.Red)
-            }
-        }
+        AddressSwitcher(selectedTabIx, addresses, { ix -> selectedTabIx = ix})
 
         Crossfade(selectedTabIx) { newIx ->
             (addresses as? ListViewState.Success)?.let {
@@ -56,6 +43,28 @@ fun Notifications(addresses: ListViewState<Address>) {
         val notifWorker = WorkManager.getInstance(ContextAmbient.current).getWorkInfosByTag(NotificationRepo.WORK_NAME)
         Text(text = "NotifWorker is cancelled: ${notifWorker.isCancelled}")
         Text(text = "NotifWorker is done: ${notifWorker.isDone}")
+    }
+}
+
+@Composable
+fun AddressSwitcher(
+    selectedTabIx: Int,
+    addresses: ListViewState<Address>,
+    onTabSelected: (Int) -> Unit
+) {
+    TabRow(selectedTabIndex = selectedTabIx, divider = { Divider() }) {
+        when (addresses) {
+            is ListViewState.Loading -> CircularProgressIndicator(modifier = Modifier.padding(16.dp))
+            is ListViewState.Success -> addresses.payload.forEachIndexed { ix, it ->
+                Tab(selected = selectedTabIx == ix, onClick = {
+                    onTabSelected(ix)
+                }, modifier = Modifier.padding(16.dp)) {
+                    Text(it.zipCodeItem.code, fontWeight = FontWeight.Bold)
+                    Text(it.street.names.nl, fontSize = 10.sp)
+                }
+            }
+            is ListViewState.Error -> Text("Unable to retrieve address data", color = Color.Red)
+        }
     }
 }
 

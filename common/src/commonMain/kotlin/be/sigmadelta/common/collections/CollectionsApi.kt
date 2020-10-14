@@ -1,11 +1,16 @@
 package be.sigmadelta.common.collections
 
 import be.sigmadelta.common.address.Address
+import be.sigmadelta.common.util.ApiResponse
 import be.sigmadelta.common.util.SearchQueryResult
 import be.sigmadelta.common.util.SessionStorage
 import be.sigmadelta.common.util.getApi
 import io.ktor.client.*
 import io.ktor.client.request.*
+import kotlinx.serialization.Serializable
+import org.kodein.db.Index
+import org.kodein.db.model.orm.Metadata
+import org.kodein.memory.util.UUID
 import kotlin.random.Random
 
 class CollectionsApi(
@@ -19,16 +24,47 @@ class CollectionsApi(
         fromDateYyyyMmDd: String,
         untilDateYyyyMmDd: String,
         size: Int
-    ) = client.getApi<SearchQueryResult<Collection>> {
-        url("$baseUrl/$COLLECTIONS_API")
-        sessionStorage.attachHeaders(this)
-        url.encodedPath = "${url.encodedPath}?zipcodeId=${address.zipCodeItem.id}&streetId=${address.street.id}&fromDate=$fromDateYyyyMmDd&untilDate=$untilDateYyyyMmDd&houseNumber=${address.houseNumber}&size=$size"
-        // NOTE: I had to construct the url manually here as Ktor would use character encoding on the streetId parameter, which would cause the API request to fail
-        // creating the request post encoding, makes sure that the parameter stays intact
+    ): ApiResponse<SearchQueryResult<Collection>> = try {
+        val response = client.get<SearchQueryResult<CollectionResponse>> {
+            url("$baseUrl/$COLLECTIONS_API")
+            sessionStorage.attachHeaders(this)
+            url.encodedPath =
+                "${url.encodedPath}?zipcodeId=${address.zipCodeItem.id}&streetId=${address.street.id}&fromDate=$fromDateYyyyMmDd&untilDate=$untilDateYyyyMmDd&houseNumber=${address.houseNumber}&size=$size"
+            // NOTE: I had to construct the url manually here as Ktor would use character encoding on the streetId parameter, which would cause the API request to fail
+            // creating the request post encoding, makes sure that the parameter stays intact
+        }
+        println("getCollections() - response = $response")
+        val result = SearchQueryResult(
+            response.items.map { it.toCollection(address) },
+            response.total,
+            response.pages,
+            response.size,
+            response.self,
+            response.first,
+            response.last
+        )
+
+        ApiResponse.Success(result)
+    } catch (e: Throwable) {
+        ApiResponse.Error(e)
     }
 
     companion object {
         const val COLLECTIONS_API = "collections"
     }
+}
+
+@Serializable
+data class CollectionResponse (
+    val timestamp: String,
+    val type: String,
+    val fraction: CollectionFraction,
+) {
+    fun toCollection(address: Address) = Collection(
+        timestamp = this.timestamp,
+        fraction = this.fraction,
+        type = this.type,
+        addressId = address.id
+    )
 }
 

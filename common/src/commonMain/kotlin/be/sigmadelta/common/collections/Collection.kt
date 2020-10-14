@@ -2,6 +2,8 @@ package be.sigmadelta.common.collections
 
 import be.sigmadelta.common.util.TranslationContainer
 import kotlinx.serialization.Serializable
+import org.kodein.db.Index
+import org.kodein.db.indexSet
 import org.kodein.db.model.orm.Metadata
 import org.kodein.memory.util.UUID
 
@@ -11,9 +13,10 @@ data class Collection (
     val timestamp: String,
     val type: String,
     val fraction: CollectionFraction,
-    val addressId: String? = null
+    val addressId: String
 ): Metadata {
     val collectionType = fraction.logo.toCollectionType()
+    override fun indexes() = indexSet("addressId" to addressId)
 }
 
 @Serializable

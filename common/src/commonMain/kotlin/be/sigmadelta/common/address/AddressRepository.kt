@@ -47,7 +47,7 @@ class AddressRepository(private val db: DB, private val addressApi: AddressApi, 
                             0
                         ).toYyyyMmDd()
 
-                        when (val validationResponse = collectionsApi.getCollections(response.body, date.toYyyyMmDd(), untilDate, 100)) {
+                        when (val validationResponse = collectionsApi.getCollections(response.body, date.toYyyyMmDd(), untilDate, 10)) {
                             is ApiResponse.Success -> Response.Success(response.body)
                             is ApiResponse.Error -> Response.Error(validationResponse.error)
                         }
