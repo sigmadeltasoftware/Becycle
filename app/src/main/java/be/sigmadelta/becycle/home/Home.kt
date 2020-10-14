@@ -4,13 +4,14 @@ import androidx.compose.foundation.Text
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import be.sigmadelta.becycle.collections.Collections
 import be.sigmadelta.becycle.common.Destination
 import be.sigmadelta.becycle.common.ui.util.ListViewState
+import be.sigmadelta.becycle.notification.AddressSwitcher
 import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.collections.Collection
 
@@ -27,12 +28,26 @@ fun Home(
         is ListViewState.Success -> if (addresses.payload.isEmpty()) {
             onGoToAddressInput(Destination.AddressInput)
         } else {
-            HomeLayout(
-                collections,
-                addresses.payload,
-                onClearAddresses,
-                onLoadCollections
-            )
+            var selectedTabIx by remember { mutableStateOf(0) }
+
+            Column {
+                AddressSwitcher(
+                    selectedTabIx = selectedTabIx,
+                    addresses = addresses,
+                    onTabSelected = { ix ->
+                        selectedTabIx = ix
+                        onLoadCollections(addresses.payload[selectedTabIx])
+                    }
+                )
+                HomeLayout(
+                    collections,
+                    addresses.payload,
+                    selectedTabIx,
+                    onClearAddresses,
+                    onLoadCollections
+                )
+            }
+
         }
 
         is ListViewState.Error, is ListViewState.Empty -> Text("Failed to retrieve addresses!") // TODO: Prettify
@@ -43,6 +58,7 @@ fun Home(
 fun HomeLayout(
     collections: ListViewState<Collection>,
     addresses: List<Address>,
+    addressIndex: Int,
     onClearAddresses: () -> Unit,
     onLoadCollections: (Address) -> Unit
 ) {
@@ -55,7 +71,7 @@ fun HomeLayout(
             Text("Clear Address(es)")
         }
         Button(
-            onClick = { onLoadCollections(addresses.first()) },
+            onClick = { onLoadCollections(addresses[addressIndex]) },
             modifier = Modifier.align(Alignment.CenterHorizontally).padding(16.dp)
         ) {
             Text("Load collections")

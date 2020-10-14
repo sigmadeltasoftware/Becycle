@@ -4,6 +4,7 @@ import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.util.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.*
+import kotlinx.serialization.Serializable
 import org.kodein.db.DB
 import org.kodein.db.deleteAll
 import org.kodein.db.find
@@ -45,18 +46,14 @@ class CollectionsRepository(private val db: DB, private val collectionsApi: Coll
         },
         saveFetchResult = { result ->
             when (result) {
-                is ApiResponse.Success -> storeCollections(result.body.items.map {
-                    it.copy(
-                        addressId = address.id
-                    )
-                })
+                is ApiResponse.Success -> storeCollections(result.body.items, address.id)
                 is ApiResponse.Error -> Response.Error<List<Collection>>(result.error)
             }
         }
     )
 
-    private fun storeCollections(collection: List<Collection>) {
-        db.deleteAll(db.find<Collection>().all())
+    private fun storeCollections(collection: List<Collection>, addressId: String) {
+        db.deleteAll(db.find<Collection>().byIndex("addressId", addressId))
         collection.forEach { db.put(it) }
     }
 
@@ -64,4 +61,3 @@ class CollectionsRepository(private val db: DB, private val collectionsApi: Coll
         private const val SIZE_UPCOMING_ITEMS_RETURN = 6
     }
 }
-

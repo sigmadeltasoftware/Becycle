@@ -19,10 +19,7 @@ import be.sigmadelta.common.db.appCtx
 import be.sigmadelta.common.util.Response
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.collect
-import kotlinx.datetime.Clock
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.*
 import org.kodein.db.DB
 import org.kodein.db.deleteAll
 import org.kodein.db.find
@@ -64,7 +61,7 @@ actual class NotificationRepo(
         )
 
         val findPrevious = db.find<NotificationProps>().byIndex("addressId", address.id)
-        Log.e(TAG, "findPrevious: $findPrevious")
+        Log.e(TAG, "findPrevious: ${findPrevious.model()}")
         db.deleteAll(findPrevious)
         db.put(notificationProps)
         Log.e(TAG, "insertDefaultNotificationProps() - notificationProps: $notificationProps")
