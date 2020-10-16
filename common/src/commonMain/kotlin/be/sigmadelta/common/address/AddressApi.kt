@@ -35,7 +35,19 @@ class AddressApi(
             parameter("streetId", street.id)
             sessionStorage.attachHeaders(this)
         }
-        ApiResponse.Success(Address(UUID.randomUUID().toString(), zipCodeItem, street, houseNumber))
+        ApiResponse.Success(Address(zipCodeItem, street, houseNumber))
+    } catch (e: Throwable) {
+        ApiResponse.Error(e)
+    }
+
+    suspend fun validateExistingAddress(address: Address): ApiResponse<Address> = try {
+        client.head<Unit> {
+            url("$baseUrl/$STREETS_API")
+            parameter("zipcodeId", address.zipCodeItem.id)
+            parameter("streetId", address.street.id)
+            sessionStorage.attachHeaders(this)
+        }
+        ApiResponse.Success(address)
     } catch (e: Throwable) {
         ApiResponse.Error(e)
     }

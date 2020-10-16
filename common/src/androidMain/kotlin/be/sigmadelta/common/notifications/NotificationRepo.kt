@@ -61,7 +61,6 @@ actual class NotificationRepo(
         )
 
         val findPrevious = db.find<NotificationProps>().byIndex("addressId", address.id)
-        Log.e(TAG, "findPrevious: ${findPrevious.model()}")
         db.deleteAll(findPrevious)
         db.put(notificationProps)
         Log.e(TAG, "insertDefaultNotificationProps() - notificationProps: $notificationProps")

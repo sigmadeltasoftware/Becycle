@@ -1,5 +1,6 @@
 package be.sigmadelta.becycle.common.ui.widgets
 
+import android.util.Log
 import androidx.compose.foundation.Text
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -18,6 +19,10 @@ import androidx.compose.ui.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import be.sigmadelta.becycle.common.ui.util.ListViewState
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @ExperimentalFocus
 @Composable
@@ -30,7 +35,10 @@ fun <T> DropDownTextField(
     itemLayout: @Composable (LazyItemScope.(T) -> Unit),
     focusRequester: FocusRequester = FocusRequester()
 ) {
+
     var textField by remember { mutableStateOf("") }
+    var isDebouncing by remember { mutableStateOf(false) }
+    var job = remember { mutableStateOf(newJob { isDebouncing = false }) }
 
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
         TextField(
@@ -46,9 +54,24 @@ fun <T> DropDownTextField(
             value = textValue ?: textField,
             onValueChange = {
                 textField = it
-                if (it.isNotBlank() && it.length > 1) {
+                if (isDebouncing.not() && it.isNotBlank() && it.length > 1) {
+                    isDebouncing = true
                     textChangeAction(it)
                 }
+
+                // Debouncing routine
+                if (job.value.isActive) {
+                    job.value.cancel()
+                }
+                job.value = newJob { isDebouncing = false }.apply {
+                    invokeOnCompletion {
+                        // Solely execute the last search action when debouncing is done
+                        if (isDebouncing.not() && textField.isNotBlank() && textField.length > 1) {
+                            textChangeAction(textField)
+                        }
+                    }
+                }
+                job.value.start()
             },
             isErrorValue = itemListViewState is ListViewState.Error,
         )
@@ -70,4 +93,9 @@ fun <T> DropDownTextField(
             }
         }
     }
+}
+
+private fun newJob(action: () -> Unit) = GlobalScope.launch(Dispatchers.IO) {
+    delay(500L)
+    action()
 }

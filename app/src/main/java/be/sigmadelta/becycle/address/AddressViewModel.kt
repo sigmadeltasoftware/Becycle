@@ -34,8 +34,15 @@ class AddressViewModel(
     }
 
     fun saveAddress(address: Address) = viewModelScope.launch {
-        addressRepository.insertAddress(address)
-        createDefaultNotificationSettings(address)
+        val addressExists = addressRepository.getAddresses().map { it.id }.contains(address.id)
+
+        if (addressExists) {
+            addressRepository.updateAddress(address.id, address)
+        } else {
+            addressRepository.insertAddress(address)
+            createDefaultNotificationSettings(address)
+        }
+
         loadSavedAddresses()
     }
 
@@ -45,7 +52,7 @@ class AddressViewModel(
         addressesViewState.value = ListViewState.Success(addresses)
     }
 
-    fun clearAddresses() = viewModelScope.launch {
+    fun clearAllAddresses() = viewModelScope.launch {
         addressRepository.removeAddresses()
         loadSavedAddresses()
     }
@@ -76,12 +83,26 @@ class AddressViewModel(
         }
     }
 
+    fun validateExistingAddress(address: Address) = viewModelScope.launch {
+        addressRepository.validateExistingAddress(address).collect {
+            validationViewState.value = when (it) {
+                is Response.Loading -> ValidationViewState.Loading
+                is Response.Success -> ValidationViewState.Success(it.body)
+                is Response.Error -> when (it.error) {
+                    is ClientRequestException -> ValidationViewState.InvalidCombination
+                    is InvalidAddressException -> ValidationViewState.InvalidAddressSpecified
+                    else -> ValidationViewState.NetworkError
+                }
+            }
+        }
+    }
+
     private fun createDefaultNotificationSettings(address: Address) {
         notificationRepo.insertDefaultNotificationProps(address)
     }
 
     companion object {
-        const val TAG = "AddressViewModel"
+        private const val TAG = "AddressViewModel"
     }
 }
 

@@ -20,9 +20,9 @@ import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.common.address.Address
 
 @Composable
-fun AddressOverview(
+fun SettingsAddressOverview(
     addresses: ListViewState<Address>,
-    onEditAddressClicked: () -> Unit,
+    onEditAddressClicked: (Address) -> Unit,
     onAddAddressClicked: () -> Unit
 ) {
     when (addresses) {
@@ -30,7 +30,7 @@ fun AddressOverview(
         is ListViewState.Loading -> CircularProgressIndicator()
         is ListViewState.Success -> Column {
             LazyColumnForIndexed(items = addresses.payload) { ix, addr ->
-                AddressOverviewItem(index = ix, addresses = addresses.payload, onEditAddressClicked)
+                SettingsAddressOverviewItem(index = ix, addresses = addresses.payload, onEditAddressClicked)
                 if (ix < addresses.payload.size - 1) {
                     Divider()
                 }
@@ -42,14 +42,14 @@ fun AddressOverview(
 }
 
 @Composable
-fun AddressOverviewItem(
+fun SettingsAddressOverviewItem(
     index: Int,
     addresses: List<Address>,
-    onEditAddressClicked: () -> Unit
+    onEditAddressClicked: (Address) -> Unit
 ) {
     val address = addresses[index]
     Row {
-        Column(modifier = Modifier.clickable(onClick = onEditAddressClicked)) {
+        Column(modifier = Modifier.clickable(onClick = { onEditAddressClicked(address) })) {
             Text(text = address.id)
             Text(text = "${address.street.names.nl} ${address.houseNumber}")
             Text(text = "${address.zipCodeItem.code} ${address.zipCodeItem.names.firstOrNull()?.nl}")

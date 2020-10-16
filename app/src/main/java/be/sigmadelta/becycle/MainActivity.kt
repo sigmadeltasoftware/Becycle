@@ -18,13 +18,10 @@ import androidx.compose.ui.platform.ContextAmbient
 import androidx.compose.ui.platform.setContent
 import androidx.compose.ui.res.vectorResource
 import be.sigmadelta.becycle.accesstoken.AccessTokenViewModel
+import be.sigmadelta.becycle.address.*
 import be.sigmadelta.becycle.common.*
 import be.sigmadelta.becycle.common.ui.theme.BecycleTheme
 import be.sigmadelta.becycle.common.ui.util.ListViewState
-import be.sigmadelta.becycle.address.AddressInput
-import be.sigmadelta.becycle.address.AddressOverview
-import be.sigmadelta.becycle.address.AddressViewModel
-import be.sigmadelta.becycle.address.ValidationViewState
 import be.sigmadelta.becycle.collections.CollectionsViewModel
 import be.sigmadelta.becycle.common.ui.util.ViewState
 import be.sigmadelta.becycle.home.Home
@@ -155,17 +152,10 @@ fun Main(
                 addresses,
                 collections,
                 actions.goTo,
-                { addressViewModel.clearAddresses() },
+                { addressViewModel.clearAllAddresses() },
                 { address -> collectionsViewModel.searchCollections(address,) }
             )
 
-            Destination.AddressInput -> AddressInput(
-                zipCodeItemsViewState,
-                streetsViewState,
-                onSearchZipCode = addressViewModel::searchZipCode,
-                onSearchStreet = addressViewModel::searchStreets,
-                onValidateAddress = addressViewModel::validateAddress
-            )
 
             Destination.Settings -> {
                 val notificationSwitchState = remember { mutableStateOf(preferences.notificationsEnabled) }
@@ -175,13 +165,35 @@ fun Main(
                 }
             }
 
+
             Destination.SettingsNotifications -> Notifications(addresses)
 
-            Destination.SettingsAddresses -> AddressOverview(
+            Destination.SettingsAddresses -> SettingsAddressOverview(
                 addresses,
-                {},
-                { actions.goTo(Destination.AddressInput) }
+                { actions.goTo(Destination.SettingsAddressEditRemoval(it.id)) },
+                { actions.goTo(Destination.SettingsAddressCreation) }
             )
+
+            Destination.SettingsAddressCreation -> AddressCreation(
+                zipCodeItemsViewState,
+                streetsViewState,
+                onSearchZipCode = addressViewModel::searchZipCode,
+                onSearchStreet = addressViewModel::searchStreets,
+                onValidateAddress = addressViewModel::validateAddress
+            )
+
+            is Destination.SettingsAddressEditRemoval -> {
+                AddressEditRemoval(
+                    dest.addressId,
+                    addresses,
+                    zipCodeItemsViewState,
+                    streetsViewState,
+                    addressViewModel::searchZipCode,
+                    addressViewModel::searchStreets,
+                    addressViewModel::validateExistingAddress,
+                    { addr -> }
+                )
+            }
         }
     }
 
