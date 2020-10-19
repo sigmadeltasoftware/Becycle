@@ -1,17 +1,11 @@
 package be.sigmadelta.common.address
-
 import be.sigmadelta.common.collections.CollectionsApi
 import be.sigmadelta.common.util.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.datetime.Clock
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
-import org.kodein.db.DB
-import org.kodein.db.deleteAll
-import org.kodein.db.find
-import org.kodein.db.useModels
+import kotlinx.datetime.*
+import org.kodein.db.*
+import org.kodein.memory.use
 
 class AddressRepository(private val db: DB, private val addressApi: AddressApi, private val collectionsApi: CollectionsApi) {
 
@@ -20,6 +14,21 @@ class AddressRepository(private val db: DB, private val addressApi: AddressApi, 
     fun getAddresses() = db.find<Address>().all().useModels { it.toList() }
 
     fun removeAddresses() = db.deleteAll(db.find<Address>().all())
+
+    fun removeAddress(address: Address) = db.find<Address>().byId(address.id).use {
+        if (it.isValid()) {
+            db.deleteAll(it)
+        }
+    }
+
+    fun updateAddress(addressId: String, address: Address) {
+        db.find<Address>().byId(addressId).use {
+            if (it.isValid()) {
+                db.deleteAll(it)
+                db.put(address)
+            }
+        }
+    }
 
     suspend fun searchZipCodes(queryString: String): Flow<Response<List<ZipCodeItem>>> =
         addressApi.getZipCodes(queryString).apiSearchRequestToFlow()
@@ -30,31 +39,30 @@ class AddressRepository(private val db: DB, private val addressApi: AddressApi, 
     suspend fun validateAddress(zipCodeItem: ZipCodeItem, street: Street, houseNumber: Int): Flow<Response<Address>> =
         flow {
             emit(Response.Loading())
-
-            emit(
-                when (val response = addressApi.validateAddress(zipCodeItem, street, houseNumber)) {
-                    is ApiResponse.Success -> {
-                        val date = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-                        val untilMonth = if (date.monthNumber == 12) 1 else date.monthNumber + 1
-                        val untilYear = if (date.monthNumber == 12) date.year + 1 else date.year
-                        val untilDate = LocalDateTime(
-                            untilYear,
-                            untilMonth,
-                            date.dayOfMonth,
-                            0,
-                            0,
-                            0,
-                            0
-                        ).toYyyyMmDd()
-
-                        when (val validationResponse = collectionsApi.getCollections(response.body, date.toYyyyMmDd(), untilDate, 10)) {
-                            is ApiResponse.Success -> Response.Success(response.body)
-                            is ApiResponse.Error -> Response.Error(validationResponse.error)
-                        }
-                    }
-
-                    is ApiResponse.Error -> Response.Error(response.error)
-                }
-            )
+            emit(addressApi.validateAddress(zipCodeItem, street, houseNumber).toResponse(collectionsApi))
         }
+
+    suspend fun validateExistingAddress(address: Address): Flow<Response<Address>> =
+        flow {
+            emit(Response.Loading())
+            emit(addressApi.validateExistingAddress(address).toResponse(collectionsApi))
+        }
+}
+
+private suspend fun ApiResponse<Address>.toResponse(collectionsApi: CollectionsApi) = when (this) {
+    is ApiResponse.Success -> {
+
+        val date = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+            .toYyyyMmDd()
+        val untilDate = Clock.System.now().plus(DateTimePeriod(months = 1), TimeZone.currentSystemDefault())
+            .toLocalDateTime(TimeZone.currentSystemDefault())
+            .toYyyyMmDd()
+
+        when (val validationResponse = collectionsApi.getCollections(body, date, untilDate, 10)) {
+            is ApiResponse.Success -> Response.Success(body)
+            is ApiResponse.Error -> Response.Error(validationResponse.error)
+        }
+    }
+
+    is ApiResponse.Error -> Response.Error(error)
 }

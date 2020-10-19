@@ -25,16 +25,19 @@ import org.koin.ext.isInt
 
 @ExperimentalFocus
 @Composable
-fun AddressInput(
+fun AddressCreation(
     zipCodeItemsViewState: ListViewState<ZipCodeItem>,
     streetsViewState: ListViewState<Street>,
     onSearchZipCode: (String) -> Unit,
     onSearchStreet: (String, ZipCodeItem) -> Unit,
-    onValidateAddress: (ZipCodeItem, Street, Int) -> Unit
-) {
+    onValidateAddress: (ZipCodeItem, Street, Int) -> Unit,
+    prefill: AddressCreationPrefill? = null,
+    ) {
     var selectedZipCode by remember { mutableStateOf<ZipCodeItem?>(null) }
     var selectedStreet by remember { mutableStateOf<Street?>(null) }
     var selectedHouseNumber by remember { mutableStateOf("1") }
+
+    prefill?.let { if (it.houseNumber.isInt()) selectedHouseNumber = it.houseNumber }
 
     val streetFocusRequester = FocusRequester()
     val houseNumberFocusRequester = FocusRequester()
@@ -42,7 +45,7 @@ fun AddressInput(
     Column {
         DropDownTextField(
             zipCodeItemsViewState,
-            textValue = selectedZipCode?.code,
+            textValue = selectedZipCode?.code ?: prefill?.postCodeNumber,
             label = "Zipcode",
             textChangeAction = {
                 selectedZipCode = null
@@ -57,7 +60,7 @@ fun AddressInput(
 
         DropDownTextField(
             streetsViewState,
-            textValue = selectedStreet?.names?.nl,
+            textValue = selectedStreet?.names?.nl ?: prefill?.streetName,
             label = "Street",
             textChangeAction = {
                 selectedStreet = null
@@ -74,7 +77,7 @@ fun AddressInput(
         )
 
         TextField(
-            modifier = Modifier.fillMaxWidth().focusRequester(houseNumberFocusRequester),
+            modifier = Modifier.fillMaxWidth().focusRequester(houseNumberFocusRequester).padding(horizontal = 16.dp),
             backgroundColor = Color.White,
             label = { Text("House number") },
             value = selectedHouseNumber,
@@ -113,3 +116,9 @@ fun StreetLayout(street: Street) {
     Text(street.id, fontSize = 10.sp)
     Divider(modifier = Modifier.fillMaxWidth())
 }
+
+data class AddressCreationPrefill(
+    val postCodeNumber: String,
+    val streetName: String,
+    val houseNumber: String
+)

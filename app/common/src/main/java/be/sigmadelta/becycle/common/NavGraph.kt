@@ -11,11 +11,6 @@ sealed class Destination: Parcelable {
     @Parcelize
     object Home: Destination()
 
-    @Parcelize
-    object AddressInput: Destination()
-
-    @Parcelize
-    object RecycleWebsite: Destination()
 
     @Parcelize
     object Settings: Destination()
@@ -25,6 +20,12 @@ sealed class Destination: Parcelable {
 
     @Parcelize
     object SettingsAddresses: Destination()
+
+    @Parcelize
+    object SettingsAddressCreation: Destination()
+
+    @Parcelize
+    data class SettingsAddressEditRemoval(val addressId: String): Destination()
 }
 
 class Actions(private val nav: Navigator<Destination>) {

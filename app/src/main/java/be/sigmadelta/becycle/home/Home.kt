@@ -19,14 +19,14 @@ import be.sigmadelta.common.collections.Collection
 fun Home(
     addresses: ListViewState<Address>,
     collections: ListViewState<Collection>,
-    onGoToAddressInput: (Destination.AddressInput) -> Unit,
+    onGoToAddressInput: (Destination.SettingsAddressCreation) -> Unit,
     onClearAddresses: () -> Unit,
     onLoadCollections: (Address) -> Unit
 ) {
     when (addresses) {
 
         is ListViewState.Success -> if (addresses.payload.isEmpty()) {
-            onGoToAddressInput(Destination.AddressInput)
+            onGoToAddressInput(Destination.SettingsAddressCreation)
         } else {
             var selectedTabIx by remember { mutableStateOf(0) }
 
