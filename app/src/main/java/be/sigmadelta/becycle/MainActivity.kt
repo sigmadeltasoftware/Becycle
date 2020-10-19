@@ -105,9 +105,9 @@ fun MainLayout(
     Providers(BackDispatcherAmbient provides backPressedDispatcher) {
         ProvideDisplayInsets {
             Scaffold(
-                topBar = {
-                    TopAppBar(title = { Text("Becycle") })
-                },
+//                topBar = {
+//                    TopAppBar(title = { Text("Becycle") })
+//                },
                 bodyContent = { _ ->
                     Main(
                         nav,
@@ -119,7 +119,7 @@ fun MainLayout(
                 },
                 bottomBar = {
                     val ctx = ContextAmbient.current
-                    BottomNavigation() {
+                    BottomNavigation {
                         BottomNavigationItem(
                             icon = { Icon(asset = vectorResource(id = R.drawable.ic_home)) },
                             selected = nav.current == Destination.Home,
@@ -169,8 +169,7 @@ fun Main(
                 addresses,
                 collections,
                 actions.goTo,
-                { addressViewModel.clearAllAddresses() },
-                { address -> collectionsViewModel.searchCollections(address,) }
+                { address -> collectionsViewModel.searchCollections(address) }
             )
 
 
@@ -210,7 +209,7 @@ fun Main(
                     addressViewModel::validateExistingAddress,
                     {
                         addressViewModel.removeAddress(it)
-                        actions.pressOnBack()
+                        actions.pressOnBack
                     }
                 )
             }
@@ -264,10 +263,10 @@ fun ValidationSnackbar(
                 )
             }
         }
+
         MainScope().launch {
             delay(4000)
             addressViewModel.resetValidation()
-
         }
     }
 }

@@ -20,9 +20,10 @@ fun Home(
     addresses: ListViewState<Address>,
     collections: ListViewState<Collection>,
     onGoToAddressInput: (Destination.SettingsAddressCreation) -> Unit,
-    onClearAddresses: () -> Unit,
     onLoadCollections: (Address) -> Unit
 ) {
+    var isInitialized by remember { mutableStateOf(false) }
+
     when (addresses) {
 
         is ListViewState.Success -> if (addresses.payload.isEmpty()) {
@@ -40,14 +41,14 @@ fun Home(
                     }
                 )
                 HomeLayout(
-                    collections,
-                    addresses.payload,
-                    selectedTabIx,
-                    onClearAddresses,
-                    onLoadCollections
+                    collections
                 )
             }
 
+            if (isInitialized.not() && addresses.payload.firstOrNull() != null) {
+                addresses.payload.firstOrNull()?.let { onLoadCollections(it) }
+                isInitialized = true
+            }
         }
 
         is ListViewState.Error, is ListViewState.Empty -> Text("Failed to retrieve addresses!") // TODO: Prettify
@@ -56,26 +57,10 @@ fun Home(
 
 @Composable
 fun HomeLayout(
-    collections: ListViewState<Collection>,
-    addresses: List<Address>,
-    addressIndex: Int,
-    onClearAddresses: () -> Unit,
-    onLoadCollections: (Address) -> Unit
+    collections: ListViewState<Collection>
 ) {
 
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-        Button(
-            onClick = { onClearAddresses() },
-            modifier = Modifier.align(Alignment.CenterHorizontally).padding(16.dp)
-        ) {
-            Text("Clear Address(es)")
-        }
-        Button(
-            onClick = { onLoadCollections(addresses[addressIndex]) },
-            modifier = Modifier.align(Alignment.CenterHorizontally).padding(16.dp)
-        ) {
-            Text("Load collections")
-        }
         when (collections) {
             is ListViewState.Empty -> Unit
             is ListViewState.Loading -> Unit // TODO
