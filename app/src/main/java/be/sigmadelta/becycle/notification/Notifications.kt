@@ -1,14 +1,12 @@
 package be.sigmadelta.becycle.notification
 
 import android.app.TimePickerDialog
+import android.util.Log
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Icon
 import androidx.compose.foundation.Text
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.work.WorkManager
 import be.sigmadelta.becycle.R
+import be.sigmadelta.becycle.common.Destination
 import be.sigmadelta.becycle.common.ui.theme.primaryAccent
 import be.sigmadelta.becycle.common.ui.theme.primaryBackgroundColor
 import be.sigmadelta.becycle.common.ui.theme.secondaryAccent
@@ -31,11 +30,14 @@ import be.sigmadelta.common.notifications.NotificationRepo
 import be.sigmadelta.common.util.addLeadingZeroBelow10
 
 @Composable
-fun SettingsNotifications(addresses: ListViewState<Address>) {
+fun SettingsNotifications(
+    addresses: ListViewState<Address>,
+    onGoToAddressInput: () -> Unit
+) {
     var selectedTabIx by remember { mutableStateOf(0) }
 
     Column {
-        AddressSwitcher(selectedTabIx, addresses) { ix -> selectedTabIx = ix }
+        AddressSwitcher(selectedTabIx, addresses, onGoToAddressInput) { ix -> selectedTabIx = ix }
 
         Crossfade(selectedTabIx) { newIx ->
             (addresses as? ListViewState.Success)?.let {
@@ -56,6 +58,7 @@ fun SettingsNotifications(addresses: ListViewState<Address>) {
 fun AddressSwitcher(
     selectedTabIx: Int,
     addresses: ListViewState<Address>,
+    onGoToAddressInput: () -> Unit,
     onTabSelected: (Int) -> Unit
 ) {
     TabRow(
@@ -66,29 +69,55 @@ fun AddressSwitcher(
     ) {
         when (addresses) {
             is ListViewState.Loading -> CircularProgressIndicator(modifier = Modifier.padding(16.dp))
-            is ListViewState.Success -> addresses.payload.forEachIndexed { ix, it ->
-                Tab(
-                    selected = selectedTabIx == ix,
-                    onClick = { onTabSelected(ix) },
-                    modifier = Modifier
-                        .background(if (selectedTabIx == ix) secondaryAccent else primaryBackgroundColor)
-                        .padding(16.dp),
-                    selectedContentColor = primaryAccent,
-                    unselectedContentColor = primaryBackgroundColor,
-                ) {
-                    Text(
-                        it.zipCodeItem.code,
-                        fontWeight = FontWeight.Bold,
-                        color = if (selectedTabIx == ix) primaryAccent else unselectedColor
-                    )
-                    Text(
-                        "${it.street.names.nl} ${it.houseNumber}",
-                        fontSize = 10.sp,
-                        color = if (selectedTabIx == ix) primaryAccent else unselectedColor
-                    )
+            is ListViewState.Success -> {
+                addresses.payload.forEachIndexed { ix, it ->
+                    Tab(
+                        selected = selectedTabIx == ix,
+                        onClick = { onTabSelected(ix) },
+                        modifier = Modifier
+                            .background(if (selectedTabIx == ix) secondaryAccent else primaryBackgroundColor)
+                            .padding(16.dp),
+                        selectedContentColor = primaryAccent,
+                        unselectedContentColor = primaryBackgroundColor,
+                    ) {
+                        Text(
+                            it.zipCodeItem.code,
+                            fontWeight = FontWeight.Bold,
+                            color = if (selectedTabIx == ix) primaryAccent else unselectedColor
+                        )
+                        Text(
+                            "${it.street.names.nl} ${it.houseNumber}",
+                            fontSize = 10.sp,
+                            color = if (selectedTabIx == ix) primaryAccent else unselectedColor
+                        )
+                    }
+                }
+
+                if (addresses.payload.size < 5) {
+                    Tab(selected = false, onClick = onGoToAddressInput) {
+                        Column(
+                            verticalArrangement = Arrangement.Center,
+                            modifier = Modifier.padding(top = 8.dp)
+                        ) {
+                            Text(
+                                text = "Add Address",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp,
+                                color = unselectedColor
+                            )
+                            Icon(
+                                asset = vectorResource(id = R.drawable.ic_add),
+                                tint = primaryAccent,
+                                modifier = Modifier.align(Alignment.CenterHorizontally)
+                            )
+                        }
+                    }
                 }
             }
-            is ListViewState.Error -> Text("Unable to retrieve address data", color = Color.Red)
+            is ListViewState.Error -> {
+                Log.e("AddressSwitcher", addresses.error?.localizedMessage.toString())
+                Text("Unable to retrieve address data", color = Color.Red)
+            }
         }
     }
 }

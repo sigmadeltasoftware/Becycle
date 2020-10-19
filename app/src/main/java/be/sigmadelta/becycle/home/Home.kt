@@ -19,7 +19,7 @@ import be.sigmadelta.common.collections.Collection
 fun Home(
     addresses: ListViewState<Address>,
     collections: ListViewState<Collection>,
-    onGoToAddressInput: (Destination.SettingsAddressCreation) -> Unit,
+    onGoToAddressInput: () -> Unit,
     onLoadCollections: (Address) -> Unit
 ) {
     var isInitialized by remember { mutableStateOf(false) }
@@ -27,7 +27,7 @@ fun Home(
     when (addresses) {
 
         is ListViewState.Success -> if (addresses.payload.isEmpty()) {
-            onGoToAddressInput(Destination.SettingsAddressCreation)
+            onGoToAddressInput()
         } else {
             var selectedTabIx by remember { mutableStateOf(0) }
 
@@ -35,6 +35,7 @@ fun Home(
                 AddressSwitcher(
                     selectedTabIx = selectedTabIx,
                     addresses = addresses,
+                    onGoToAddressInput = onGoToAddressInput,
                     onTabSelected = { ix ->
                         selectedTabIx = ix
                         onLoadCollections(addresses.payload[selectedTabIx])

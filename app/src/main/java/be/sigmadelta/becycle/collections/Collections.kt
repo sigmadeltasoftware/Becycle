@@ -2,11 +2,11 @@ package be.sigmadelta.becycle.collections
 
 import androidx.compose.foundation.Icon
 import androidx.compose.foundation.Text
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumnFor
 import androidx.compose.foundation.lazy.LazyColumnForIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Card
 import androidx.compose.material.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -16,30 +16,64 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import be.sigmadelta.becycle.R
+import be.sigmadelta.becycle.common.ui.theme.bottomNavigationMargin
+import be.sigmadelta.becycle.common.ui.theme.primaryBackgroundColor
+import be.sigmadelta.becycle.common.ui.theme.textPrimary
 import be.sigmadelta.common.collections.Collection
 import java.text.SimpleDateFormat
 
 @Composable
 fun Collections(collections: List<Collection>) {
     // TODO: Check why bottom padding is necessary for BottomNavigation
-    LazyColumnForIndexed(
-        items = collections.sortedBy { it.timestamp },
-        modifier = Modifier.fillMaxSize().padding(bottom = 48.dp)
-    ) { ix, it ->
-        collectionItem(collection = it, ix == collections.size - 1)
+
+    val collectionViewItems = mutableListOf(
+        CollectionViewItem {
+            Text(
+                text = "Upcoming collections:",
+                fontSize = 20.sp,
+                color = textPrimary,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = 8.dp, start = 8.dp, bottom = 8.dp)
+            )
+        }
+    ).apply {
+        addAll(collections
+            .sortedBy { it.timestamp }
+            .map { CollectionViewItem { collectionItem(collection = it) } }
+        )
+    }.apply {
+        add(CollectionViewItem {
+            Divider(color = primaryBackgroundColor, modifier = Modifier.padding(bottom = 12.dp))
+        })
     }
+
+    LazyColumnFor(
+        items = collectionViewItems,
+        modifier = Modifier.fillMaxSize().padding(bottom = bottomNavigationMargin)
+    ) { it.item() }
 }
 
 private val fullFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
 private val compactFormat = SimpleDateFormat("dd-MM-yyyy")
 
 @Composable
-fun collectionItem(collection: Collection, isLast: Boolean = false) {
-    Column {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(asset = vectorResource(id = when(collection.collectionType) {
-                else -> R.drawable.ic_home
-            }))
+fun collectionItem(collection: Collection) {
+    Card(
+        elevation = 12.dp,
+        modifier = Modifier.fillMaxWidth().padding(6.dp),
+        shape = RoundedCornerShape(8.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(horizontal = 8.dp)
+        ) {
+            Icon(
+                asset = vectorResource(
+                    id = when (collection.collectionType) {
+                        else -> R.drawable.ic_home
+                    }
+                )
+            )
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.padding(16.dp)
@@ -53,8 +87,7 @@ fun collectionItem(collection: Collection, isLast: Boolean = false) {
                 Text(compactFormat.format(timeStamp), fontSize = 10.sp)
             }
         }
-        if (isLast.not()) {
-            Divider()
-        }
     }
 }
+
+class CollectionViewItem(val item: @Composable () -> Unit)
