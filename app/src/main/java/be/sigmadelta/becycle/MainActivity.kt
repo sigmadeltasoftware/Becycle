@@ -1,7 +1,6 @@
 package be.sigmadelta.becycle
 
 import android.annotation.SuppressLint
-import android.content.DialogInterface
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.OnBackPressedDispatcher
@@ -19,12 +18,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ContextAmbient
 import androidx.compose.ui.platform.setContent
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.unit.dp
 import be.sigmadelta.becycle.accesstoken.AccessTokenViewModel
 import be.sigmadelta.becycle.address.*
 import be.sigmadelta.becycle.common.*
-import be.sigmadelta.becycle.common.ui.theme.BecycleTheme
 import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.becycle.collections.CollectionsViewModel
+import be.sigmadelta.becycle.common.ui.theme.*
 import be.sigmadelta.becycle.common.ui.util.ViewState
 import be.sigmadelta.becycle.home.Home
 import be.sigmadelta.becycle.notification.Notifications
@@ -105,9 +105,6 @@ fun MainLayout(
     Providers(BackDispatcherAmbient provides backPressedDispatcher) {
         ProvideDisplayInsets {
             Scaffold(
-//                topBar = {
-//                    TopAppBar(title = { Text("Becycle") })
-//                },
                 bodyContent = { _ ->
                     Main(
                         nav,
@@ -119,22 +116,35 @@ fun MainLayout(
                 },
                 bottomBar = {
                     val ctx = ContextAmbient.current
-                    BottomNavigation {
+                    BottomNavigation(
+                        backgroundColor = primaryBackgroundColor,
+                        elevation = 8.dp,
+                    ) {
                         BottomNavigationItem(
                             icon = { Icon(asset = vectorResource(id = R.drawable.ic_home)) },
+                            selectedContentColor = primaryAccent,
+                            unselectedContentColor = unselectedColor,
                             selected = nav.current == Destination.Home,
                             onClick = { actions.goTo(Destination.Home) })
                         BottomNavigationItem(
                             icon = { Icon(asset = vectorResource(id = R.drawable.ic_settings)) },
-                            selected = nav.current.toString().contains("Settings"),
+                            selectedContentColor = primaryAccent,
+                            unselectedContentColor = unselectedColor,
+                            selected = nav.current.toString().contains("Settings"), // TODO?
                             onClick = { actions.goTo(Destination.Settings) })
                         BottomNavigationItem(
                             icon = { Icon(asset = vectorResource(id = R.drawable.ic_web)) },
+                            selectedContentColor = primaryAccent,
+                            unselectedContentColor = unselectedColor,
                             selected = false,
                             onClick = {
                                 AlertDialog.Builder(ctx)
                                     .setTitle("Go to website?")
-                                    .setPositiveButton("OK") { _, _ -> actions.goToRecycleWebsite(ctx) }
+                                    .setPositiveButton("OK") { _, _ ->
+                                        actions.goToRecycleWebsite(
+                                            ctx
+                                        )
+                                    }
                                     .setNegativeButton("Close") { p0, _ -> p0.dismiss() }
                                     .show()
                             }

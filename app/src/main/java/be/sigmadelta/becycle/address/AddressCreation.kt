@@ -89,13 +89,12 @@ fun AddressCreation(
             isErrorValue = !selectedHouseNumber.isInt()
         )
 
-        if (selectedZipCode != null && selectedStreet != null && selectedHouseNumber.isInt()) {
-            Button(
-                onClick = { onValidateAddress(selectedZipCode!!, selectedStreet!!, selectedHouseNumber.toInt()) },
-                modifier = Modifier.padding(16.dp).align(Alignment.CenterHorizontally)
-            ) {
-                Text("Store Address")
-            }
+        Button(
+            onClick = { onValidateAddress(selectedZipCode!!, selectedStreet!!, selectedHouseNumber.toInt()) },
+            modifier = Modifier.padding(16.dp).align(Alignment.CenterHorizontally),
+            enabled = selectedZipCode != null && selectedStreet != null && selectedHouseNumber.isInt()
+        ) {
+            Text("Save Address")
         }
     }
 }
