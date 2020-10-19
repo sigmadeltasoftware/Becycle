@@ -1,9 +1,11 @@
 package be.sigmadelta.becycle
 
 import android.annotation.SuppressLint
+import android.content.DialogInterface
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.OnBackPressedDispatcher
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
@@ -106,7 +108,15 @@ fun MainLayout(
                 topBar = {
                     TopAppBar(title = { Text("Becycle") })
                 },
-                bodyContent = { _ -> Main(nav, actions, preferences, addressViewModel, collectionsViewModel) },
+                bodyContent = { _ ->
+                    Main(
+                        nav,
+                        actions,
+                        preferences,
+                        addressViewModel,
+                        collectionsViewModel
+                    )
+                },
                 bottomBar = {
                     val ctx = ContextAmbient.current
                     BottomNavigation() {
@@ -121,7 +131,14 @@ fun MainLayout(
                         BottomNavigationItem(
                             icon = { Icon(asset = vectorResource(id = R.drawable.ic_web)) },
                             selected = false,
-                            onClick = { actions.goToRecycleWebsite(ctx) })
+                            onClick = {
+                                AlertDialog.Builder(ctx)
+                                    .setTitle("Go to website?")
+                                    .setPositiveButton("OK") { _, _ -> actions.goToRecycleWebsite(ctx) }
+                                    .setNegativeButton("Close") { p0, _ -> p0.dismiss() }
+                                    .show()
+                            }
+                        )
                     }
                 }
             )
