@@ -4,6 +4,7 @@ import android.app.TimePickerDialog
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Icon
 import androidx.compose.foundation.Text
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,6 +21,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.work.WorkManager
 import be.sigmadelta.becycle.R
+import be.sigmadelta.becycle.common.ui.theme.primaryAccent
+import be.sigmadelta.becycle.common.ui.theme.primaryBackgroundColor
+import be.sigmadelta.becycle.common.ui.theme.secondaryAccent
+import be.sigmadelta.becycle.common.ui.theme.unselectedColor
 import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.notifications.NotificationRepo
@@ -30,7 +35,7 @@ fun Notifications(addresses: ListViewState<Address>) {
     var selectedTabIx by remember { mutableStateOf(0) }
 
     Column {
-        AddressSwitcher(selectedTabIx, addresses, { ix -> selectedTabIx = ix})
+        AddressSwitcher(selectedTabIx, addresses, { ix -> selectedTabIx = ix })
 
         Crossfade(selectedTabIx) { newIx ->
             (addresses as? ListViewState.Success)?.let {
@@ -40,7 +45,8 @@ fun Notifications(addresses: ListViewState<Address>) {
             }
         }
 
-        val notifWorker = WorkManager.getInstance(ContextAmbient.current).getWorkInfosByTag(NotificationRepo.WORK_NAME)
+        val notifWorker = WorkManager.getInstance(ContextAmbient.current)
+            .getWorkInfosByTag(NotificationRepo.WORK_NAME)
         Text(text = "NotifWorker is cancelled: ${notifWorker.isCancelled}")
         Text(text = "NotifWorker is done: ${notifWorker.isDone}")
     }
@@ -52,15 +58,33 @@ fun AddressSwitcher(
     addresses: ListViewState<Address>,
     onTabSelected: (Int) -> Unit
 ) {
-    TabRow(selectedTabIndex = selectedTabIx, divider = { Divider() }) {
+    TabRow(
+        selectedTabIndex = selectedTabIx,
+        backgroundColor = primaryBackgroundColor,
+        contentColor = primaryAccent,
+        divider = { Divider() }
+    ) {
         when (addresses) {
             is ListViewState.Loading -> CircularProgressIndicator(modifier = Modifier.padding(16.dp))
             is ListViewState.Success -> addresses.payload.forEachIndexed { ix, it ->
-                Tab(selected = selectedTabIx == ix, onClick = {
-                    onTabSelected(ix)
-                }, modifier = Modifier.padding(16.dp)) {
-                    Text(it.zipCodeItem.code, fontWeight = FontWeight.Bold)
-                    Text("${it.street.names.nl} ${it.houseNumber}", fontSize = 10.sp)
+                Tab(
+                    selected = selectedTabIx == ix,
+                    onClick = { onTabSelected(ix) },
+                    modifier = Modifier
+                        .background(if (selectedTabIx == ix) secondaryAccent else primaryBackgroundColor)
+                        .padding(16.dp),
+                    selectedContentColor = primaryAccent,
+                    unselectedContentColor = primaryBackgroundColor,
+                ) {
+                    Text(it.zipCodeItem.code,
+                        fontWeight = FontWeight.Bold,
+                        color = if (selectedTabIx == ix) primaryAccent else unselectedColor
+                    )
+                    Text(
+                        "${it.street.names.nl} ${it.houseNumber}",
+                        fontSize = 10.sp,
+                        color = if (selectedTabIx == ix) primaryAccent else unselectedColor
+                    )
                 }
             }
             is ListViewState.Error -> Text("Unable to retrieve address data", color = Color.Red)
@@ -75,17 +99,21 @@ fun NotificationSettings(address: Address) {
 
     Text("Enable notifications for")
     Row(modifier = Modifier.padding(16.dp)) {
-        Text(text = "A day up front:", modifier = Modifier.align(alignment = Alignment.CenterVertically))
+        Text(
+            text = "A day up front:",
+            modifier = Modifier.align(alignment = Alignment.CenterVertically)
+        )
         Spacer(modifier = Modifier.weight(1f))
         Button(onClick = {
             TimePickerDialog(
                 ctx,
                 { _, hr, min ->
                     notificationTime = "${addLeadingZeroBelow10(hr)}:${addLeadingZeroBelow10(min)}"
-                 },
+                },
                 notificationTime.substringBefore(":").toInt(),
-                notificationTime.substringAfter(":").toInt() ,
-                true).show()
+                notificationTime.substringAfter(":").toInt(),
+                true
+            ).show()
         }, modifier = Modifier.padding(16.dp).align(alignment = Alignment.CenterVertically)) {
             Row {
                 Icon(vectorResource(id = R.drawable.ic_notification))

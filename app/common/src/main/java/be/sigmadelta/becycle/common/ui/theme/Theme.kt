@@ -8,19 +8,21 @@ import androidx.compose.runtime.Composable
 
 
 private val DarkColorPalette = darkColors(
-        primary = maroon200,
-        primaryVariant = maroon700,
-        secondary = teal200
+    primary = primaryAccent,
+    primaryVariant = variantAccent,
+    secondary = secondaryAccent,
+    error = errorColor,
 )
 
 private val LightColorPalette = lightColors(
-        primary = maroon500,
-        primaryVariant = maroon700,
-        secondary = teal200
+    primary = primaryAccent,
+    primaryVariant = variantAccent,
+    secondary = secondaryAccent,
+    error = errorColor
 )
 
 @Composable
-fun BecycleTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable() () -> Unit) {
+fun BecycleTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
     val colors = if (darkTheme) {
         DarkColorPalette
     } else {
@@ -29,6 +31,6 @@ fun BecycleTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composabl
 
     MaterialTheme(
         colors = colors,
-        content = content
+        content = content,
     )
 }
