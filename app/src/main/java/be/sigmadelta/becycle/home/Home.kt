@@ -3,15 +3,12 @@ package be.sigmadelta.becycle.home
 import androidx.compose.foundation.Text
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Button
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import be.sigmadelta.becycle.address.AddressSwitcher
 import be.sigmadelta.becycle.collections.Collections
-import be.sigmadelta.becycle.common.Destination
 import be.sigmadelta.becycle.common.ui.util.ListViewState
-import be.sigmadelta.becycle.notification.AddressSwitcher
 import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.collections.Collection
 
