@@ -13,6 +13,11 @@
         <item name="windowNoTitle">true</item>
     </style>
 
+    <style name="timePickerTheme" parent="@style/ThemeOverlay.MaterialComponents.Dialog">
+        <item name="colorControlActivated">#13DC98</item>
+        <item name="colorAccent">#13DC98</item>
+    </style>
+
     <style name="Theme.MyApplication.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
     <style name="Theme.MyApplication.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>

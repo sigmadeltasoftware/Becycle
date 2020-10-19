@@ -27,7 +27,7 @@ import be.sigmadelta.becycle.collections.CollectionsViewModel
 import be.sigmadelta.becycle.common.ui.theme.*
 import be.sigmadelta.becycle.common.ui.util.ViewState
 import be.sigmadelta.becycle.home.Home
-import be.sigmadelta.becycle.notification.Notifications
+import be.sigmadelta.becycle.notification.SettingsNotifications
 import be.sigmadelta.becycle.settings.Settings
 import be.sigmadelta.common.Preferences
 import be.sigmadelta.common.notifications.NotificationRepo
@@ -192,7 +192,7 @@ fun Main(
             }
 
 
-            Destination.SettingsNotifications -> Notifications(addresses)
+            Destination.SettingsNotifications -> SettingsNotifications(addresses)
 
             Destination.SettingsAddresses -> SettingsAddressOverview(
                 addresses,

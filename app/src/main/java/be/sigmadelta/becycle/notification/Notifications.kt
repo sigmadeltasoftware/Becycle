@@ -31,11 +31,11 @@ import be.sigmadelta.common.notifications.NotificationRepo
 import be.sigmadelta.common.util.addLeadingZeroBelow10
 
 @Composable
-fun Notifications(addresses: ListViewState<Address>) {
+fun SettingsNotifications(addresses: ListViewState<Address>) {
     var selectedTabIx by remember { mutableStateOf(0) }
 
     Column {
-        AddressSwitcher(selectedTabIx, addresses, { ix -> selectedTabIx = ix })
+        AddressSwitcher(selectedTabIx, addresses) { ix -> selectedTabIx = ix }
 
         Crossfade(selectedTabIx) { newIx ->
             (addresses as? ListViewState.Success)?.let {
@@ -76,7 +76,8 @@ fun AddressSwitcher(
                     selectedContentColor = primaryAccent,
                     unselectedContentColor = primaryBackgroundColor,
                 ) {
-                    Text(it.zipCodeItem.code,
+                    Text(
+                        it.zipCodeItem.code,
                         fontWeight = FontWeight.Bold,
                         color = if (selectedTabIx == ix) primaryAccent else unselectedColor
                     )
@@ -107,6 +108,7 @@ fun NotificationSettings(address: Address) {
         Button(onClick = {
             TimePickerDialog(
                 ctx,
+                R.style.timePickerTheme,
                 { _, hr, min ->
                     notificationTime = "${addLeadingZeroBelow10(hr)}:${addLeadingZeroBelow10(min)}"
                 },
