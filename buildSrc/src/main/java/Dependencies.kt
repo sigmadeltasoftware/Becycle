@@ -28,6 +28,7 @@ object Versions {
     const val datetime = "0.1.0"
     const val settings_prefs = "0.6.2"
     const val workmanager = "2.4.0"
+    const val flowTuple = "1.0.0"
 }
 
 object Kotlin {
@@ -79,5 +80,6 @@ object Kodein_db {
 object Util {
     const val slf4j = "org.slf4j:slf4j-simple:${Versions.slf4j}"
     const val prefs = "com.russhwolf:multiplatform-settings-no-arg:${Versions.settings_prefs}"
+    const val flowTuple = "com.github.Zhuinden:flow-combinetuple-kt:${Versions.flowTuple}"
 
 }

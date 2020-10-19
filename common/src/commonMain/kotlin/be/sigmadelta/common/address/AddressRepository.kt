@@ -15,6 +15,12 @@ class AddressRepository(private val db: DB, private val addressApi: AddressApi, 
 
     fun removeAddresses() = db.deleteAll(db.find<Address>().all())
 
+    fun removeAddress(address: Address) = db.find<Address>().byId(address.id).use {
+        if (it.isValid()) {
+            db.deleteAll(it)
+        }
+    }
+
     fun updateAddress(addressId: String, address: Address) {
         db.find<Address>().byId(addressId).use {
             if (it.isValid()) {

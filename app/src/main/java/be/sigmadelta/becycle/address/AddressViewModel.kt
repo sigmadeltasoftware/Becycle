@@ -57,6 +57,11 @@ class AddressViewModel(
         loadSavedAddresses()
     }
 
+    fun removeAddress(address: Address) = viewModelScope.launch {
+        addressRepository.removeAddress(address)
+        loadSavedAddresses()
+    }
+
     fun searchZipCode(searchQuery: String) = viewModelScope.launch {
         addressRepository.searchZipCodes(searchQuery).collect {
             zipCodeItemsViewState.value = it.toViewState()
@@ -95,6 +100,17 @@ class AddressViewModel(
                 }
             }
         }
+    }
+
+    fun resetAll() {
+        validationViewState.value = ValidationViewState.Empty
+        zipCodeItemsViewState.value = ListViewState.Empty()
+        streetsViewState.value = ListViewState.Empty()
+        addressesViewState.value = ListViewState.Empty()
+    }
+
+    fun resetValidation() {
+        validationViewState.value = ValidationViewState.Empty
     }
 
     private fun createDefaultNotificationSettings(address: Address) {

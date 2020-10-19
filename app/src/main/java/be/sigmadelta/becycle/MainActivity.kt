@@ -32,7 +32,7 @@ import be.sigmadelta.common.notifications.NotificationRepo
 import be.sigmadelta.common.util.AuthorizationKeyExpiredException
 import be.sigmadelta.common.util.SessionStorage
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -183,7 +183,7 @@ fun Main(
             )
 
             is Destination.SettingsAddressEditRemoval -> {
-                AddressEditRemoval(
+                SettingsAddressEditRemoval(
                     dest.addressId,
                     addresses,
                     zipCodeItemsViewState,
@@ -191,7 +191,10 @@ fun Main(
                     addressViewModel::searchZipCode,
                     addressViewModel::searchStreets,
                     addressViewModel::validateExistingAddress,
-                    { addr -> }
+                    {
+                        addressViewModel.removeAddress(it)
+                        actions.pressOnBack()
+                    }
                 )
             }
         }
@@ -246,19 +249,16 @@ fun ValidationSnackbar(
         }
         MainScope().launch {
             delay(4000)
-            addressViewModel.validationViewState.value = ValidationViewState.Empty
+            addressViewModel.resetValidation()
+
         }
     }
 }
 
-private fun resetViewStates(addressViewModel: AddressViewModel) = addressViewModel.apply {
-    validationViewState.value = ValidationViewState.Empty
-    zipCodeItemsViewState.value = ListViewState.Empty()
-    streetsViewState.value = ListViewState.Empty()
-}
+private fun resetViewStates(addressViewModel: AddressViewModel) = addressViewModel.resetAll()
 
 @ExperimentalCoroutinesApi
-suspend fun <T> MutableStateFlow<ListViewState<T>>.observeForAutKeyErrors(getAccessToken: () -> Unit) =
+suspend fun <T> StateFlow<ListViewState<T>>.observeForAutKeyErrors(getAccessToken: () -> Unit) =
     collect {
         if (it is ListViewState.Error && it.error is AuthorizationKeyExpiredException) {
             getAccessToken()
