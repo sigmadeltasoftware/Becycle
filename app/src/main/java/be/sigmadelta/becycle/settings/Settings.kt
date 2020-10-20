@@ -2,37 +2,32 @@ package be.sigmadelta.becycle.settings
 
 import android.widget.Toast
 import androidx.annotation.DrawableRes
-import androidx.compose.foundation.Icon
-import androidx.compose.foundation.Text
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Divider
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ContextAmbient
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import be.sigmadelta.becycle.R
 import be.sigmadelta.becycle.common.Destination
-import be.sigmadelta.becycle.common.ui.theme.primaryAccent
-import be.sigmadelta.becycle.common.ui.theme.primaryBackgroundColor
-import be.sigmadelta.becycle.common.ui.theme.unselectedColor
+import be.sigmadelta.becycle.common.ui.theme.*
 
 @Composable
 fun Settings(
     goTo: (Destination) -> Unit,
     notificationSwitchState: State<Boolean>,
+    onSigmaDeltaLogoClicked: () -> Unit,
     onNotificationSwitchAction: ((Boolean) -> Unit)? = null
 ) {
-    Column {
+    Column(modifier = Modifier.padding(bottom = bottomNavigationMargin)) {
         SettingsMenuItem(
             title = "Address(es)",
             subtitle = "Manage your address(es) here",
@@ -46,6 +41,22 @@ fun Settings(
             onClickAction = { goTo(Destination.SettingsNotifications) },
             notificationSwitchState,
             onNotificationSwitchAction
+        )
+
+        Spacer(modifier = Modifier.weight(1f))
+        Text(
+            text = "Created by",
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            color = textSecondary
+        )
+        Image(
+            asset = imageResource(id = R.drawable.ic_sigmadelta_footer),
+            modifier = Modifier.padding(bottom = 8.dp, start = 96.dp, end = 96.dp)
+                .clickable(onClick = {
+                    onSigmaDeltaLogoClicked()
+                })
         )
     }
 }

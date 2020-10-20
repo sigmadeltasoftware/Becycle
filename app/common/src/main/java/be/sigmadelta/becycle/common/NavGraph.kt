@@ -48,4 +48,10 @@ class Actions(private val nav: Navigator<Destination>) {
             data = Uri.parse("https://www.recycleapp.be")
         })
     }
+
+    fun goToSigmaDeltaWebsite(context: Context) {
+        context.startActivity(Intent(Intent.ACTION_VIEW).apply {
+            data = Uri.parse("https://www.sigmadelta.be")
+        })
+    }
 }

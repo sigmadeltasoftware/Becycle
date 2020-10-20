@@ -3,15 +3,13 @@ package be.sigmadelta.becycle.home
 import androidx.compose.foundation.Text
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Button
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import be.sigmadelta.becycle.address.AddressSwitcher
 import be.sigmadelta.becycle.collections.Collections
-import be.sigmadelta.becycle.common.Destination
+import be.sigmadelta.becycle.collections.EmptyCollections
 import be.sigmadelta.becycle.common.ui.util.ListViewState
-import be.sigmadelta.becycle.notification.AddressSwitcher
 import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.collections.Collection
 
@@ -19,15 +17,14 @@ import be.sigmadelta.common.collections.Collection
 fun Home(
     addresses: ListViewState<Address>,
     collections: ListViewState<Collection>,
-    onGoToAddressInput: (Destination.SettingsAddressCreation) -> Unit,
+    onGoToAddressInput: () -> Unit,
     onLoadCollections: (Address) -> Unit
 ) {
     var isInitialized by remember { mutableStateOf(false) }
 
     when (addresses) {
-
         is ListViewState.Success -> if (addresses.payload.isEmpty()) {
-            onGoToAddressInput(Destination.SettingsAddressCreation)
+            onGoToAddressInput()
         } else {
             var selectedTabIx by remember { mutableStateOf(0) }
 
@@ -35,13 +32,15 @@ fun Home(
                 AddressSwitcher(
                     selectedTabIx = selectedTabIx,
                     addresses = addresses,
+                    onGoToAddressInput = onGoToAddressInput,
                     onTabSelected = { ix ->
                         selectedTabIx = ix
                         onLoadCollections(addresses.payload[selectedTabIx])
                     }
                 )
                 HomeLayout(
-                    collections
+                    collections,
+                    addresses.payload[selectedTabIx]
                 )
             }
 
@@ -57,12 +56,13 @@ fun Home(
 
 @Composable
 fun HomeLayout(
-    collections: ListViewState<Collection>
+    collections: ListViewState<Collection>,
+    address: Address
 ) {
 
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
         when (collections) {
-            is ListViewState.Empty -> Unit
+            is ListViewState.Empty -> EmptyCollections(address)
             is ListViewState.Loading -> Unit // TODO
             is ListViewState.Success -> Collections(collections = collections.payload)
             is ListViewState.Error -> Unit // TODO

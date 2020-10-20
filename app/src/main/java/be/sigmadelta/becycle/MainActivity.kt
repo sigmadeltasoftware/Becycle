@@ -139,7 +139,7 @@ fun MainLayout(
                             selected = false,
                             onClick = {
                                 AlertDialog.Builder(ctx)
-                                    .setTitle("Go to website?")
+                                    .setTitle("Go to Recycle App website?")
                                     .setPositiveButton("OK") { _, _ ->
                                         actions.goToRecycleWebsite(
                                             ctx
@@ -178,21 +178,29 @@ fun Main(
             Destination.Home -> Home(
                 addresses,
                 collections,
-                actions.goTo,
+                { actions.goTo(Destination.SettingsAddressCreation) },
                 { address -> collectionsViewModel.searchCollections(address) }
             )
 
-
             Destination.Settings -> {
+                val ctx = ContextAmbient.current
                 val notificationSwitchState = remember { mutableStateOf(preferences.notificationsEnabled) }
-                Settings(actions.goTo, notificationSwitchState) {
+                Settings(
+                    actions.goTo,
+                    notificationSwitchState,
+                    onSigmaDeltaLogoClicked = {
+                        actions.goToSigmaDeltaWebsite(ctx)
+                    }) {
                     preferences.notificationsEnabled = it
                     notificationSwitchState.value = it
                 }
             }
 
 
-            Destination.SettingsNotifications -> SettingsNotifications(addresses)
+            Destination.SettingsNotifications -> SettingsNotifications(addresses) {
+                actions.goTo(Destination.SettingsAddressCreation)
+            }
+
 
             Destination.SettingsAddresses -> SettingsAddressOverview(
                 addresses,
@@ -216,12 +224,11 @@ fun Main(
                     streetsViewState,
                     addressViewModel::searchZipCode,
                     addressViewModel::searchStreets,
-                    addressViewModel::validateExistingAddress,
-                    {
-                        addressViewModel.removeAddress(it)
-                        actions.pressOnBack
-                    }
-                )
+                    addressViewModel::validateExistingAddress
+                ) {
+                    addressViewModel.removeAddress(it)
+                    actions.pressOnBack()
+                }
             }
         }
     }
