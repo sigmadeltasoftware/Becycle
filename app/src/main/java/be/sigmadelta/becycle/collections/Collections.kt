@@ -4,7 +4,6 @@ import androidx.compose.foundation.Icon
 import androidx.compose.foundation.Text
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumnFor
-import androidx.compose.foundation.lazy.LazyColumnForIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.Divider
@@ -19,6 +18,7 @@ import be.sigmadelta.becycle.R
 import be.sigmadelta.becycle.common.ui.theme.bottomNavigationMargin
 import be.sigmadelta.becycle.common.ui.theme.primaryBackgroundColor
 import be.sigmadelta.becycle.common.ui.theme.textPrimary
+import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.collections.Collection
 import java.text.SimpleDateFormat
 
@@ -26,8 +26,8 @@ import java.text.SimpleDateFormat
 fun Collections(collections: List<Collection>) {
     // TODO: Check why bottom padding is necessary for BottomNavigation
 
-    val collectionViewItems = mutableListOf(
-        CollectionViewItem {
+    val collectionViewItems = mutableListOf<@Composable () -> Unit>(
+        {
             Text(
                 text = "Upcoming collections:",
                 fontSize = 20.sp,
@@ -39,25 +39,27 @@ fun Collections(collections: List<Collection>) {
     ).apply {
         addAll(collections
             .sortedBy { it.timestamp }
-            .map { CollectionViewItem { collectionItem(collection = it) } }
+            .map { { CollectionItem(collection = it) } }
         )
     }.apply {
-        add(CollectionViewItem {
+        add {
             Divider(color = primaryBackgroundColor, modifier = Modifier.padding(bottom = 12.dp))
-        })
+        }
     }
 
     LazyColumnFor(
         items = collectionViewItems,
         modifier = Modifier.fillMaxSize().padding(bottom = bottomNavigationMargin)
-    ) { it.item() }
+    ) {
+        it()
+    }
 }
 
 private val fullFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
 private val compactFormat = SimpleDateFormat("dd-MM-yyyy")
 
 @Composable
-fun collectionItem(collection: Collection) {
+fun CollectionItem(collection: Collection) {
     Card(
         elevation = 12.dp,
         modifier = Modifier.fillMaxWidth().padding(6.dp),
@@ -90,4 +92,17 @@ fun collectionItem(collection: Collection) {
     }
 }
 
-class CollectionViewItem(val item: @Composable () -> Unit)
+@Composable
+fun EmptyCollections(address: Address) {
+    Card(
+        elevation = 12.dp,
+        modifier = Modifier.fillMaxWidth().padding(12.dp),
+        shape = RoundedCornerShape(8.dp)
+    ) {
+        Text(
+            "No collections available for ${address.street.names.nl} ${address.houseNumber}.",
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(8.dp)
+        )
+    }
+}

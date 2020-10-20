@@ -18,7 +18,10 @@ sealed class ViewState<T> {
 
 fun <V> Response<List<V>>.toViewState() = when (this) {
     is Response.Loading -> ListViewState.Loading()
-    is Response.Success -> ListViewState.Success(body)
+    is Response.Success -> if (this.body.isEmpty())
+        ListViewState.Empty()
+    else
+        ListViewState.Success(body)
     is Response.Error -> ListViewState.Error(error)
 }
 

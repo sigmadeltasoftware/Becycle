@@ -224,12 +224,11 @@ fun Main(
                     streetsViewState,
                     addressViewModel::searchZipCode,
                     addressViewModel::searchStreets,
-                    addressViewModel::validateExistingAddress,
-                    {
-                        addressViewModel.removeAddress(it)
-                        actions.pressOnBack
-                    }
-                )
+                    addressViewModel::validateExistingAddress
+                ) {
+                    addressViewModel.removeAddress(it)
+                    actions.pressOnBack()
+                }
             }
         }
     }

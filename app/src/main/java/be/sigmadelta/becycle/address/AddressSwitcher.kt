@@ -66,7 +66,7 @@ fun AddressSwitcher(
                     }
                 }
 
-                if (addresses.payload.size < 5) {
+                if (addresses.payload.size < 2) {
                     Tab(selected = false, onClick = onGoToAddressInput) {
                         Column(
                             verticalArrangement = Arrangement.Center,
