@@ -33,7 +33,7 @@ fun Collections(collections: List<Collection>) {
                 fontSize = 20.sp,
                 color = textPrimary,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(top = 8.dp, start = 8.dp, bottom = 8.dp)
+                modifier = Modifier.padding(top = 16.dp, start = 8.dp, bottom = 8.dp)
             )
         }
     ).apply {

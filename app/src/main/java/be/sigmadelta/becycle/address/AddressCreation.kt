@@ -77,7 +77,10 @@ fun AddressCreation(
         )
 
         TextField(
-            modifier = Modifier.fillMaxWidth().focusRequester(houseNumberFocusRequester).padding(horizontal = 16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .focusRequester(houseNumberFocusRequester)
+                .padding(horizontal = 32.dp, vertical = 8.dp),
             backgroundColor = Color.White,
             label = { Text("House number") },
             value = selectedHouseNumber,

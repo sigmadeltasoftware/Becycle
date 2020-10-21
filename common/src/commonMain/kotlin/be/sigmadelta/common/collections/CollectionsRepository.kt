@@ -58,6 +58,6 @@ class CollectionsRepository(private val db: DB, private val collectionsApi: Coll
     }
 
     companion object {
-        private const val SIZE_UPCOMING_ITEMS_RETURN = 6
+        private const val SIZE_UPCOMING_ITEMS_RETURN = 4
     }
 }
