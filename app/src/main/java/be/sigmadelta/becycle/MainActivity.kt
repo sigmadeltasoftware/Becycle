@@ -20,6 +20,7 @@ import androidx.compose.ui.platform.ContextAmbient
 import androidx.compose.ui.platform.setContent
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import be.sigmadelta.becycle.accesstoken.AccessTokenViewModel
 import be.sigmadelta.becycle.address.*
 import be.sigmadelta.becycle.collections.CollectionsViewModel
@@ -35,6 +36,7 @@ import be.sigmadelta.common.Preferences
 import be.sigmadelta.common.notifications.NotificationRepo
 import be.sigmadelta.common.util.AuthorizationKeyExpiredException
 import be.sigmadelta.common.util.SessionStorage
+import com.judemanutd.autostarter.AutoStartPermissionHelper
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
@@ -54,10 +56,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        if (preferences.isFirstRun) {
-            PowerUtil.checkBattery(this)
-        }
 
         // Add observers for access token expiration
         launch {
@@ -90,8 +88,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         }
 
         notificationRepo.scheduleWorker()
-
-        preferences.isFirstRun = false
     }
 }
 
@@ -109,6 +105,24 @@ fun MainLayout(
         }
 
     val actions = remember(nav) { Actions(nav) }
+
+    if (preferences.isFirstRun && nav.current != Destination.Settings) {
+        AlertDialog.Builder(ContextAmbient.current)
+            .setTitle("Battery Optimisations")
+            .setMessage("Due to aggressive battery optimisations, notifications might not work on your device. Would you like disable the optimisations for this app?")
+            .setPositiveButton("Disable Battery Optimisations") { _, _ ->
+                actions.goTo(Destination.Settings)
+                preferences.isFirstRun = false
+            }
+            .setPositiveButtonIcon(ContextCompat.getDrawable(ContextAmbient.current, R.drawable.ic_notifications_on))
+            .setNegativeButton("No, I don't need reminders") { p0, _ ->
+                p0.dismiss()
+                preferences.notificationsEnabled = false
+                preferences.isFirstRun = false
+            }
+            .setNegativeButtonIcon(ContextCompat.getDrawable(ContextAmbient.current, R.drawable.ic_notifications_off))
+            .show()
+    }
 
     Providers(BackDispatcherAmbient provides backPressedDispatcher) {
         ProvideDisplayInsets {
@@ -191,6 +205,7 @@ fun Main(
 
         Destination.Settings -> {
             val ctx = ContextAmbient.current
+            val autoStarter = AutoStartPermissionHelper.getInstance()
             var notificationSwitchState by remember { mutableStateOf(preferences.notificationsEnabled) }
 
             Settings(
@@ -203,6 +218,8 @@ fun Main(
                     // by going back home, the warning will be refreshed and therefor gone
                     actions.pressOnBack()
                 },
+                autoStarter.isAutoStartPermissionAvailable(ctx),
+                { autoStarter.getAutoStartPermission(ctx) },
                 onSigmaDeltaLogoClicked = {
                     actions.goToSigmaDeltaWebsite(ctx)
                 }) {

@@ -29,6 +29,7 @@ object Versions {
     const val settings_prefs = "0.6.2"
     const val workmanager = "2.4.0"
     const val flowTuple = "1.0.0"
+    const val autostarter = "1.0.8"
 }
 
 object Kotlin {
@@ -81,5 +82,5 @@ object Util {
     const val slf4j = "org.slf4j:slf4j-simple:${Versions.slf4j}"
     const val prefs = "com.russhwolf:multiplatform-settings-no-arg:${Versions.settings_prefs}"
     const val flowTuple = "com.github.Zhuinden:flow-combinetuple-kt:${Versions.flowTuple}"
-
+    const val autoStarter = "com.github.judemanutd:autostarter:${Versions.autostarter}"
 }

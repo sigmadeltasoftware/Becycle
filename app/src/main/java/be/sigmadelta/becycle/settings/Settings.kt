@@ -17,6 +17,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import be.sigmadelta.becycle.BuildConfig
 import be.sigmadelta.becycle.R
 import be.sigmadelta.becycle.common.Destination
 import be.sigmadelta.becycle.common.ui.theme.*
@@ -27,6 +28,8 @@ fun Settings(
     notificationSwitchState: Boolean,
     shouldShowBatteryOptimisationWarning: Boolean,
     onDisableBatteryOptimisationClicked: () -> Unit,
+    shouldShowAutoStarterWarning: Boolean,
+    onAutoStarterClicked: () -> Unit,
     onSigmaDeltaLogoClicked: () -> Unit,
     onNotificationSwitchAction: ((Boolean) -> Unit)? = null
 ) {
@@ -51,8 +54,20 @@ fun Settings(
                 onDisableBatteryOptimisationClicked()
             }
         }
+        if (shouldShowAutoStarterWarning) {
+            NotificationSettingsAutoStarterWarning {
+                onAutoStarterClicked()
+            }
+        }
 
         Spacer(modifier = Modifier.weight(1f))
+        Text(
+            text = "Version: V${BuildConfig.VERSION_NAME}",
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            color = textPrimary
+        )
         Text(
             text = "Created by",
             modifier = Modifier.align(Alignment.CenterHorizontally),
@@ -131,31 +146,60 @@ fun SettingsMenuItemDivider() {
 fun NotificationSettingsBatteryOptimisationWarning(
     onDisableBatteryOptimisationClicked: () -> Unit
 ) {
-    Column(
-        modifier = Modifier.background(color = errorSecondaryColor, shape = RoundedCornerShape(12.dp))
-            .padding(horizontal = 16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(top = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.background(
+                color = errorSecondaryColor,
+                shape = RoundedCornerShape(12.dp)
+            ).fillMaxWidth().padding(vertical = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
         ) {
             Icon(
-                asset = vectorResource(id = R.drawable.ic_home),
-                tint = errorColor,
-                modifier = Modifier.padding(start = 16.dp)
+                asset = vectorResource(id = R.drawable.ic_info),
+                tint = warningColor,
+                modifier = Modifier.padding(start = 8.dp).clickable(onClick = {
+
+                })
             )
-            Text(
-                text = "Battery optimisations active, notifications might not trigger properly!",
+            Button(
+                onClick = { onDisableBatteryOptimisationClicked() },
+                backgroundColor = errorColor,
                 modifier = Modifier.padding(start = 16.dp)
-            )
+            ) {
+                Text(text = "DISABLE BATTERY OPTIMISATIONS", color = primaryBackgroundColor)
+            }
         }
-        Button(
-            onClick = { onDisableBatteryOptimisationClicked() },
-            backgroundColor = errorColor,
-            modifier = Modifier.padding(vertical = 8.dp)
+    }
+}
+
+@Composable
+fun NotificationSettingsAutoStarterWarning(
+    onAutoStarterClicked: () -> Unit
+) {
+    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+        Row(
+            modifier = Modifier.background(
+                color = errorSecondaryColor,
+                shape = RoundedCornerShape(12.dp)
+            ).fillMaxWidth().padding(vertical = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
         ) {
-            Text(text = "DISABLE BATTERY OPTIMISATIONS", color = primaryBackgroundColor)
+            Icon(
+                asset = vectorResource(id = R.drawable.ic_info),
+                tint = warningColor,
+                modifier = Modifier.padding(start = 8.dp).clickable(onClick = {
+
+                })
+            )
+            Button(
+                onClick = { onAutoStarterClicked() },
+                backgroundColor = errorColor,
+                modifier = Modifier.padding(start = 16.dp)
+            ) {
+                Text(text = "GIVE HIGHER PRIORITY", color = primaryBackgroundColor)
+            }
         }
     }
 }

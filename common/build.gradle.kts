@@ -95,6 +95,7 @@ kotlin {
             dependencies {
                 api(Ktor.android)
                 api(Android.workmanager)
+                api(Util.autoStarter)
             }
         }
 
