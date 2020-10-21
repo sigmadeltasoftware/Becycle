@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import be.sigmadelta.becycle.R
@@ -61,7 +62,9 @@ fun AddressSwitcher(
                         Text(
                             "${it.street.names.nl} ${it.houseNumber}",
                             fontSize = 10.sp,
-                            color = if (selectedTabIx == ix) primaryAccent else unselectedColor
+                            color = if (selectedTabIx == ix) primaryAccent else unselectedColor,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                 }

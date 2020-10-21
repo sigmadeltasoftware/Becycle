@@ -173,62 +173,61 @@ fun Main(
     val streetsViewState by addressViewModel.streetsViewState.collectAsState()
     val validation by addressViewModel.validationViewState.collectAsState()
 
-    Crossfade(nav.current, animation = tween(300)) { dest ->
-        when (dest) {
-            Destination.Home -> Home(
-                addresses,
-                collections,
-                { actions.goTo(Destination.SettingsAddressCreation) },
-                { address -> collectionsViewModel.searchCollections(address) }
-            )
+    when (nav.current) {
+        Destination.Home -> Home(
+            addresses,
+            collections,
+            { actions.goTo(Destination.SettingsAddressCreation) },
+            { address -> collectionsViewModel.searchCollections(address) }
+        )
 
-            Destination.Settings -> {
-                val ctx = ContextAmbient.current
-                val notificationSwitchState = remember { mutableStateOf(preferences.notificationsEnabled) }
-                Settings(
-                    actions.goTo,
-                    notificationSwitchState,
-                    onSigmaDeltaLogoClicked = {
-                        actions.goToSigmaDeltaWebsite(ctx)
-                    }) {
-                    preferences.notificationsEnabled = it
-                    notificationSwitchState.value = it
-                }
+        Destination.Settings -> {
+            val ctx = ContextAmbient.current
+            val notificationSwitchState =
+                remember { mutableStateOf(preferences.notificationsEnabled) }
+            Settings(
+                actions.goTo,
+                notificationSwitchState,
+                onSigmaDeltaLogoClicked = {
+                    actions.goToSigmaDeltaWebsite(ctx)
+                }) {
+                preferences.notificationsEnabled = it
+                notificationSwitchState.value = it
             }
+        }
 
 
-            Destination.SettingsNotifications -> SettingsNotifications(addresses) {
-                actions.goTo(Destination.SettingsAddressCreation)
-            }
+        Destination.SettingsNotifications -> SettingsNotifications(addresses) {
+            actions.goTo(Destination.SettingsAddressCreation)
+        }
 
 
-            Destination.SettingsAddresses -> SettingsAddressOverview(
+        Destination.SettingsAddresses -> SettingsAddressOverview(
+            addresses,
+            { actions.goTo(Destination.SettingsAddressEditRemoval(it.id)) },
+            { actions.goTo(Destination.SettingsAddressCreation) }
+        )
+
+        Destination.SettingsAddressCreation -> AddressCreation(
+            zipCodeItemsViewState,
+            streetsViewState,
+            onSearchZipCode = addressViewModel::searchZipCode,
+            onSearchStreet = addressViewModel::searchStreets,
+            onValidateAddress = addressViewModel::validateAddress
+        )
+
+        is Destination.SettingsAddressEditRemoval -> {
+            SettingsAddressEditRemoval(
+                (nav.current as Destination.SettingsAddressEditRemoval).addressId,
                 addresses,
-                { actions.goTo(Destination.SettingsAddressEditRemoval(it.id)) },
-                { actions.goTo(Destination.SettingsAddressCreation) }
-            )
-
-            Destination.SettingsAddressCreation -> AddressCreation(
                 zipCodeItemsViewState,
                 streetsViewState,
-                onSearchZipCode = addressViewModel::searchZipCode,
-                onSearchStreet = addressViewModel::searchStreets,
-                onValidateAddress = addressViewModel::validateAddress
-            )
-
-            is Destination.SettingsAddressEditRemoval -> {
-                SettingsAddressEditRemoval(
-                    dest.addressId,
-                    addresses,
-                    zipCodeItemsViewState,
-                    streetsViewState,
-                    addressViewModel::searchZipCode,
-                    addressViewModel::searchStreets,
-                    addressViewModel::validateExistingAddress
-                ) {
-                    addressViewModel.removeAddress(it)
-                    actions.pressOnBack()
-                }
+                addressViewModel::searchZipCode,
+                addressViewModel::searchStreets,
+                addressViewModel::validateExistingAddress
+            ) {
+                addressViewModel.removeAddress(it)
+                actions.pressOnBack()
             }
         }
     }
@@ -242,49 +241,47 @@ fun ValidationSnackbar(
     addressViewModel: AddressViewModel,
     actions: Actions
 ) {
-    Crossfade(validationViewState, animation = tween(300)) {
-        when (it) {
-            ValidationViewState.Empty -> Unit
+    when (validationViewState) {
+        ValidationViewState.Empty -> Unit
 
-            ValidationViewState.Loading -> CircularProgressIndicator()
+        ValidationViewState.Loading -> CircularProgressIndicator()
 
-            is ValidationViewState.Success -> {
-                Snackbar(backgroundColor = Color(0xFF43A047)) {
-                    Text(text = "Address Validated!", color = Color.White)
-                }
-                MainScope().launch {
-                    (validationViewState as? ValidationViewState.Success)?.let { success ->
-                        addressViewModel.saveAddress(success.address)
-                        actions.goTo(Destination.Home)
-                        delay(2000)
-                        resetViewStates(addressViewModel)
-                    }
+        is ValidationViewState.Success -> {
+            Snackbar(backgroundColor = primaryAccent) {
+                Text(text = "Address Validated!", color = Color.White)
+            }
+            MainScope().launch {
+                (validationViewState as? ValidationViewState.Success)?.let { success ->
+                    addressViewModel.saveAddress(success.address)
+                    actions.goTo(Destination.Home)
+                    delay(2000)
+                    resetViewStates(addressViewModel)
                 }
             }
-            ValidationViewState.InvalidCombination -> Snackbar(backgroundColor = Color.Red) {
-                Text(
-                    text = "Something went wrong, invalid Address combination. Please reselect your zipcode and street, and try again.",
-                    color = Color.White
-                )
-            }
-            ValidationViewState.NetworkError -> Snackbar(backgroundColor = Color.Red) {
-                Text(
-                    text = "Something went wrong, bad network response. Please check your connection or try again later.",
-                    color = Color.White
-                )
-            }
-            ValidationViewState.InvalidAddressSpecified -> Snackbar(backgroundColor = Color.Red) {
-                Text(
-                    text = "Invalid address specified. Please check your house number and try again",
-                    color = Color.White
-                )
-            }
         }
+        ValidationViewState.InvalidCombination -> Snackbar(backgroundColor = Color.Red) {
+            Text(
+                text = "Something went wrong, invalid Address combination. Please reselect your zipcode and street, and try again.",
+                color = Color.White
+            )
+        }
+        ValidationViewState.NetworkError -> Snackbar(backgroundColor = Color.Red) {
+            Text(
+                text = "Something went wrong, bad network response. Please check your connection or try again later.",
+                color = Color.White
+            )
+        }
+        ValidationViewState.InvalidAddressSpecified -> Snackbar(backgroundColor = Color.Red) {
+            Text(
+                text = "Invalid address specified. Please check your house number and try again",
+                color = Color.White
+            )
+        }
+    }
 
-        MainScope().launch {
-            delay(4000)
-            addressViewModel.resetValidation()
-        }
+    MainScope().launch {
+        delay(4000)
+        addressViewModel.resetValidation()
     }
 }
 

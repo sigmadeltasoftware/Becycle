@@ -1,21 +1,26 @@
 package be.sigmadelta.becycle.address
 
+import android.widget.Space
 import androidx.compose.foundation.Icon
 import androidx.compose.foundation.Text
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumnForIndexed
-import androidx.compose.material.Card
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Divider
+import androidx.compose.material.*
+import androidx.compose.material.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import be.sigmadelta.becycle.R
+import be.sigmadelta.becycle.common.ui.theme.primaryAccent
+import be.sigmadelta.becycle.common.ui.theme.secondaryAccent
+import be.sigmadelta.becycle.common.ui.theme.textPrimary
+import be.sigmadelta.becycle.common.ui.theme.unselectedColor
 import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.common.address.Address
 
@@ -29,8 +34,27 @@ fun SettingsAddressOverview(
         is ListViewState.Empty -> Unit
         is ListViewState.Loading -> CircularProgressIndicator()
         is ListViewState.Success -> Column {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text(
+                    text = "Addresses",
+                    color = textPrimary,
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                Text(
+                    text = "${addresses.payload.size}/5",
+                    modifier = Modifier.background(secondaryAccent).padding(vertical = 8.dp, horizontal = 16.dp),
+                    color = primaryAccent,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
             LazyColumnForIndexed(items = addresses.payload) { ix, addr ->
-                SettingsAddressOverviewItem(index = ix, addresses = addresses.payload, onEditAddressClicked)
+                SettingsAddressOverviewItem(addr, onEditAddressClicked)
                 if (ix < addresses.payload.size - 1) {
                     Divider()
                 }
@@ -43,28 +67,46 @@ fun SettingsAddressOverview(
 
 @Composable
 fun SettingsAddressOverviewItem(
-    index: Int,
-    addresses: List<Address>,
+    address: Address,
     onEditAddressClicked: (Address) -> Unit
 ) {
-    val address = addresses[index]
-    Row {
-        Column(modifier = Modifier.clickable(onClick = { onEditAddressClicked(address) })) {
-            Text(text = address.id)
-            Text(text = "${address.street.names.nl} ${address.houseNumber}")
-            Text(text = "${address.zipCodeItem.code} ${address.zipCodeItem.names.firstOrNull()?.nl}")
+    Row(modifier = Modifier.clickable(onClick = { onEditAddressClicked(address) })) {
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .align(Alignment.CenterVertically)
+        )
+        {
+            Text(
+                text = "${address.street.names.nl} ${address.houseNumber}",
+                color = textPrimary,
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp
+            )
+            Text(
+                text = "${address.zipCodeItem.code} ${address.zipCodeItem.names.firstOrNull()?.nl}",
+                color = textPrimary,
+                fontSize = 12.sp
+            )
         }
         Spacer(modifier = Modifier.weight(1f))
-        Icon(asset = vectorResource(id = R.drawable.ic_edit), modifier = Modifier.padding(16.dp))
+        Icon(
+            asset = vectorResource(id = R.drawable.ic_edit),
+            modifier = Modifier.padding(32.dp),
+            tint = unselectedColor
+        )
     }
 }
 
 @Composable
 fun AddAddressItem(onAddAddressClicked: () -> Unit) {
-    Card(modifier = Modifier.padding(16.dp).clickable(onClick = onAddAddressClicked)) {
-        Column {
-            Icon(asset = vectorResource(id = R.drawable.ic_home))
-            Text(text = "Add address")
+    Button(
+        onClick = onAddAddressClicked,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp, vertical = 16.dp)
+    ) {
+        Row(modifier = Modifier.align(Alignment.CenterVertically)) {
+            Icon(asset = vectorResource(id = R.drawable.ic_add))
+            Text(text = "Add address", modifier = Modifier.padding(start = 16.dp))
         }
     }
 }

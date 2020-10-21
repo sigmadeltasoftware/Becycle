@@ -5,7 +5,7 @@ object Properties {
 }
 
 object Versions {
-    const val gradleTools = "4.2.0-alpha13"
+    const val gradleTools = "4.2.0-alpha14"
     const val compileSdk = 30
     const val targetSdk = compileSdk
     const val minSdk = 23
