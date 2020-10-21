@@ -10,9 +10,13 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Icon
 import androidx.compose.foundation.Text
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.savedinstancestate.rememberSavedInstanceState
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.ExperimentalFocus
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ContextAmbient
@@ -244,7 +248,12 @@ fun ValidationSnackbar(
     when (validationViewState) {
         ValidationViewState.Empty -> Unit
 
-        ValidationViewState.Loading -> CircularProgressIndicator()
+        ValidationViewState.Loading -> Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            CircularProgressIndicator()
+        }
 
         is ValidationViewState.Success -> {
             Snackbar(backgroundColor = primaryAccent) {
