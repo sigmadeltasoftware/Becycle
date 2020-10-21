@@ -21,6 +21,7 @@ import be.sigmadelta.becycle.common.ui.theme.BecycleTheme
 import be.sigmadelta.becycle.accesstoken.AccessTokenViewModel
 import be.sigmadelta.becycle.baseheaders.BaseHeadersViewModel
 import be.sigmadelta.becycle.baseheaders.BaseHeadersViewState
+import be.sigmadelta.becycle.common.ui.theme.errorColor
 import be.sigmadelta.common.util.SessionStorage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -108,6 +109,6 @@ fun ErrorLayout(msg: String) {
 //    TODO("Make a more aesthetic/informative error")
     Text(
         msg,
-        color = Color.Red
+        color = errorColor
     )
 }

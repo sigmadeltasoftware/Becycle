@@ -6,8 +6,6 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedDispatcher
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Icon
 import androidx.compose.foundation.Text
 import androidx.compose.foundation.layout.Arrangement
@@ -16,7 +14,6 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.savedinstancestate.rememberSavedInstanceState
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.ExperimentalFocus
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ContextAmbient
@@ -25,11 +22,12 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import be.sigmadelta.becycle.accesstoken.AccessTokenViewModel
 import be.sigmadelta.becycle.address.*
-import be.sigmadelta.becycle.common.*
-import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.becycle.collections.CollectionsViewModel
+import be.sigmadelta.becycle.common.*
 import be.sigmadelta.becycle.common.ui.theme.*
+import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.becycle.common.ui.util.ViewState
+import be.sigmadelta.becycle.common.util.PowerUtil
 import be.sigmadelta.becycle.home.Home
 import be.sigmadelta.becycle.notification.SettingsNotifications
 import be.sigmadelta.becycle.settings.Settings
@@ -56,6 +54,10 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (preferences.isFirstRun) {
+            PowerUtil.checkBattery(this)
+        }
 
         // Add observers for access token expiration
         launch {
@@ -88,6 +90,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         }
 
         notificationRepo.scheduleWorker()
+
+        preferences.isFirstRun = false
     }
 }
 
@@ -187,16 +191,23 @@ fun Main(
 
         Destination.Settings -> {
             val ctx = ContextAmbient.current
-            val notificationSwitchState =
-                remember { mutableStateOf(preferences.notificationsEnabled) }
+            var notificationSwitchState by remember { mutableStateOf(preferences.notificationsEnabled) }
+
             Settings(
                 actions.goTo,
                 notificationSwitchState,
+                PowerUtil.isIgnoringBatteryOptimizations(ctx).not() && notificationSwitchState,
+                onDisableBatteryOptimisationClicked = {
+                    PowerUtil.checkBattery(ctx)
+                    // Can't get proper callback from checkBattery to refresh optimisation warning state,
+                    // by going back home, the warning will be refreshed and therefor gone
+                    actions.pressOnBack()
+                },
                 onSigmaDeltaLogoClicked = {
                     actions.goToSigmaDeltaWebsite(ctx)
                 }) {
                 preferences.notificationsEnabled = it
-                notificationSwitchState.value = it
+                notificationSwitchState = it
             }
         }
 
@@ -268,19 +279,19 @@ fun ValidationSnackbar(
                 }
             }
         }
-        ValidationViewState.InvalidCombination -> Snackbar(backgroundColor = Color.Red) {
+        ValidationViewState.InvalidCombination -> Snackbar(backgroundColor = errorColor) {
             Text(
                 text = "Something went wrong, invalid Address combination. Please reselect your zipcode and street, and try again.",
                 color = Color.White
             )
         }
-        ValidationViewState.NetworkError -> Snackbar(backgroundColor = Color.Red) {
+        ValidationViewState.NetworkError -> Snackbar(backgroundColor = errorColor) {
             Text(
                 text = "Something went wrong, bad network response. Please check your connection or try again later.",
                 color = Color.White
             )
         }
-        ValidationViewState.InvalidAddressSpecified -> Snackbar(backgroundColor = Color.Red) {
+        ValidationViewState.InvalidAddressSpecified -> Snackbar(backgroundColor = errorColor) {
             Text(
                 text = "Invalid address specified. Please check your house number and try again",
                 color = Color.White

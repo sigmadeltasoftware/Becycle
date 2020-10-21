@@ -4,10 +4,11 @@ import android.widget.Toast
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.Switch
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ContextAmbient
@@ -23,7 +24,9 @@ import be.sigmadelta.becycle.common.ui.theme.*
 @Composable
 fun Settings(
     goTo: (Destination) -> Unit,
-    notificationSwitchState: State<Boolean>,
+    notificationSwitchState: Boolean,
+    shouldShowBatteryOptimisationWarning: Boolean,
+    onDisableBatteryOptimisationClicked: () -> Unit,
     onSigmaDeltaLogoClicked: () -> Unit,
     onNotificationSwitchAction: ((Boolean) -> Unit)? = null
 ) {
@@ -42,6 +45,12 @@ fun Settings(
             notificationSwitchState,
             onNotificationSwitchAction
         )
+
+        if (shouldShowBatteryOptimisationWarning) {
+            NotificationSettingsBatteryOptimisationWarning {
+                onDisableBatteryOptimisationClicked()
+            }
+        }
 
         Spacer(modifier = Modifier.weight(1f))
         Text(
@@ -67,19 +76,19 @@ fun SettingsMenuItem(
     subtitle: String,
     @DrawableRes icon: Int,
     onClickAction: () -> Unit,
-    switchState: State<Boolean>? = null,
+    switchState: Boolean? = null,
     switchAction: ((Boolean) -> Unit)? = null
 ) {
     val ctx = ContextAmbient.current
     Row(
         Modifier.clickable(onClick = {
-            if (switchState == null || switchState.value) {
+            if (switchState == null || switchState) {
                 onClickAction()
             } else {
                 Toast.makeText(ctx, "Enable switch to modify settings", Toast.LENGTH_SHORT).show()
             }
-        }, enabled = switchState == null || switchState.value)
-            .background(color = if (switchState == null || switchState.value) primaryBackgroundColor else unselectedColor)
+        }, enabled = switchState == null || switchState)
+            .background(color = if (switchState == null || switchState) primaryBackgroundColor else unselectedColor)
     )
     {
         Icon(
@@ -103,7 +112,7 @@ fun SettingsMenuItem(
         Spacer(modifier = Modifier.weight(1f))
         switchAction?.let {
             Switch(
-                checked = switchState?.value == true,
+                checked = switchState == true,
                 onCheckedChange = switchAction,
                 color = primaryAccent,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 32.dp)
@@ -116,4 +125,37 @@ fun SettingsMenuItem(
 @Composable
 fun SettingsMenuItemDivider() {
     Divider(modifier = Modifier.padding(horizontal = 16.dp))
+}
+
+@Composable
+fun NotificationSettingsBatteryOptimisationWarning(
+    onDisableBatteryOptimisationClicked: () -> Unit
+) {
+    Column(
+        modifier = Modifier.background(color = errorSecondaryColor, shape = RoundedCornerShape(12.dp))
+            .padding(horizontal = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(top = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                asset = vectorResource(id = R.drawable.ic_home),
+                tint = errorColor,
+                modifier = Modifier.padding(start = 16.dp)
+            )
+            Text(
+                text = "Battery optimisations active, notifications might not trigger properly!",
+                modifier = Modifier.padding(start = 16.dp)
+            )
+        }
+        Button(
+            onClick = { onDisableBatteryOptimisationClicked() },
+            backgroundColor = errorColor,
+            modifier = Modifier.padding(vertical = 8.dp)
+        ) {
+            Text(text = "DISABLE BATTERY OPTIMISATIONS", color = primaryBackgroundColor)
+        }
+    }
 }
