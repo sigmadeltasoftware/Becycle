@@ -34,7 +34,8 @@ fun <T> DropDownTextField(
     itemSelectedAction: (T) -> Unit,
     itemLayout: @Composable (LazyItemScope.(T) -> Unit),
     keyboardType: KeyboardType = KeyboardType.Text,
-    focusRequester: FocusRequester = FocusRequester()
+    focusRequester: FocusRequester = FocusRequester(),
+    isError: Boolean = false
 ) {
 
     var textField by remember { mutableStateOf("") }
@@ -75,7 +76,7 @@ fun <T> DropDownTextField(
                 }
                 job.value.start()
             },
-            isErrorValue = itemListViewState is ListViewState.Error,
+            isErrorValue = itemListViewState is ListViewState.Error || isError,
         )
         if (textValue == null) {
             when (itemListViewState) {

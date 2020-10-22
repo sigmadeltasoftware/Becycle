@@ -14,30 +14,37 @@ import androidx.compose.ui.focus.ExperimentalFocus
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.ContextAmbient
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import be.sigmadelta.becycle.R
+import be.sigmadelta.becycle.common.ui.theme.errorColor
 import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.becycle.common.ui.widgets.DropDownTextField
+import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.address.Street
 import be.sigmadelta.common.address.ZipCodeItem
+import com.afollestad.materialdialogs.MaterialDialog
 import org.koin.ext.isInt
 
 @ExperimentalFocus
 @Composable
-fun SettingsAddressCreation(
+fun SettingsAddressManipulation(
     zipCodeItemsViewState: ListViewState<ZipCodeItem>,
     streetsViewState: ListViewState<Street>,
     onSearchZipCode: (String) -> Unit,
     onSearchStreet: (String, ZipCodeItem) -> Unit,
     onValidateAddress: (ZipCodeItem, Street, Int) -> Unit,
     onBackClicked: () -> Unit,
-    appBarTitle: String? = null
+    appBarTitle: String? = null,
+    existingAddress: Address? = null,
+    onAddressRemove: ((Address) -> Unit)? = null
     ) {
     var selectedZipCode by remember { mutableStateOf<ZipCodeItem?>(null) }
+    var isInvalidZipCodeInput by remember { mutableStateOf(false) }
     var selectedStreet by remember { mutableStateOf<Street?>(null) }
     var selectedHouseNumber by remember { mutableStateOf<String>("") }
 
@@ -65,7 +72,10 @@ fun SettingsAddressCreation(
                     textChangeAction = {
                         selectedZipCode = null
                         if (it.isInt()) {
+                            isInvalidZipCodeInput = false
                             onSearchZipCode(it)
+                        } else {
+                            isInvalidZipCodeInput = true
                         }
                     },
                     itemSelectedAction = { zipCode ->
@@ -73,7 +83,8 @@ fun SettingsAddressCreation(
                         streetFocusRequester.requestFocus()
                     },
                     itemLayout = { item: ZipCodeItem -> ZipCodeItemLayout(zipCodeItem = item) },
-                    keyboardType = KeyboardType.Number
+                    keyboardType = KeyboardType.Number,
+                    isError = isInvalidZipCodeInput
                 )
 
                 DropDownTextField(
@@ -91,7 +102,8 @@ fun SettingsAddressCreation(
                         houseNumberFocusRequester.requestFocus()
                     },
                     itemLayout = { item: Street -> StreetLayout(street = item) },
-                    focusRequester = streetFocusRequester
+                    focusRequester = streetFocusRequester,
+                    isError = selectedZipCode == null
                 )
 
                 TextField(
@@ -115,6 +127,30 @@ fun SettingsAddressCreation(
                     enabled = selectedZipCode != null && selectedStreet != null && selectedHouseNumber.isInt()
                 ) {
                     Text("Save Address")
+                }
+
+                onAddressRemove?.let {
+                    val ctx = ContextAmbient.current
+                    Button(
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                            .padding(vertical = 16.dp),
+                        onClick = {
+                            MaterialDialog(ctx).show {
+                                cornerRadius(16f)
+                                title(text = "Remove Address?")
+                                message(text = "Are you sure you want to remove this address?")
+                                positiveButton(text = "Remove") {
+                                    existingAddress?.let {
+                                        onAddressRemove(it)
+                                    }
+                                }
+                                negativeButton(text = "Cancel") { it.dismiss() }
+                            }
+                        },
+                        backgroundColor = errorColor
+                    ) {
+                        Text(text = "Remove Address")
+                    }
                 }
             }
         }
