@@ -28,6 +28,7 @@ fun Settings(
     notificationSwitchState: Boolean,
     shouldShowBatteryOptimisationWarning: Boolean,
     onDisableBatteryOptimisationClicked: () -> Unit,
+    onGetDisableBatteryOptimisationInfoClicked: () -> Unit,
     shouldShowAutoStarterWarning: Boolean,
     onAutoStarterClicked: () -> Unit,
     onSigmaDeltaLogoClicked: () -> Unit,
@@ -50,38 +51,20 @@ fun Settings(
         )
 
         if (shouldShowBatteryOptimisationWarning) {
-            NotificationSettingsBatteryOptimisationWarning {
-                onDisableBatteryOptimisationClicked()
-            }
+            NotificationSettingsBatteryOptimisationWarning(
+               onDisableBatteryOptimisationClicked = { onDisableBatteryOptimisationClicked() },
+                onGetDisableBatteryOptimisationInfoClicked = { onGetDisableBatteryOptimisationInfoClicked() }
+            )
         }
-        if (shouldShowAutoStarterWarning) {
-            NotificationSettingsAutoStarterWarning {
-                onAutoStarterClicked()
-            }
-        }
+//        if (shouldShowAutoStarterWarning) {
+//            NotificationSettingsAutoStarterWarning {
+//                onAutoStarterClicked()
+//            }
+//        }
 
         Spacer(modifier = Modifier.weight(1f))
-        Text(
-            text = "Version: V${BuildConfig.VERSION_NAME}",
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Bold,
-            color = textPrimary
-        )
-        Text(
-            text = "Created by",
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Bold,
-            color = textSecondary
-        )
-        Image(
-            asset = imageResource(id = R.drawable.ic_sigmadelta_footer),
-            modifier = Modifier.padding(bottom = 8.dp, start = 96.dp, end = 96.dp)
-                .clickable(onClick = {
-                    onSigmaDeltaLogoClicked()
-                })
-        )
+
+        SettingsFooter(onSigmaDeltaLogoClicked)
     }
 }
 
@@ -144,7 +127,8 @@ fun SettingsMenuItemDivider() {
 
 @Composable
 fun NotificationSettingsBatteryOptimisationWarning(
-    onDisableBatteryOptimisationClicked: () -> Unit
+    onDisableBatteryOptimisationClicked: () -> Unit,
+    onGetDisableBatteryOptimisationInfoClicked: () -> Unit
 ) {
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
         Row(
@@ -158,8 +142,8 @@ fun NotificationSettingsBatteryOptimisationWarning(
             Icon(
                 asset = vectorResource(id = R.drawable.ic_info),
                 tint = warningColor,
-                modifier = Modifier.padding(start = 8.dp).clickable(onClick = {
-
+                modifier = Modifier.clickable(onClick = {
+                    onGetDisableBatteryOptimisationInfoClicked()
                 })
             )
             Button(
@@ -201,5 +185,33 @@ fun NotificationSettingsAutoStarterWarning(
                 Text(text = "GIVE HIGHER PRIORITY", color = primaryBackgroundColor)
             }
         }
+    }
+}
+
+@Composable
+fun SettingsFooter(
+    onSigmaDeltaLogoClicked: () -> Unit
+) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally,
+    modifier = Modifier.padding(bottom = 8.dp)) {
+        Text(
+            text = "Version: V${BuildConfig.VERSION_NAME}",
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Bold,
+            color = textPrimary
+        )
+        Text(
+            text = "Created by",
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Bold,
+            color = textSecondary
+        )
+        Image(
+            asset = imageResource(id = R.drawable.ic_sigmadelta_footer),
+            modifier = Modifier.padding(bottom = 8.dp, start = 128.dp, end = 128.dp)
+                .clickable(onClick = {
+                    onSigmaDeltaLogoClicked()
+                })
+        )
     }
 }

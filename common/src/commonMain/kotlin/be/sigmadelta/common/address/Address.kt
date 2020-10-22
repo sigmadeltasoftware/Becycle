@@ -10,4 +10,6 @@ data class Address(
     val street: Street,
     val houseNumber: Int,
     override val id: String = UUID.randomUUID().toString()
-) : Metadata
+) : Metadata {
+    val streetWithHouseNr = "${street.names.nl} $houseNumber"
+}

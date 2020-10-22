@@ -71,4 +71,7 @@ dependencies {
     api(Compose.material)
     api(Compose.runtimeLiveData)
     api(Compose.compiler)
+
+    api(AndroidUi.material_dialogs_core)
+    api(AndroidUi.material_dialogs_bottomsheet)
 }

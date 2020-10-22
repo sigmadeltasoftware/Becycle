@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.OnBackPressedDispatcher
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Icon
 import androidx.compose.foundation.Text
@@ -20,7 +19,6 @@ import androidx.compose.ui.platform.ContextAmbient
 import androidx.compose.ui.platform.setContent
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import be.sigmadelta.becycle.accesstoken.AccessTokenViewModel
 import be.sigmadelta.becycle.address.*
 import be.sigmadelta.becycle.collections.CollectionsViewModel
@@ -36,6 +34,8 @@ import be.sigmadelta.common.Preferences
 import be.sigmadelta.common.notifications.NotificationRepo
 import be.sigmadelta.common.util.AuthorizationKeyExpiredException
 import be.sigmadelta.common.util.SessionStorage
+import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.bottomsheets.BottomSheet
 import com.judemanutd.autostarter.AutoStartPermissionHelper
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.StateFlow
@@ -106,22 +106,24 @@ fun MainLayout(
 
     val actions = remember(nav) { Actions(nav) }
 
-    if (preferences.isFirstRun && nav.current != Destination.Settings) {
-        AlertDialog.Builder(ContextAmbient.current)
-            .setTitle("Battery Optimisations")
-            .setMessage("Due to aggressive battery optimisations, notifications might not work on your device. Would you like disable the optimisations for this app?")
-            .setPositiveButton("Disable Battery Optimisations") { _, _ ->
+    if (preferences.isFirstRun && nav.current != Destination.Settings && nav.current != Destination.SettingsAddressCreation) {
+        MaterialDialog(ContextAmbient.current).show {
+            cornerRadius(16f)
+            title(text = "Battery Optimisations")
+            message(text = "Due to Android's aggressive battery optimisations, notification reminders might not work on your device.\n\nWould you like disable the battery optimisations for this app to make sure the reminders are allowed to trigger?")
+            icon(R.drawable.ic_notifications_on)
+            positiveButton(text = "Disable Battery Optimisations") {
                 actions.goTo(Destination.Settings)
                 preferences.isFirstRun = false
             }
-            .setPositiveButtonIcon(ContextCompat.getDrawable(ContextAmbient.current, R.drawable.ic_notifications_on))
-            .setNegativeButton("No, I don't need reminders") { p0, _ ->
-                p0.dismiss()
+            negativeButton(text = "Turn off notification reminders") {
+                it.dismiss()
                 preferences.notificationsEnabled = false
                 preferences.isFirstRun = false
             }
-            .setNegativeButtonIcon(ContextCompat.getDrawable(ContextAmbient.current, R.drawable.ic_notifications_off))
-            .show()
+            cancelable(false)
+            cancelOnTouchOutside(false)
+        }
     }
 
     Providers(BackDispatcherAmbient provides backPressedDispatcher) {
@@ -160,15 +162,17 @@ fun MainLayout(
                             unselectedContentColor = unselectedColor,
                             selected = false,
                             onClick = {
-                                AlertDialog.Builder(ctx)
-                                    .setTitle("Go to Recycle App website?")
-                                    .setPositiveButton("OK") { _, _ ->
-                                        actions.goToRecycleWebsite(
-                                            ctx
-                                        )
+                                MaterialDialog(ctx).show {
+                                    cornerRadius(16f)
+                                    title(text = ("Go to Recycle App website?"))
+                                    message(text = "Would you like to visit the Recycle App website for additional information?")
+                                    positiveButton(text = "OK") {
+                                        actions.goToRecycleWebsite(ctx)
                                     }
-                                    .setNegativeButton("Close") { p0, _ -> p0.dismiss() }
-                                    .show()
+                                    negativeButton(text = "Cancel") {
+                                        it.dismiss()
+                                    }
+                                }
                             }
                         )
                     }
@@ -218,6 +222,26 @@ fun Main(
                     // by going back home, the warning will be refreshed and therefor gone
                     actions.pressOnBack()
                 },
+                onGetDisableBatteryOptimisationInfoClicked = {
+                    MaterialDialog(ctx, BottomSheet()).show {
+                        cornerRadius(16f)
+                        title(text = "Disable Battery Optimisations")
+                        message(text =
+                        """
+                            Android will try to extend its battery life by letting the system go to sleep. This mode is called 'Doze' and might prevent the apps from acting when necessary such as in the case of firing a reminder notification. 
+                            
+                            To disable this, Becycle needs to be whitelisted by disabling battery optimizations. This will allow the app to send reminders even when the system is in Doze mode.
+                        """.trimIndent()
+                        )
+                        icon(R.drawable.ic_notifications_on)
+                        positiveButton(text = "Disable Battery Optimisations") {
+                            PowerUtil.checkBattery(ctx)
+                            // Can't get proper callback from checkBattery to refresh optimisation warning state,
+                            // by going back home, the warning will be refreshed and therefor gone
+                            actions.pressOnBack()
+                        }
+                    }
+                },
                 autoStarter.isAutoStartPermissionAvailable(ctx),
                 { autoStarter.getAutoStartPermission(ctx) },
                 onSigmaDeltaLogoClicked = {
@@ -237,15 +261,17 @@ fun Main(
         Destination.SettingsAddresses -> SettingsAddressOverview(
             addresses,
             { actions.goTo(Destination.SettingsAddressEditRemoval(it.id)) },
-            { actions.goTo(Destination.SettingsAddressCreation) }
+            { actions.goTo(Destination.SettingsAddressCreation) },
+            { actions.pressOnBack() }
         )
 
-        Destination.SettingsAddressCreation -> AddressCreation(
+        Destination.SettingsAddressCreation -> SettingsAddressCreation(
             zipCodeItemsViewState,
             streetsViewState,
             onSearchZipCode = addressViewModel::searchZipCode,
             onSearchStreet = addressViewModel::searchStreets,
-            onValidateAddress = addressViewModel::validateAddress
+            onValidateAddress = addressViewModel::validateAddress,
+            onBackClicked = { actions.pressOnBack() }
         )
 
         is Destination.SettingsAddressEditRemoval -> {
@@ -256,11 +282,13 @@ fun Main(
                 streetsViewState,
                 addressViewModel::searchZipCode,
                 addressViewModel::searchStreets,
-                addressViewModel::validateExistingAddress
-            ) {
-                addressViewModel.removeAddress(it)
-                actions.pressOnBack()
-            }
+                addressViewModel::validateExistingAddress,
+                {
+                    addressViewModel.removeAddress(it)
+                    actions.pressOnBack()
+                },
+                { actions.pressOnBack() }
+            )
         }
     }
 

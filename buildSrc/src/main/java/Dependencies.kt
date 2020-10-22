@@ -28,8 +28,8 @@ object Versions {
     const val datetime = "0.1.0"
     const val settings_prefs = "0.6.2"
     const val workmanager = "2.4.0"
-    const val flowTuple = "1.0.0"
     const val autostarter = "1.0.8"
+    const val material_dialogs = "3.3.0"
 }
 
 object Kotlin {
@@ -67,6 +67,11 @@ object Android {
     const val workmanager = "androidx.work:work-runtime-ktx:${Versions.workmanager}"
 }
 
+object AndroidUi {
+    const val material_dialogs_core = "com.afollestad.material-dialogs:core:${Versions.material_dialogs}"
+    const val material_dialogs_bottomsheet = "com.afollestad.material-dialogs:bottomsheets:${Versions.material_dialogs}"
+}
+
 object Koin {
     const val core = "org.koin:koin-core:${Versions.koin}"
     const val android = "org.koin:koin-android:${Versions.koin}"
@@ -81,6 +86,5 @@ object Kodein_db {
 object Util {
     const val slf4j = "org.slf4j:slf4j-simple:${Versions.slf4j}"
     const val prefs = "com.russhwolf:multiplatform-settings-no-arg:${Versions.settings_prefs}"
-    const val flowTuple = "com.github.Zhuinden:flow-combinetuple-kt:${Versions.flowTuple}"
     const val autoStarter = "com.github.judemanutd:autostarter:${Versions.autostarter}"
 }

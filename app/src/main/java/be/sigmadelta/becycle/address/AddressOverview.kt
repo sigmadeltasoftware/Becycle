@@ -1,14 +1,13 @@
 package be.sigmadelta.becycle.address
 
-import android.widget.Space
 import androidx.compose.foundation.Icon
 import androidx.compose.foundation.Text
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumnForIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,41 +27,54 @@ import be.sigmadelta.common.address.Address
 fun SettingsAddressOverview(
     addresses: ListViewState<Address>,
     onEditAddressClicked: (Address) -> Unit,
-    onAddAddressClicked: () -> Unit
+    onAddAddressClicked: () -> Unit,
+    onBackClicked: () -> Unit
 ) {
-    when (addresses) {
-        is ListViewState.Empty -> Unit
-        is ListViewState.Loading -> CircularProgressIndicator()
-        is ListViewState.Success -> Column {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.padding(16.dp)
-            ) {
-                Text(
-                    text = "Addresses",
-                    color = textPrimary,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                Text(
-                    text = "${addresses.payload.size}/5",
-                    modifier = Modifier.background(secondaryAccent).padding(vertical = 8.dp, horizontal = 16.dp),
-                    color = primaryAccent,
-                    fontWeight = FontWeight.Bold,
-                )
-            }
-            LazyColumnForIndexed(items = addresses.payload) { ix, addr ->
-                SettingsAddressOverviewItem(addr, onEditAddressClicked)
-                if (ix < addresses.payload.size - 1) {
-                    Divider()
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(text = "Address Settings") },
+                navigationIcon = {
+                    Icon(
+                        asset = vectorResource(id = R.drawable.ic_back),
+                        modifier = Modifier.clickable(onClick = onBackClicked).padding(start = 8.dp)
+                    )
                 }
+            )
+        },
+        bodyContent = {
+            when (addresses) {
+                is ListViewState.Empty -> Unit
+                is ListViewState.Loading -> CircularProgressIndicator()
+                is ListViewState.Success -> Column {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier.padding(16.dp).padding(end = 16.dp)
+                    ) {
+                        Spacer(modifier = Modifier.weight(1f))
+                        Text(
+                            text = "${addresses.payload.size}/5",
+                            modifier = Modifier.background(
+                                color = secondaryAccent,
+                                shape = RoundedCornerShape(16.dp)
+                            ).padding(vertical = 4.dp, horizontal = 8.dp),
+                            color = primaryAccent,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    LazyColumnForIndexed(items = addresses.payload) { ix, addr ->
+                        SettingsAddressOverviewItem(addr, onEditAddressClicked)
+                        if (ix < addresses.payload.size - 1) {
+                            Divider()
+                        }
+                    }
+                    AddAddressItem(onAddAddressClicked = onAddAddressClicked)
+                }
+                is ListViewState.Error -> Text(text = "ERROR: ${addresses.error?.localizedMessage}")
             }
-            AddAddressItem(onAddAddressClicked = onAddAddressClicked)
         }
-        is ListViewState.Error -> Text(text = "ERROR: ${addresses.error?.localizedMessage}")
-    }
+    )
 }
 
 @Composable
@@ -100,13 +112,17 @@ fun SettingsAddressOverviewItem(
 
 @Composable
 fun AddAddressItem(onAddAddressClicked: () -> Unit) {
-    Button(
-        onClick = onAddAddressClicked,
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp, vertical = 16.dp)
-    ) {
-        Row(modifier = Modifier.align(Alignment.CenterVertically)) {
-            Icon(asset = vectorResource(id = R.drawable.ic_add))
-            Text(text = "Add address", modifier = Modifier.padding(start = 16.dp))
+    Row {
+        Spacer(modifier = Modifier.weight(1f))
+        Button(
+            onClick = onAddAddressClicked,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(asset = vectorResource(id = R.drawable.ic_add))
+                Text(text = "Add Address", modifier = Modifier.padding(start = 16.dp))
+            }
         }
+        Spacer(modifier = Modifier.weight(1f))
     }
 }
