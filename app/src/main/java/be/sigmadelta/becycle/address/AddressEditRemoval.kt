@@ -1,21 +1,12 @@
 package be.sigmadelta.becycle.address
 
-import androidx.compose.foundation.Text
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Button
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.ExperimentalFocus
-import androidx.compose.ui.platform.ContextAmbient
-import androidx.compose.ui.unit.dp
-import be.sigmadelta.becycle.common.ui.theme.errorColor
 import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.address.Street
 import be.sigmadelta.common.address.ZipCodeItem
-import com.afollestad.materialdialogs.MaterialDialog
 
 @ExperimentalFocus
 @Composable
@@ -36,7 +27,7 @@ fun SettingsAddressEditRemoval(
         is ListViewState.Success -> {
             addresses.payload.firstOrNull { it.id == addressId }?.let {
                 Column {
-                    SettingsAddressCreation(
+                    SettingsAddressManipulation(
                         zipCodeItemsViewState = zipCodeItemViewState,
                         streetsViewState = streetsViewState,
                         onSearchZipCode = onSearchZipCode,
@@ -51,28 +42,10 @@ fun SettingsAddressEditRemoval(
                             )
                         },
                         onBackClicked = onBackClicked,
-                        "Edit Address"
+                        "Edit Address",
+                        it,
+                        onAddressRemove = onAddressRemove
                     )
-
-                    val ctx = ContextAmbient.current
-                    Button(
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
-                            .padding(vertical = 16.dp),
-                        onClick = {
-                            MaterialDialog(ctx).show {
-                                cornerRadius(16f)
-                                title(text = "Remove ${it.streetWithHouseNr}?")
-                                message(text = "Are you sure you want to remove this address?")
-                                positiveButton(text = "Remove") {dialog ->
-                                    onAddressRemove(it)
-                                }
-                                negativeButton(text = "Cancel") { it.dismiss() }
-                            }
-                        },
-                        backgroundColor = errorColor
-                    ) {
-                        Text(text = "Remove Address")
-                    }
                 }
             }
         }

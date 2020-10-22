@@ -265,7 +265,7 @@ fun Main(
             { actions.pressOnBack() }
         )
 
-        Destination.SettingsAddressCreation -> SettingsAddressCreation(
+        Destination.SettingsAddressCreation -> SettingsAddressManipulation(
             zipCodeItemsViewState,
             streetsViewState,
             onSearchZipCode = addressViewModel::searchZipCode,
