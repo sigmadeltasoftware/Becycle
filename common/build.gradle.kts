@@ -87,7 +87,6 @@ kotlin {
                 // Util
                 api (Util.slf4j) // Necessary for HttpClient logging
                 api (Util.prefs) // Multiplatform preferences
-                api (Util.flowTuple)
             }
         }
 
@@ -95,6 +94,7 @@ kotlin {
             dependencies {
                 api(Ktor.android)
                 api(Android.workmanager)
+                api(Util.autoStarter)
             }
         }
 

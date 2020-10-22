@@ -4,10 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.OnBackPressedDispatcher
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Icon
 import androidx.compose.foundation.Text
 import androidx.compose.foundation.layout.Arrangement
@@ -16,7 +13,6 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.savedinstancestate.rememberSavedInstanceState
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.ExperimentalFocus
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ContextAmbient
@@ -25,11 +21,12 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import be.sigmadelta.becycle.accesstoken.AccessTokenViewModel
 import be.sigmadelta.becycle.address.*
-import be.sigmadelta.becycle.common.*
-import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.becycle.collections.CollectionsViewModel
+import be.sigmadelta.becycle.common.*
 import be.sigmadelta.becycle.common.ui.theme.*
+import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.becycle.common.ui.util.ViewState
+import be.sigmadelta.becycle.common.util.PowerUtil
 import be.sigmadelta.becycle.home.Home
 import be.sigmadelta.becycle.notification.SettingsNotifications
 import be.sigmadelta.becycle.settings.Settings
@@ -37,6 +34,9 @@ import be.sigmadelta.common.Preferences
 import be.sigmadelta.common.notifications.NotificationRepo
 import be.sigmadelta.common.util.AuthorizationKeyExpiredException
 import be.sigmadelta.common.util.SessionStorage
+import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.bottomsheets.BottomSheet
+import com.judemanutd.autostarter.AutoStartPermissionHelper
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
@@ -106,6 +106,26 @@ fun MainLayout(
 
     val actions = remember(nav) { Actions(nav) }
 
+    if (preferences.isFirstRun && nav.current != Destination.Settings && nav.current != Destination.SettingsAddressCreation) {
+        MaterialDialog(ContextAmbient.current).show {
+            cornerRadius(16f)
+            title(text = "Battery Optimisations")
+            message(text = "Due to Android's aggressive battery optimisations, notification reminders might not work on your device.\n\nWould you like disable the battery optimisations for this app to make sure the reminders are allowed to trigger?")
+            icon(R.drawable.ic_notifications_on)
+            positiveButton(text = "Disable Battery Optimisations") {
+                actions.goTo(Destination.Settings)
+                preferences.isFirstRun = false
+            }
+            negativeButton(text = "Turn off notification reminders") {
+                it.dismiss()
+                preferences.notificationsEnabled = false
+                preferences.isFirstRun = false
+            }
+            cancelable(false)
+            cancelOnTouchOutside(false)
+        }
+    }
+
     Providers(BackDispatcherAmbient provides backPressedDispatcher) {
         ProvideDisplayInsets {
             Scaffold(
@@ -142,15 +162,17 @@ fun MainLayout(
                             unselectedContentColor = unselectedColor,
                             selected = false,
                             onClick = {
-                                AlertDialog.Builder(ctx)
-                                    .setTitle("Go to Recycle App website?")
-                                    .setPositiveButton("OK") { _, _ ->
-                                        actions.goToRecycleWebsite(
-                                            ctx
-                                        )
+                                MaterialDialog(ctx).show {
+                                    cornerRadius(16f)
+                                    title(text = ("Go to Recycle App website?"))
+                                    message(text = "Would you like to visit the Recycle App website for additional information?")
+                                    positiveButton(text = "OK") {
+                                        actions.goToRecycleWebsite(ctx)
                                     }
-                                    .setNegativeButton("Close") { p0, _ -> p0.dismiss() }
-                                    .show()
+                                    negativeButton(text = "Cancel") {
+                                        it.dismiss()
+                                    }
+                                }
                             }
                         )
                     }
@@ -187,16 +209,46 @@ fun Main(
 
         Destination.Settings -> {
             val ctx = ContextAmbient.current
-            val notificationSwitchState =
-                remember { mutableStateOf(preferences.notificationsEnabled) }
+            val autoStarter = AutoStartPermissionHelper.getInstance()
+            var notificationSwitchState by remember { mutableStateOf(preferences.notificationsEnabled) }
+
             Settings(
                 actions.goTo,
                 notificationSwitchState,
+                PowerUtil.isIgnoringBatteryOptimizations(ctx).not() && notificationSwitchState,
+                onDisableBatteryOptimisationClicked = {
+                    PowerUtil.checkBattery(ctx)
+                    // Can't get proper callback from checkBattery to refresh optimisation warning state,
+                    // by going back home, the warning will be refreshed and therefor gone
+                    actions.pressOnBack()
+                },
+                onGetDisableBatteryOptimisationInfoClicked = {
+                    MaterialDialog(ctx, BottomSheet()).show {
+                        cornerRadius(16f)
+                        title(text = "Disable Battery Optimisations")
+                        message(text =
+                        """
+                            Android will try to extend its battery life by letting the system go to sleep. This mode is called 'Doze' and might prevent the apps from acting when necessary such as in the case of firing a reminder notification. 
+                            
+                            To disable this, Becycle needs to be whitelisted by disabling battery optimizations. This will allow the app to send reminders even when the system is in Doze mode.
+                        """.trimIndent()
+                        )
+                        icon(R.drawable.ic_notifications_on)
+                        positiveButton(text = "Disable Battery Optimisations") {
+                            PowerUtil.checkBattery(ctx)
+                            // Can't get proper callback from checkBattery to refresh optimisation warning state,
+                            // by going back home, the warning will be refreshed and therefor gone
+                            actions.pressOnBack()
+                        }
+                    }
+                },
+                autoStarter.isAutoStartPermissionAvailable(ctx),
+                { autoStarter.getAutoStartPermission(ctx) },
                 onSigmaDeltaLogoClicked = {
                     actions.goToSigmaDeltaWebsite(ctx)
                 }) {
                 preferences.notificationsEnabled = it
-                notificationSwitchState.value = it
+                notificationSwitchState = it
             }
         }
 
@@ -209,15 +261,17 @@ fun Main(
         Destination.SettingsAddresses -> SettingsAddressOverview(
             addresses,
             { actions.goTo(Destination.SettingsAddressEditRemoval(it.id)) },
-            { actions.goTo(Destination.SettingsAddressCreation) }
+            { actions.goTo(Destination.SettingsAddressCreation) },
+            { actions.pressOnBack() }
         )
 
-        Destination.SettingsAddressCreation -> AddressCreation(
+        Destination.SettingsAddressCreation -> SettingsAddressCreation(
             zipCodeItemsViewState,
             streetsViewState,
             onSearchZipCode = addressViewModel::searchZipCode,
             onSearchStreet = addressViewModel::searchStreets,
-            onValidateAddress = addressViewModel::validateAddress
+            onValidateAddress = addressViewModel::validateAddress,
+            onBackClicked = { actions.pressOnBack() }
         )
 
         is Destination.SettingsAddressEditRemoval -> {
@@ -228,11 +282,13 @@ fun Main(
                 streetsViewState,
                 addressViewModel::searchZipCode,
                 addressViewModel::searchStreets,
-                addressViewModel::validateExistingAddress
-            ) {
-                addressViewModel.removeAddress(it)
-                actions.pressOnBack()
-            }
+                addressViewModel::validateExistingAddress,
+                {
+                    addressViewModel.removeAddress(it)
+                    actions.pressOnBack()
+                },
+                { actions.pressOnBack() }
+            )
         }
     }
 
@@ -268,19 +324,19 @@ fun ValidationSnackbar(
                 }
             }
         }
-        ValidationViewState.InvalidCombination -> Snackbar(backgroundColor = Color.Red) {
+        ValidationViewState.InvalidCombination -> Snackbar(backgroundColor = errorColor) {
             Text(
                 text = "Something went wrong, invalid Address combination. Please reselect your zipcode and street, and try again.",
                 color = Color.White
             )
         }
-        ValidationViewState.NetworkError -> Snackbar(backgroundColor = Color.Red) {
+        ValidationViewState.NetworkError -> Snackbar(backgroundColor = errorColor) {
             Text(
                 text = "Something went wrong, bad network response. Please check your connection or try again later.",
                 color = Color.White
             )
         }
-        ValidationViewState.InvalidAddressSpecified -> Snackbar(backgroundColor = Color.Red) {
+        ValidationViewState.InvalidAddressSpecified -> Snackbar(backgroundColor = errorColor) {
             Text(
                 text = "Invalid address specified. Please check your house number and try again",
                 color = Color.White

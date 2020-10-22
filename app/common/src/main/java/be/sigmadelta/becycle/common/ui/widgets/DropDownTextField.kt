@@ -16,6 +16,7 @@ import androidx.compose.ui.focus.ExperimentalFocus
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import be.sigmadelta.becycle.common.ui.util.ListViewState
 import kotlinx.coroutines.Dispatchers
@@ -32,6 +33,7 @@ fun <T> DropDownTextField(
     textChangeAction: (String) -> Unit,
     itemSelectedAction: (T) -> Unit,
     itemLayout: @Composable (LazyItemScope.(T) -> Unit),
+    keyboardType: KeyboardType = KeyboardType.Text,
     focusRequester: FocusRequester = FocusRequester()
 ) {
 
@@ -43,6 +45,7 @@ fun <T> DropDownTextField(
         TextField(
             modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
             backgroundColor = Color.White,
+            keyboardType = keyboardType,
             label = {
                 if (itemListViewState !is ListViewState.Error) {
                     Text(text = label)

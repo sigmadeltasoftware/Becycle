@@ -29,11 +29,11 @@ fun Collections(collections: List<Collection>) {
     val collectionViewItems = mutableListOf<@Composable () -> Unit>(
         {
             Text(
-                text = "Upcoming collections:",
+                text = "Upcoming Collections",
                 fontSize = 20.sp,
                 color = textPrimary,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(top = 16.dp, start = 8.dp, bottom = 8.dp)
+                modifier = Modifier.padding(top = 16.dp, start = 8.dp, bottom = 16.dp)
             )
         }
     ).apply {

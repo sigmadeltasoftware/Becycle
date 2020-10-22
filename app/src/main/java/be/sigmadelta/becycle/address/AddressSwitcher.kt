@@ -21,10 +21,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import be.sigmadelta.becycle.R
-import be.sigmadelta.becycle.common.ui.theme.primaryAccent
-import be.sigmadelta.becycle.common.ui.theme.primaryBackgroundColor
-import be.sigmadelta.becycle.common.ui.theme.secondaryAccent
-import be.sigmadelta.becycle.common.ui.theme.unselectedColor
+import be.sigmadelta.becycle.common.ui.theme.*
 import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.common.address.Address
 
@@ -92,7 +89,7 @@ fun AddressSwitcher(
             }
             is ListViewState.Error -> {
                 Log.e("AddressSwitcher", addresses.error?.localizedMessage.toString())
-                Text("Unable to retrieve address data", color = Color.Red)
+                Text("Unable to retrieve address data", color = errorColor)
             }
         }
     }
