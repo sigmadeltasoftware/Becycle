@@ -8,7 +8,7 @@ object Versions {
     const val gradleTools = "4.2.0-alpha14"
     const val compileSdk = 30
     const val targetSdk = compileSdk
-    const val minSdk = 23
+    const val minSdk = 24
     const val buildTools = "$compileSdk.0.2"
 
     const val kotlin = "1.4.10"

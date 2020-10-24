@@ -73,7 +73,7 @@ class SplashScreenActivity : AppCompatActivity(), CoroutineScope by MainScope() 
             accessTokenViewModel.accessTokenViewState.collect { result ->
                 when (result) {
                     is ViewState.Success -> {
-                        Log.d(TAG, "Received Accesstoken: ${result.payload}")
+                        Log.d(TAG, "Received Access token: ${result.payload}")
                         sessionStorage.accessToken = result.payload.accessToken
                         startActivity(Intent(this@SplashScreenActivity, MainActivity::class.java))
                         finish()
