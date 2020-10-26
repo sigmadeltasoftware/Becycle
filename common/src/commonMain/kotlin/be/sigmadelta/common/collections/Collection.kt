@@ -2,7 +2,6 @@ package be.sigmadelta.common.collections
 
 import be.sigmadelta.common.util.TranslationContainer
 import kotlinx.serialization.Serializable
-import org.kodein.db.Index
 import org.kodein.db.indexSet
 import org.kodein.db.model.orm.Metadata
 import org.kodein.memory.util.UUID
@@ -46,6 +45,7 @@ data class CollectionFractionLogo(val id: String) {
         "5d610b86162c063cc0400117" -> CollectionType.GROF_HUISVUIL_APPOINTMENT
         "5d610b86162c063cc0400122" -> CollectionType.OLD_METALS
         "5d610b86162c063cc0400129" -> CollectionType.RE_USE_CENTER
+        "5d610b86162c063cc0400133",
         "5d610b86162c063cc0400112" -> CollectionType.RESIDUAL_HOUSEHOLD_WASTE
         "5d610b86162c063cc0400105" -> CollectionType.IJZER
         "5d610b86162c063cc0400102" -> CollectionType.CHRISTMAS_TREES

@@ -1,27 +1,32 @@
 package be.sigmadelta.becycle
 
 import android.content.Intent
+import android.graphics.drawable.Animatable2
+import android.graphics.drawable.AnimatedVectorDrawable
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
+import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Text
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.ExperimentalFocus
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.ContextAmbient
 import androidx.compose.ui.platform.setContent
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import be.sigmadelta.becycle.common.ui.util.ViewState
 import be.sigmadelta.becycle.common.ui.theme.BecycleTheme
 import be.sigmadelta.becycle.accesstoken.AccessTokenViewModel
 import be.sigmadelta.becycle.baseheaders.BaseHeadersViewModel
 import be.sigmadelta.becycle.baseheaders.BaseHeadersViewState
 import be.sigmadelta.becycle.common.ui.theme.errorColor
+import be.sigmadelta.becycle.common.ui.widgets.BecycleProgressIndicator
 import be.sigmadelta.common.util.SessionStorage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -100,7 +105,7 @@ fun SplashScreenLayout() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text("Becycle")
-        CircularProgressIndicator()
+        BecycleProgressIndicator(modifier = Modifier.height(180.dp).padding(16.dp))
     }
 }
 

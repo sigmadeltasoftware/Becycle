@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.sp
 import be.sigmadelta.becycle.R
 import be.sigmadelta.becycle.common.ui.theme.*
 import be.sigmadelta.becycle.common.ui.util.ListViewState
+import be.sigmadelta.becycle.common.ui.widgets.BecycleProgressIndicator
 import be.sigmadelta.common.address.Address
 
 @Composable
@@ -39,7 +40,7 @@ fun AddressSwitcher(
         divider = { Divider() }
     ) {
         when (addresses) {
-            is ListViewState.Loading -> CircularProgressIndicator(modifier = Modifier.padding(16.dp))
+            is ListViewState.Loading -> BecycleProgressIndicator(modifier = Modifier.padding(16.dp))
             is ListViewState.Success -> {
                 addresses.payload.forEachIndexed { ix, it ->
                     Tab(

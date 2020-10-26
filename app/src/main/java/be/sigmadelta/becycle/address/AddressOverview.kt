@@ -21,6 +21,7 @@ import be.sigmadelta.becycle.common.ui.theme.secondaryAccent
 import be.sigmadelta.becycle.common.ui.theme.textPrimary
 import be.sigmadelta.becycle.common.ui.theme.unselectedColor
 import be.sigmadelta.becycle.common.ui.util.ListViewState
+import be.sigmadelta.becycle.common.ui.widgets.BecycleProgressIndicator
 import be.sigmadelta.common.address.Address
 
 @Composable
@@ -45,7 +46,7 @@ fun SettingsAddressOverview(
         bodyContent = {
             when (addresses) {
                 is ListViewState.Empty -> Unit
-                is ListViewState.Loading -> CircularProgressIndicator()
+                is ListViewState.Loading -> BecycleProgressIndicator()
                 is ListViewState.Success -> Column {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,

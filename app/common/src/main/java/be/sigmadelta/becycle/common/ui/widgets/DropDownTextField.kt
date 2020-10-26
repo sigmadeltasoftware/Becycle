@@ -80,7 +80,7 @@ fun <T> DropDownTextField(
         )
         if (textValue == null) {
             when (itemListViewState) {
-                is ListViewState.Loading -> CircularProgressIndicator()
+                is ListViewState.Loading -> BecycleProgressIndicator()
                 is ListViewState.Success -> {
                     LazyColumnFor(
                         modifier = Modifier.preferredHeight(150.dp).padding(start = 16.dp)

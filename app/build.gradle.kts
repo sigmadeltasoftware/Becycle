@@ -12,6 +12,7 @@ android {
         applicationId = Properties.applicationId
         minSdkVersion(Versions.minSdk)
         targetSdkVersion(Versions.targetSdk)
+        vectorDrawables.useSupportLibrary = true
 
         versionCode = Properties.versionCode
         versionName = Properties.versionName

@@ -1,5 +1,6 @@
 package be.sigmadelta.becycle.collections
 
+import android.widget.ImageView
 import androidx.compose.foundation.Icon
 import androidx.compose.foundation.Text
 import androidx.compose.foundation.layout.*
@@ -10,14 +11,17 @@ import androidx.compose.material.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import be.sigmadelta.becycle.R
 import be.sigmadelta.becycle.common.ui.theme.bottomNavigationMargin
 import be.sigmadelta.becycle.common.ui.theme.primaryBackgroundColor
 import be.sigmadelta.becycle.common.ui.theme.textPrimary
+import be.sigmadelta.becycle.common.ui.util.iconRef
 import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.collections.Collection
 import java.text.SimpleDateFormat
@@ -69,18 +73,19 @@ fun CollectionItem(collection: Collection) {
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(horizontal = 8.dp)
         ) {
-            Icon(
-                asset = vectorResource(
-                    id = when (collection.collectionType) {
-                        else -> R.drawable.ic_home
-                    }
-                )
-            )
+            AndroidView(viewBlock = {
+                ImageView(it).apply {
+                    setImageDrawable(it.getDrawable(collection.collectionType.iconRef()))
+                }
+            }, modifier = Modifier.width(24.dp),
+            update = {
+                it.setImageDrawable(it.context.getDrawable(collection.collectionType.iconRef()))
+            })
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.padding(16.dp)
             ) {
-                Text(collection.fraction.name.nl, fontWeight = FontWeight.Bold)
+                Text(collection.fraction.name.nl.capitalize(), fontWeight = FontWeight.Bold)
                 Text(
                     "CollectionId: ${collection.id}\nAddressId: ${collection.addressId}",
                     fontSize = 10.sp

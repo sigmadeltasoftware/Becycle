@@ -5,7 +5,7 @@
         <vector
             android:name="vector"
             android:width="512dp"
-            android:height="513dp"
+            android:height="512dp"
             android:viewportWidth="512"
             android:viewportHeight="513">
             <group

@@ -26,6 +26,7 @@ import be.sigmadelta.becycle.common.*
 import be.sigmadelta.becycle.common.ui.theme.*
 import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.becycle.common.ui.util.ViewState
+import be.sigmadelta.becycle.common.ui.widgets.BecycleProgressIndicator
 import be.sigmadelta.becycle.common.util.PowerUtil
 import be.sigmadelta.becycle.home.Home
 import be.sigmadelta.becycle.notification.SettingsNotifications
@@ -308,7 +309,7 @@ fun ValidationSnackbar(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            CircularProgressIndicator()
+            BecycleProgressIndicator()
         }
 
         is ValidationViewState.Success -> {
