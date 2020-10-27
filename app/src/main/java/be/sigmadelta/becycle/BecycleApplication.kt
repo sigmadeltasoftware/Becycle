@@ -14,6 +14,8 @@ class BecycleApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
+        FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(BuildConfig.DEBUG.not())
+
         appCtx = this
 
         startKoin {
