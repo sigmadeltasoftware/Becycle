@@ -37,6 +37,7 @@ import be.sigmadelta.common.util.AuthorizationKeyExpiredException
 import be.sigmadelta.common.util.SessionStorage
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.bottomsheets.BottomSheet
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.judemanutd.autostarter.AutoStartPermissionHelper
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.StateFlow

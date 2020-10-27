@@ -4,6 +4,7 @@ import be.sigmadelta.becycle.baseheaders.BaseHeadersViewModel
 import be.sigmadelta.becycle.address.AddressViewModel
 import be.sigmadelta.becycle.accesstoken.AccessTokenViewModel
 import be.sigmadelta.becycle.collections.CollectionsViewModel
+import be.sigmadelta.becycle.common.analytics.AnalyticsTracker
 import be.sigmadelta.common.Preferences
 import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.db.getApplicationFilesDirectoryPath
@@ -13,7 +14,6 @@ import be.sigmadelta.common.address.AddressApi
 import be.sigmadelta.common.address.AddressRepository
 import be.sigmadelta.common.baseheader.BaseHeadersRepository
 import be.sigmadelta.common.accesstoken.AccessTokenRepository
-import be.sigmadelta.common.address.ZipCodeItem
 import be.sigmadelta.common.collections.CollectionsApi
 import be.sigmadelta.common.collections.CollectionsRepository
 import be.sigmadelta.common.notifications.NotificationProps
@@ -21,6 +21,7 @@ import be.sigmadelta.common.notifications.NotificationRepo
 import be.sigmadelta.common.util.AuthorizationKeyExpiredException
 import be.sigmadelta.common.util.InvalidAddressException
 import be.sigmadelta.common.util.SessionStorage
+import com.google.firebase.analytics.FirebaseAnalytics
 import io.ktor.client.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
@@ -46,6 +47,7 @@ val coreModule = module {
     single { db }
     single { Preferences() }
     single { NotificationRepo(androidContext(), get()) }
+    single { AnalyticsTracker(FirebaseAnalytics.getInstance(androidContext())) }
 }
 
 val sessionStorage = module {
@@ -64,7 +66,7 @@ val recycleModule = module {
     single { AddressApi(RECYCLE_BASE_URL, get(), get()) }
     single { AccessTokenRepository(get()) }
     single { AddressRepository(get(), get(), get()) }
-    viewModel { AddressViewModel(get(), get()) }
+    viewModel { AddressViewModel(get(), get(), get()) }
     viewModel { AccessTokenViewModel(get()) }
 }
 

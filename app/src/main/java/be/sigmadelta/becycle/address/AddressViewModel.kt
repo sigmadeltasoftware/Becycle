@@ -1,8 +1,10 @@
 package be.sigmadelta.becycle.address
 
 import android.util.Log
+import androidx.core.os.bundleOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import be.sigmadelta.becycle.common.analytics.AnalyticsTracker
 import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.becycle.common.ui.util.toViewState
 import be.sigmadelta.common.address.Address
@@ -21,7 +23,8 @@ import kotlinx.coroutines.launch
 @ExperimentalCoroutinesApi
 class AddressViewModel(
     private val addressRepository: AddressRepository,
-    private val notificationRepo: NotificationRepo
+    private val notificationRepo: NotificationRepo,
+    private val analTracker: AnalyticsTracker
 ) : ViewModel() {
 
     val addressesViewState = MutableStateFlow<ListViewState<Address>>(ListViewState.Empty())
@@ -43,34 +46,44 @@ class AddressViewModel(
             createDefaultNotificationSettings(address)
         }
 
+        analTracker.log(ANAL_TAG, if (addressExists) "updateAddress" else "saveAddress", address)
+
         loadSavedAddresses()
     }
 
     fun loadSavedAddresses() = viewModelScope.launch {
         val addresses = addressRepository.getAddresses()
         Log.d(TAG, "loadSavedAddresses(): $addresses")
+        analTracker.log(ANAL_TAG, "loadSavedAddresses", "Address count: ${addresses.size}")
         addressesViewState.value = ListViewState.Success(addresses)
     }
 
     fun clearAllAddresses() = viewModelScope.launch {
         addressRepository.removeAddresses()
+        analTracker.log(ANAL_TAG, "clearAllAddresses", null)
         loadSavedAddresses()
     }
 
     fun removeAddress(address: Address) = viewModelScope.launch {
         addressRepository.removeAddress(address)
+        analTracker.log(ANAL_TAG, "removeAddress", address)
         loadSavedAddresses()
     }
 
     fun searchZipCode(searchQuery: String) = viewModelScope.launch {
         addressRepository.searchZipCodes(searchQuery).collect {
             zipCodeItemsViewState.value = it.toViewState()
+            analTracker.log(ANAL_TAG, "searchZipCode", searchQuery)
         }
     }
 
     fun searchStreets(searchQuery: String, zipCodeItem: ZipCodeItem) = viewModelScope.launch {
         addressRepository.searchStreets(searchQuery, zipCodeItem).collect {
             streetsViewState.value = it.toViewState()
+            analTracker.log(ANAL_TAG, "searchStreets", bundleOf(
+                Pair("searchQuery", searchQuery),
+                Pair("zipCodeItem", zipCodeItem)
+            ))
         }
     }
 
@@ -78,7 +91,14 @@ class AddressViewModel(
         addressRepository.validateAddress(zipCodeItem, street, houseNumber).collect {
             validationViewState.value = when (it) {
                 is Response.Loading -> ValidationViewState.Loading
-                is Response.Success -> ValidationViewState.Success(it.body)
+                is Response.Success -> {
+                    analTracker.log(ANAL_TAG, "validateAddress", bundleOf(
+                        Pair("zipCodeItem", zipCodeItem),
+                        Pair("street", street),
+                        Pair("houseNumber", houseNumber)
+                    ))
+                    ValidationViewState.Success(it.body)
+                }
                 is Response.Error -> when (it.error) {
                     is ClientRequestException -> ValidationViewState.InvalidCombination
                     is InvalidAddressException -> ValidationViewState.InvalidAddressSpecified
@@ -92,7 +112,10 @@ class AddressViewModel(
         addressRepository.validateExistingAddress(address).collect {
             validationViewState.value = when (it) {
                 is Response.Loading -> ValidationViewState.Loading
-                is Response.Success -> ValidationViewState.Success(it.body)
+                is Response.Success -> {
+                    analTracker.log(ANAL_TAG, "validateExistingAddress", address)
+                    ValidationViewState.Success(it.body)
+                }
                 is Response.Error -> when (it.error) {
                     is ClientRequestException -> ValidationViewState.InvalidCombination
                     is InvalidAddressException -> ValidationViewState.InvalidAddressSpecified
@@ -107,18 +130,22 @@ class AddressViewModel(
         zipCodeItemsViewState.value = ListViewState.Empty()
         streetsViewState.value = ListViewState.Empty()
         addressesViewState.value = ListViewState.Empty()
+        analTracker.log(ANAL_TAG, "resetAll", null)
     }
 
     fun resetValidation() {
         validationViewState.value = ValidationViewState.Empty
+        analTracker.log(ANAL_TAG, "resetValidation", null)
     }
 
     private fun createDefaultNotificationSettings(address: Address) {
         notificationRepo.insertDefaultNotificationProps(address)
+        analTracker.log(ANAL_TAG, "createDefaultNotificationSettings", address)
     }
 
     companion object {
         private const val TAG = "AddressViewModel"
+        private const val ANAL_TAG = "AddressVM"
     }
 }
 
