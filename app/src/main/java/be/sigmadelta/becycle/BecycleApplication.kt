@@ -3,6 +3,7 @@ package be.sigmadelta.becycle
 import android.app.Application
 import be.sigmadelta.becycle.util.*
 import be.sigmadelta.common.db.appCtx
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin

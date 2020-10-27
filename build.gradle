@@ -8,6 +8,8 @@ buildscript {
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${Versions.kotlin}")
         classpath("org.jetbrains.kotlin:kotlin-serialization:${Versions.kotlin}")
         classpath("org.jetbrains.kotlin:kotlin-android-extensions-runtime:${Versions.kotlin}")
+        classpath("com.google.gms:google-services:${Versions.google_gms}")
+        classpath("com.google.firebase:firebase-crashlytics-gradle:${Versions.firebase_crashlytics_gradle}")
     }
 }
 

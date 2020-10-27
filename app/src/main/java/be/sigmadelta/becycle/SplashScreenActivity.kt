@@ -48,7 +48,7 @@ class SplashScreenActivity : AppCompatActivity(), CoroutineScope by MainScope() 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        throw RuntimeException("Test Crash")
         launch {
             baseHeadersViewModel.baseHeadersViewState.collect { viewState ->
                 when (viewState) {
