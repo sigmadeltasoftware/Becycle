@@ -3,6 +3,8 @@ package be.sigmadelta.becycle.baseheaders
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import be.sigmadelta.becycle.accesstoken.AccessTokenViewModel
+import be.sigmadelta.becycle.common.analytics.AnalyticsTracker
 import be.sigmadelta.common.util.Header
 import be.sigmadelta.common.util.Response
 import be.sigmadelta.common.baseheader.BaseHeadersRepository
@@ -12,7 +14,10 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @ExperimentalCoroutinesApi
-class BaseHeadersViewModel(private val baseHeadersRepo: BaseHeadersRepository) : ViewModel() {
+class BaseHeadersViewModel(
+    private val baseHeadersRepo: BaseHeadersRepository,
+    private val analTracker: AnalyticsTracker
+) : ViewModel() {
 
     val baseHeadersViewState = MutableStateFlow<BaseHeadersViewState?>(BaseHeadersViewState.Empty)
 
@@ -27,14 +32,22 @@ class BaseHeadersViewModel(private val baseHeadersRepo: BaseHeadersRepository) :
                             Header("x-consumer", it.body.consumer)
                         )
                     )
-                    Log.d("Becycle", "Positive response: ${it.body}")
+                    Log.d(TAG, "Positive response: ${it.body}")
+                    analTracker.log(ANAL_TAG, "getBaseHeaders.success", it.body)
                 }
                 is Response.Error -> {
                     baseHeadersViewState.value = BaseHeadersViewState.Error(it.error?.message)
-                    Log.d("Becycle", "Error occurred: ${it.error}")
+                    Log.d(TAG, "Error occurred: ${it.error}")
+                    analTracker.log(ANAL_TAG, "getBaseHeaders.error", it.error?.message)
+
                 }
             }
         }
+    }
+
+    companion object {
+        private const val TAG = "BaseHeadersViewModel"
+        private const val ANAL_TAG = "BaseHeadersVM"
     }
 }
 
