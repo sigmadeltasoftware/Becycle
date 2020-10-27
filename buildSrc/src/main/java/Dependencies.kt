@@ -10,6 +10,8 @@ object Versions {
     const val targetSdk = compileSdk
     const val minSdk = 24
     const val buildTools = "$compileSdk.0.2"
+    const val google_gms = "4.3.4"
+    const val firebase_crashlytics_gradle = "2.3.0"
 
     const val kotlin = "1.4.10"
     const val kotlinCoroutines = "1.3.9-native-mt-2"
@@ -30,6 +32,7 @@ object Versions {
     const val workmanager = "2.4.0"
     const val autostarter = "1.0.8"
     const val material_dialogs = "3.3.0"
+    const val firebase_bom = "25.12.0"
 }
 
 object Kotlin {
@@ -70,6 +73,12 @@ object Android {
 object AndroidUi {
     const val material_dialogs_core = "com.afollestad.material-dialogs:core:${Versions.material_dialogs}"
     const val material_dialogs_bottomsheet = "com.afollestad.material-dialogs:bottomsheets:${Versions.material_dialogs}"
+}
+
+object Firebase {
+    const val bom = "com.google.firebase:firebase-bom:${Versions.firebase_bom}"
+    const val analytics = "com.google.firebase:firebase-analytics-ktx"
+    const val crashlytics = "com.google.firebase:firebase-crashlytics-ktx"
 }
 
 object Koin {

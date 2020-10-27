@@ -22,7 +22,7 @@ sealed class Destination: Parcelable {
     object SettingsAddresses: Destination()
 
     @Parcelize
-    object SettingsAddressCreation: Destination()
+    object SettingsAddressManipulation: Destination()
 
     @Parcelize
     data class SettingsAddressEditRemoval(val addressId: String): Destination()

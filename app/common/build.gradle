@@ -74,4 +74,9 @@ dependencies {
 
     api(AndroidUi.material_dialogs_core)
     api(AndroidUi.material_dialogs_bottomsheet)
+
+    api platform(Firebase.bom)
+    api(Firebase.analytics)
+    api(Firebase.crashlytics)
 }
+

@@ -107,7 +107,7 @@ fun MainLayout(
 
     val actions = remember(nav) { Actions(nav) }
 
-    if (preferences.isFirstRun && nav.current != Destination.Settings && nav.current != Destination.SettingsAddressCreation) {
+    if (preferences.isFirstRun && nav.current != Destination.Settings && nav.current != Destination.SettingsAddressManipulation) {
         MaterialDialog(ContextAmbient.current).show {
             cornerRadius(16f)
             title(text = "Battery Optimisations")
@@ -204,7 +204,7 @@ fun Main(
         Destination.Home -> Home(
             addresses,
             collections,
-            { actions.goTo(Destination.SettingsAddressCreation) },
+            { actions.goTo(Destination.SettingsAddressManipulation) },
             { address -> collectionsViewModel.searchCollections(address) }
         )
 
@@ -255,18 +255,18 @@ fun Main(
 
 
         Destination.SettingsNotifications -> SettingsNotifications(addresses) {
-            actions.goTo(Destination.SettingsAddressCreation)
+            actions.goTo(Destination.SettingsAddressManipulation)
         }
 
 
         Destination.SettingsAddresses -> SettingsAddressOverview(
             addresses,
             { actions.goTo(Destination.SettingsAddressEditRemoval(it.id)) },
-            { actions.goTo(Destination.SettingsAddressCreation) },
+            { actions.goTo(Destination.SettingsAddressManipulation) },
             { actions.pressOnBack() }
         )
 
-        Destination.SettingsAddressCreation -> SettingsAddressManipulation(
+        Destination.SettingsAddressManipulation -> SettingsAddressManipulation(
             zipCodeItemsViewState,
             streetsViewState,
             onSearchZipCode = addressViewModel::searchZipCode,
