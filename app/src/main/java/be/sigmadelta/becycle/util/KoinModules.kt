@@ -58,7 +58,7 @@ val sessionStorage = module {
 val baseHeadersModule = module {
     single { BaseHeadersApi(get()) }
     single { BaseHeadersRepository(get()) }
-    viewModel { BaseHeadersViewModel(get()) }
+    viewModel { BaseHeadersViewModel(get(), get()) }
 }
 
 val recycleModule = module {
@@ -67,13 +67,13 @@ val recycleModule = module {
     single { AccessTokenRepository(get()) }
     single { AddressRepository(get(), get(), get()) }
     viewModel { AddressViewModel(get(), get(), get()) }
-    viewModel { AccessTokenViewModel(get()) }
+    viewModel { AccessTokenViewModel(get(), get()) }
 }
 
 val collectionsModule = module {
     single { CollectionsApi(RECYCLE_BASE_URL, get(), get()) }
     single { CollectionsRepository(get(), get()) }
-    viewModel { CollectionsViewModel(get()) }
+    viewModel { CollectionsViewModel(get(), get()) }
 }
 
 private val client = HttpClient {

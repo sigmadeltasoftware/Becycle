@@ -35,10 +35,7 @@ import org.koin.ext.isInt
 fun SettingsAddressManipulation(
     zipCodeItemsViewState: ListViewState<ZipCodeItem>,
     streetsViewState: ListViewState<Street>,
-    onSearchZipCode: (String) -> Unit,
-    onSearchStreet: (String, ZipCodeItem) -> Unit,
-    onValidateAddress: (ZipCodeItem, Street, Int) -> Unit,
-    onBackClicked: () -> Unit,
+    actions: SettingsAddressManipulationActions,
     appBarTitle: String? = null,
     existingAddress: Address? = null,
     onAddressRemove: ((Address) -> Unit)? = null
@@ -58,7 +55,7 @@ fun SettingsAddressManipulation(
                 navigationIcon = {
                     Icon(
                         asset = vectorResource(id = R.drawable.ic_back),
-                        modifier = Modifier.clickable(onClick = onBackClicked).padding(start = 8.dp)
+                        modifier = Modifier.clickable(onClick = actions.onBackClicked).padding(start = 8.dp)
                     )
                 }
             )
@@ -73,7 +70,7 @@ fun SettingsAddressManipulation(
                         selectedZipCode = null
                         if (it.isInt()) {
                             isInvalidZipCodeInput = false
-                            onSearchZipCode(it)
+                            actions.onSearchZipCode(it)
                         } else {
                             isInvalidZipCodeInput = true
                         }
@@ -94,7 +91,7 @@ fun SettingsAddressManipulation(
                     textChangeAction = {
                         selectedStreet = null
                         selectedZipCode?.let { zip ->
-                            onSearchStreet(it, zip)
+                            actions.onSearchStreet(it, zip)
                         }
                     },
                     itemSelectedAction = { street ->
@@ -122,7 +119,7 @@ fun SettingsAddressManipulation(
                 )
 
                 Button(
-                    onClick = { onValidateAddress(selectedZipCode!!, selectedStreet!!, selectedHouseNumber.toInt()) },
+                    onClick = { actions.onValidateAddress(selectedZipCode!!, selectedStreet!!, selectedHouseNumber.toInt()) },
                     modifier = Modifier.padding(16.dp).align(Alignment.CenterHorizontally),
                     enabled = selectedZipCode != null && selectedStreet != null && selectedHouseNumber.isInt()
                 ) {
@@ -178,4 +175,11 @@ data class AddressCreationPrefill(
     val zipCodeNumber: String,
     val streetName: String,
     val houseNumber: String
+)
+
+data class SettingsAddressManipulationActions (
+    val onSearchZipCode: (String) -> Unit,
+    val onSearchStreet: (String, ZipCodeItem) -> Unit,
+    val onValidateAddress: (ZipCodeItem, Street, Int) -> Unit,
+    val onBackClicked: () -> Unit
 )

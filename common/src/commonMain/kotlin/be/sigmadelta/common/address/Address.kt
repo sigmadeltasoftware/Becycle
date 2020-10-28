@@ -12,4 +12,5 @@ data class Address(
     override val id: String = UUID.randomUUID().toString()
 ) : Metadata {
     val streetWithHouseNr = "${street.names.nl} $houseNumber"
+    val fullAddress = "$streetWithHouseNr | ${zipCodeItem.code} ${zipCodeItem.names.firstOrNull()?.nl}"
 }

@@ -1,6 +1,7 @@
 package be.sigmadelta.becycle.baseheaders
 
 import android.util.Log
+import androidx.core.os.bundleOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import be.sigmadelta.becycle.accesstoken.AccessTokenViewModel
@@ -33,12 +34,15 @@ class BaseHeadersViewModel(
                         )
                     )
                     Log.d(TAG, "Positive response: ${it.body}")
-                    analTracker.log(ANAL_TAG, "getBaseHeaders.success", it.body)
+                    analTracker.log(ANAL_TAG, bundleOf(
+                        Pair("getBaseHeaders_success_secret", it.body.secret),
+                        Pair("getBaseHeaders_success_consumer", it.body.consumer)
+                    ))
                 }
                 is Response.Error -> {
                     baseHeadersViewState.value = BaseHeadersViewState.Error(it.error?.message)
                     Log.d(TAG, "Error occurred: ${it.error}")
-                    analTracker.log(ANAL_TAG, "getBaseHeaders.error", it.error?.message)
+                    analTracker.log(ANAL_TAG, "getBaseHeaders_error", it.error?.message)
 
                 }
             }
@@ -51,7 +55,7 @@ class BaseHeadersViewModel(
     }
 }
 
-sealed class BaseHeadersViewState() {
+sealed class BaseHeadersViewState {
     object Empty: BaseHeadersViewState()
     object Loading: BaseHeadersViewState()
     data class Headers(val headers: List<Header>) : BaseHeadersViewState()

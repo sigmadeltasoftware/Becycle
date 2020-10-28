@@ -50,7 +50,7 @@ fun Home(
             }
         }
 
-        is ListViewState.Error, is ListViewState.Empty -> Text("Failed to retrieve addresses!") // TODO: Prettify
+        is ListViewState.Error -> Text("Failed to retrieve addresses!") // TODO: Prettify
     }
 }
 
