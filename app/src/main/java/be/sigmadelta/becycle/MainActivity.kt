@@ -228,8 +228,9 @@ fun Main(
                     MaterialDialog(ctx, BottomSheet()).show {
                         cornerRadius(16f)
                         title(text = "Disable Battery Optimisations")
-                        message(text =
-                        """
+                        message(
+                            text =
+                            """
                             Android will try to extend its battery life by letting the system go to sleep. This mode is called 'Doze' and might prevent the apps from acting when necessary such as in the case of firing a reminder notification. 
                             
                             To disable this, Becycle needs to be whitelisted by disabling battery optimizations. This will allow the app to send reminders even when the system is in Doze mode.
@@ -270,10 +271,12 @@ fun Main(
         Destination.SettingsAddressManipulation -> SettingsAddressManipulation(
             zipCodeItemsViewState,
             streetsViewState,
-            onSearchZipCode = addressViewModel::searchZipCode,
-            onSearchStreet = addressViewModel::searchStreets,
-            onValidateAddress = addressViewModel::validateAddress,
-            onBackClicked = { actions.pressOnBack() }
+            SettingsAddressManipulationActions(
+                onSearchZipCode = addressViewModel::searchZipCode,
+                onSearchStreet = addressViewModel::searchStreets,
+                onValidateAddress = addressViewModel::validateAddress,
+                onBackClicked = { actions.pressOnBack() }
+            )
         )
 
         is Destination.SettingsAddressEditRemoval -> {

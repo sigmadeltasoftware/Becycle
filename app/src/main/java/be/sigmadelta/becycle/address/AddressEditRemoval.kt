@@ -30,18 +30,20 @@ fun SettingsAddressEditRemoval(
                     SettingsAddressManipulation(
                         zipCodeItemsViewState = zipCodeItemViewState,
                         streetsViewState = streetsViewState,
-                        onSearchZipCode = onSearchZipCode,
-                        onSearchStreet = onSearchStreet,
-                        onValidateAddress = { zipCodeItem, street, houseNumber ->
-                            onAddressChanged(
-                                it.copy(
-                                    zipCodeItem = zipCodeItem,
-                                    street = street,
-                                    houseNumber = houseNumber
+                        SettingsAddressManipulationActions(
+                            onSearchZipCode = onSearchZipCode,
+                            onSearchStreet = onSearchStreet,
+                            onValidateAddress = { zipCodeItem, street, houseNumber ->
+                                onAddressChanged(
+                                    it.copy(
+                                        zipCodeItem = zipCodeItem,
+                                        street = street,
+                                        houseNumber = houseNumber
+                                    )
                                 )
-                            )
-                        },
-                        onBackClicked = onBackClicked,
+                            },
+                            onBackClicked = onBackClicked
+                        ),
                         "Edit Address",
                         it,
                         onAddressRemove = onAddressRemove

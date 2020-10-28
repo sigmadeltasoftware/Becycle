@@ -46,7 +46,7 @@ class AddressViewModel(
             createDefaultNotificationSettings(address)
         }
 
-        analTracker.log(ANAL_TAG, if (addressExists) "updateAddress" else "saveAddress", address)
+        analTracker.log(ANAL_TAG, if (addressExists) "updateAddress" else "saveAddress", address.fullAddress)
 
         loadSavedAddresses()
     }
@@ -66,7 +66,7 @@ class AddressViewModel(
 
     fun removeAddress(address: Address) = viewModelScope.launch {
         addressRepository.removeAddress(address)
-        analTracker.log(ANAL_TAG, "removeAddress", address)
+        analTracker.log(ANAL_TAG, "removeAddress", address.toString())
         loadSavedAddresses()
     }
 
@@ -79,11 +79,11 @@ class AddressViewModel(
 
     fun searchStreets(searchQuery: String, zipCodeItem: ZipCodeItem) = viewModelScope.launch {
         addressRepository.searchStreets(searchQuery, zipCodeItem).collect {
-            streetsViewState.value = it.toViewState()
-            analTracker.log(ANAL_TAG, "searchStreets", bundleOf(
-                Pair("searchQuery", searchQuery),
-                Pair("zipCodeItem", zipCodeItem)
+            analTracker.log(ANAL_TAG, bundleOf(
+                Pair("searchStreets_searchQuery", searchQuery),
+                Pair("searchStreets_zipCodeItem", zipCodeItem.toString())
             ))
+            streetsViewState.value = it.toViewState()
         }
     }
 
@@ -92,17 +92,20 @@ class AddressViewModel(
             validationViewState.value = when (it) {
                 is Response.Loading -> ValidationViewState.Loading
                 is Response.Success -> {
-                    analTracker.log(ANAL_TAG, "validateAddress", bundleOf(
-                        Pair("zipCodeItem", zipCodeItem),
-                        Pair("street", street),
-                        Pair("houseNumber", houseNumber)
+                    analTracker.log(ANAL_TAG, bundleOf(
+                        Pair("validateAddress_zipCodeItem", zipCodeItem.code),
+                        Pair("validateAddress_street", street.names.nl),
+                        Pair("validateAddress_houseNumber", houseNumber)
                     ))
                     ValidationViewState.Success(it.body)
                 }
-                is Response.Error -> when (it.error) {
-                    is ClientRequestException -> ValidationViewState.InvalidCombination
-                    is InvalidAddressException -> ValidationViewState.InvalidAddressSpecified
-                    else -> ValidationViewState.NetworkError
+                is Response.Error -> {
+                    analTracker.log(ANAL_TAG, "validateAddress_error", it.error?.localizedMessage)
+                    when (it.error) {
+                        is ClientRequestException -> ValidationViewState.InvalidCombination
+                        is InvalidAddressException -> ValidationViewState.InvalidAddressSpecified
+                        else -> ValidationViewState.NetworkError
+                    }
                 }
             }
         }
@@ -113,13 +116,16 @@ class AddressViewModel(
             validationViewState.value = when (it) {
                 is Response.Loading -> ValidationViewState.Loading
                 is Response.Success -> {
-                    analTracker.log(ANAL_TAG, "validateExistingAddress", address)
+                    analTracker.log(ANAL_TAG, "validateExistingAddress", address.toString())
                     ValidationViewState.Success(it.body)
                 }
-                is Response.Error -> when (it.error) {
-                    is ClientRequestException -> ValidationViewState.InvalidCombination
-                    is InvalidAddressException -> ValidationViewState.InvalidAddressSpecified
-                    else -> ValidationViewState.NetworkError
+                is Response.Error -> {
+                    analTracker.log(ANAL_TAG, "validateExistingAddress_error", it.error?.localizedMessage)
+                    when (it.error) {
+                        is ClientRequestException -> ValidationViewState.InvalidCombination
+                        is InvalidAddressException -> ValidationViewState.InvalidAddressSpecified
+                        else -> ValidationViewState.NetworkError
+                    }
                 }
             }
         }
@@ -129,7 +135,6 @@ class AddressViewModel(
         validationViewState.value = ValidationViewState.Empty
         zipCodeItemsViewState.value = ListViewState.Empty()
         streetsViewState.value = ListViewState.Empty()
-        addressesViewState.value = ListViewState.Empty()
         analTracker.log(ANAL_TAG, "resetAll", null)
     }
 
@@ -140,7 +145,7 @@ class AddressViewModel(
 
     private fun createDefaultNotificationSettings(address: Address) {
         notificationRepo.insertDefaultNotificationProps(address)
-        analTracker.log(ANAL_TAG, "createDefaultNotificationSettings", address)
+        analTracker.log(ANAL_TAG, "createDefaultNotificationSettings", address.fullAddress)
     }
 
     companion object {

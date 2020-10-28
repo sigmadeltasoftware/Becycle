@@ -25,14 +25,14 @@ class AccessTokenViewModel(
         accessTokenRepository.getAccessToken().collect {
             analTracker.log(
                 ANAL_TAG,
-                "getAccessToken.${when (it) {
+                "getAccessToken_${when (it) {
                     is Response.Success -> "success"
                     is Response.Error -> "error"
                     is Response.Loading -> "loading"
                 }}",
                 when(it){
                     is Response.Loading -> null
-                    is Response.Success -> it.body
+                    is Response.Success -> it.body.toString()
                     is Response.Error -> it.error?.localizedMessage
                 })
 
