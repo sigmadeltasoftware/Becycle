@@ -37,7 +37,6 @@ import be.sigmadelta.common.util.AuthorizationKeyExpiredException
 import be.sigmadelta.common.util.SessionStorage
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.bottomsheets.BottomSheet
-import com.google.firebase.analytics.FirebaseAnalytics
 import com.judemanutd.autostarter.AutoStartPermissionHelper
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.StateFlow
@@ -75,7 +74,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
                 }
             }
             addressViewModel.addressesViewState.observeForAutKeyErrors { accessTokenViewModel.getAccessToken() }
-            collectionsViewModel.collectionsViewState.observeForAutKeyErrors { accessTokenViewModel.getAccessToken() }
+//            collectionsViewModel.collectionsViewState.observeForAutKeyErrors { accessTokenViewModel.getAccessToken() } // TODO
         }
 
         setContent {
@@ -108,13 +107,17 @@ fun MainLayout(
 
     val actions = remember(nav) { Actions(nav) }
 
-    if (preferences.isFirstRun && nav.current != Destination.Settings && nav.current != Destination.SettingsAddressManipulation) {
+    if ((addressViewModel.addressesViewState.value as? ListViewState.Success)?.payload?.isNotEmpty() == true
+        && nav.current != Destination.Settings
+        && nav.current != Destination.SettingsAddressManipulation
+        && preferences.isFirstRun)
+    {
         MaterialDialog(ContextAmbient.current).show {
             cornerRadius(16f)
             title(text = "Battery Optimisations")
             message(text = "Due to Android's aggressive battery optimisations, notification reminders might not work on your device.\n\nWould you like disable the battery optimisations for this app to make sure the reminders are allowed to trigger?")
             icon(R.drawable.ic_notifications_on)
-            positiveButton(text = "Disable Battery Optimisations") {
+            positiveButton(text = "Go to Settings") {
                 actions.goTo(Destination.Settings)
                 preferences.isFirstRun = false
             }
@@ -196,7 +199,7 @@ fun Main(
 ) {
 
     val addresses by addressViewModel.addressesViewState.collectAsState()
-    val collections by collectionsViewModel.collectionsViewState.collectAsState()
+    val collectionOverview by collectionsViewModel.collectionsViewState.collectAsState()
     val zipCodeItemsViewState by addressViewModel.zipCodeItemsViewState.collectAsState()
     val streetsViewState by addressViewModel.streetsViewState.collectAsState()
     val validation by addressViewModel.validationViewState.collectAsState()
@@ -204,7 +207,7 @@ fun Main(
     when (nav.current) {
         Destination.Home -> Home(
             addresses,
-            collections,
+            collectionOverview,
             { actions.goTo(Destination.SettingsAddressManipulation) },
             { address -> collectionsViewModel.searchCollections(address) }
         )
@@ -275,6 +278,11 @@ fun Main(
                 onSearchZipCode = addressViewModel::searchZipCode,
                 onSearchStreet = addressViewModel::searchStreets,
                 onValidateAddress = addressViewModel::validateAddress,
+                onAddressRemove = {
+                    addressViewModel.removeAddress(it)
+                    collectionsViewModel.removeCollections(it)
+                    actions.pressOnBack()
+                },
                 onBackClicked = { actions.pressOnBack() }
             )
         )
@@ -287,9 +295,15 @@ fun Main(
                 streetsViewState,
                 addressViewModel::searchZipCode,
                 addressViewModel::searchStreets,
-                addressViewModel::validateExistingAddress,
+                {
+                    addressViewModel.validateExistingAddress(it)
+                    collectionsViewModel.removeCollections(it)
+                    collectionsViewModel.searchCollections(it)
+                },
                 {
                     addressViewModel.removeAddress(it)
+                    collectionsViewModel.removeCollections(it)
+                    collectionsViewModel.searchCollections(it)
                     actions.pressOnBack()
                 },
                 { actions.pressOnBack() }

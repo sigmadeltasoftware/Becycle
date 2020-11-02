@@ -113,16 +113,14 @@ fun SettingsAddressOverviewItem(
 
 @Composable
 fun AddAddressItem(onAddAddressClicked: () -> Unit) {
-    Row {
+    Button(
+        onClick = onAddAddressClicked,
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
+    ) {
         Spacer(modifier = Modifier.weight(1f))
-        Button(
-            onClick = onAddAddressClicked,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(asset = vectorResource(id = R.drawable.ic_add))
-                Text(text = "Add Address", modifier = Modifier.padding(start = 16.dp))
-            }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(asset = vectorResource(id = R.drawable.ic_add))
+            Text(text = "Add Address", modifier = Modifier.padding(start = 16.dp))
         }
         Spacer(modifier = Modifier.weight(1f))
     }

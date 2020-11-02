@@ -42,11 +42,11 @@ fun SettingsAddressEditRemoval(
                                     )
                                 )
                             },
+                            onAddressRemove = onAddressRemove,
                             onBackClicked = onBackClicked
                         ),
                         "Edit Address",
                         it,
-                        onAddressRemove = onAddressRemove
                     )
                 }
             }

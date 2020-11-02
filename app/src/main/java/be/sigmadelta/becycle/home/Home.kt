@@ -9,14 +9,16 @@ import androidx.compose.ui.unit.dp
 import be.sigmadelta.becycle.address.AddressSwitcher
 import be.sigmadelta.becycle.collections.Collections
 import be.sigmadelta.becycle.collections.EmptyCollections
+import be.sigmadelta.becycle.common.ui.theme.bottomNavigationMargin
 import be.sigmadelta.becycle.common.ui.util.ListViewState
+import be.sigmadelta.becycle.common.ui.util.ViewState
 import be.sigmadelta.common.address.Address
-import be.sigmadelta.common.collections.Collection
+import be.sigmadelta.common.collections.CollectionOverview
 
 @Composable
 fun Home(
     addresses: ListViewState<Address>,
-    collections: ListViewState<Collection>,
+    collectionOverview: ViewState<CollectionOverview>,
     onGoToAddressInput: () -> Unit,
     onLoadCollections: (Address) -> Unit
 ) {
@@ -39,7 +41,7 @@ fun Home(
                     }
                 )
                 HomeLayout(
-                    collections,
+                    collectionOverview,
                     addresses.payload[selectedTabIx]
                 )
             }
@@ -56,16 +58,16 @@ fun Home(
 
 @Composable
 fun HomeLayout(
-    collections: ListViewState<Collection>,
+    collectionOverview: ViewState<CollectionOverview>,
     address: Address
 ) {
 
-    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-        when (collections) {
-            is ListViewState.Empty -> EmptyCollections(address)
-            is ListViewState.Loading -> Unit // TODO
-            is ListViewState.Success -> Collections(collections = collections.payload)
-            is ListViewState.Error -> Unit // TODO
+    Column(modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = bottomNavigationMargin + 8.dp)) {
+        when (collectionOverview) {
+            is ViewState.Empty -> EmptyCollections(address)
+            is ViewState.Loading -> Unit // TODO
+            is ViewState.Success -> Collections(collectionOverview = collectionOverview.payload)
+            is ViewState.Error -> Unit // TODO
         }
     }
 }
