@@ -29,7 +29,7 @@ fun Collections(collectionOverview: CollectionOverview) {
             title = "Today",
             date = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         )
-        collectionOverview.upcoming?.let {
+        collectionOverview.today?.let {
             LazyRowFor(items = it) { collection ->
                 CollectionItem(collection)
             }
