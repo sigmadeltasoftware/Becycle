@@ -12,6 +12,7 @@ private val redPinkish = Color(0xFFF6E0E1)
 private val greyFaded = Color(0xFFA0A0A0)
 private val blackish = Color(0xFF3E3E3E)
 private val white = Color(0xFFFFFFFF)
+private val whiteish = Color(0xFFF0F0F0)
 
 val primaryAccent = greenFluo
 val variantAccent = pinkAccent
@@ -22,4 +23,5 @@ val errorSecondaryColor = redPinkish
 val textPrimary = blackish
 val textSecondary = greyFaded
 val unselectedColor = greyFaded
+val unselectedBackgroundColor = whiteish
 val primaryBackgroundColor = white

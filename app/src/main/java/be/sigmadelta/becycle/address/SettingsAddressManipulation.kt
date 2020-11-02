@@ -38,8 +38,7 @@ fun SettingsAddressManipulation(
     actions: SettingsAddressManipulationActions,
     appBarTitle: String? = null,
     existingAddress: Address? = null,
-    onAddressRemove: ((Address) -> Unit)? = null
-    ) {
+) {
     var selectedZipCode by remember { mutableStateOf<ZipCodeItem?>(null) }
     var isInvalidZipCodeInput by remember { mutableStateOf(false) }
     var selectedStreet by remember { mutableStateOf<Street?>(null) }
@@ -55,7 +54,8 @@ fun SettingsAddressManipulation(
                 navigationIcon = {
                     Icon(
                         asset = vectorResource(id = R.drawable.ic_back),
-                        modifier = Modifier.clickable(onClick = actions.onBackClicked).padding(start = 8.dp)
+                        modifier = Modifier.clickable(onClick = actions.onBackClicked)
+                            .padding(start = 8.dp)
                     )
                 }
             )
@@ -118,35 +118,44 @@ fun SettingsAddressManipulation(
                     isErrorValue = !selectedHouseNumber.isInt()
                 )
 
-                Button(
-                    onClick = { actions.onValidateAddress(selectedZipCode!!, selectedStreet!!, selectedHouseNumber.toInt()) },
-                    modifier = Modifier.padding(16.dp).align(Alignment.CenterHorizontally),
-                    enabled = selectedZipCode != null && selectedStreet != null && selectedHouseNumber.isInt()
-                ) {
-                    Text("Save Address")
-                }
-
-                onAddressRemove?.let {
-                    val ctx = ContextAmbient.current
+                Column(Modifier.padding(horizontal = 24.dp)) {
                     Button(
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
-                            .padding(vertical = 16.dp),
                         onClick = {
-                            MaterialDialog(ctx).show {
-                                cornerRadius(16f)
-                                title(text = "Remove Address?")
-                                message(text = "Are you sure you want to remove this address?")
-                                positiveButton(text = "Remove") {
-                                    existingAddress?.let {
-                                        onAddressRemove(it)
-                                    }
-                                }
-                                negativeButton(text = "Cancel") { it.dismiss() }
-                            }
+                            actions.onValidateAddress(
+                                selectedZipCode!!,
+                                selectedStreet!!,
+                                selectedHouseNumber.toInt()
+                            )
                         },
-                        backgroundColor = errorColor
+                        modifier = Modifier.fillMaxWidth()
+                            .padding(vertical = 8.dp)
+                            .align(Alignment.CenterHorizontally),
+                        enabled = selectedZipCode != null && selectedStreet != null && selectedHouseNumber.isInt()
                     ) {
-                        Text(text = "Remove Address")
+                        Text("Save Address")
+                    }
+
+                    actions.onAddressRemove?.let {
+                        val ctx = ContextAmbient.current
+                        Button(
+                            modifier = Modifier.align(Alignment.CenterHorizontally).fillMaxWidth(),
+                            onClick = {
+                                MaterialDialog(ctx).show {
+                                    cornerRadius(16f)
+                                    title(text = "Remove Address?")
+                                    message(text = "Are you sure you want to remove this address?")
+                                    positiveButton(text = "Remove") {
+                                        existingAddress?.let { address ->
+                                            it(address)
+                                        }
+                                    }
+                                    negativeButton(text = "Cancel") { it.dismiss() }
+                                }
+                            },
+                            backgroundColor = errorColor
+                        ) {
+                            Text(text = "Remove Address")
+                        }
                     }
                 }
             }
@@ -177,9 +186,10 @@ data class AddressCreationPrefill(
     val houseNumber: String
 )
 
-data class SettingsAddressManipulationActions (
+data class SettingsAddressManipulationActions(
     val onSearchZipCode: (String) -> Unit,
     val onSearchStreet: (String, ZipCodeItem) -> Unit,
     val onValidateAddress: (ZipCodeItem, Street, Int) -> Unit,
+    val onAddressRemove: ((Address) -> Unit)?,
     val onBackClicked: () -> Unit
 )

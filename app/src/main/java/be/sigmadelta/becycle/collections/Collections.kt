@@ -1,69 +1,133 @@
 package be.sigmadelta.becycle.collections
 
 import android.widget.ImageView
-import androidx.compose.foundation.Icon
+import androidx.compose.foundation.ScrollableColumn
 import androidx.compose.foundation.Text
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumnFor
+import androidx.compose.foundation.lazy.LazyRowFor
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
-import androidx.compose.material.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.imageResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import be.sigmadelta.becycle.R
-import be.sigmadelta.becycle.common.ui.theme.bottomNavigationMargin
-import be.sigmadelta.becycle.common.ui.theme.primaryBackgroundColor
-import be.sigmadelta.becycle.common.ui.theme.textPrimary
+import be.sigmadelta.becycle.common.ui.theme.*
 import be.sigmadelta.becycle.common.ui.util.iconRef
 import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.collections.Collection
-import java.text.SimpleDateFormat
+import be.sigmadelta.common.collections.CollectionOverview
+import kotlinx.datetime.*
 
 @Composable
-fun Collections(collections: List<Collection>) {
-    // TODO: Check why bottom padding is necessary for BottomNavigation
+fun Collections(collectionOverview: CollectionOverview) {
 
-    val collectionViewItems = mutableListOf<@Composable () -> Unit>(
-        {
-            Text(
-                text = "Upcoming Collections",
-                fontSize = 20.sp,
-                color = textPrimary,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(top = 16.dp, start = 8.dp, bottom = 16.dp)
-            )
-        }
-    ).apply {
-        addAll(collections
-            .sortedBy { it.timestamp }
-            .map { { CollectionItem(collection = it) } }
+    ScrollableColumn {
+        CollectionTitle(
+            title = "Today",
+            date = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         )
-    }.apply {
-        add {
-            Divider(color = primaryBackgroundColor, modifier = Modifier.padding(bottom = 12.dp))
-        }
-    }
+        collectionOverview.today?.let {
+            LazyRowFor(items = it) { collection ->
+                CollectionItem(collection)
+            }
+        } ?: NoCollectionsSubtitle()
 
-    LazyColumnFor(
-        items = collectionViewItems,
-        modifier = Modifier.fillMaxSize().padding(bottom = bottomNavigationMargin)
-    ) {
-        it()
+        CollectionTitle(
+            title = "Tomorrow",
+            date = (Clock.System.now()
+                .plus(DateTimePeriod(days = 1), TimeZone.currentSystemDefault())).toLocalDateTime(
+                    TimeZone.currentSystemDefault()
+                )
+        )
+        collectionOverview.tomorrow?.let {
+            LazyRowFor(items = it) { collection ->
+                CollectionItem(collection = collection, true)
+            }
+        } ?: NoCollectionsSubtitle()
+
+        CollectionTitle(title = "Upcoming Collections")
+        collectionOverview.upcoming?.let {
+            it.forEach { collection ->
+                UpcomingCollectionItem(collection = collection)
+            }
+        } ?: NoCollectionsSubtitle()
     }
 }
 
-private val fullFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
-private val compactFormat = SimpleDateFormat("dd-MM-yyyy")
+@Composable
+fun CollectionTitle(
+    title: String,
+    date: LocalDateTime? = null
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = title,
+            fontSize = 24.sp,
+            color = textPrimary,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(top = 16.dp, start = 8.dp, bottom = 16.dp)
+        )
+        Spacer(modifier = Modifier.weight(1f))
+        date?.let {
+            Text(
+                text = "${it.dayOfMonth}-${it.monthNumber}-${it.year}",
+                fontSize = 12.sp,
+                color = textSecondary
+            )
+        }
+    }
+}
 
 @Composable
-fun CollectionItem(collection: Collection) {
+fun NoCollectionsSubtitle() {
+    Text(
+        text = "No scheduled collections",
+        fontSize = 18.sp,
+        color = textSecondary,
+        modifier = Modifier.padding(start = 8.dp),
+        fontWeight = FontWeight.SemiBold
+    )
+}
+
+@Composable
+fun CollectionItem(collection: Collection, isTomorrow: Boolean = false) {
+    Card(
+        elevation = 12.dp,
+        modifier = Modifier.width(180.dp).padding(6.dp),
+        shape = RoundedCornerShape(8.dp),
+        backgroundColor = if (isTomorrow) secondaryAccent else unselectedBackgroundColor
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                collection.fraction.name.nl.capitalize(),
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                color = if (isTomorrow) primaryAccent else textPrimary,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+
+            AndroidView(viewBlock = {
+                ImageView(it).apply {
+                    setImageDrawable(it.getDrawable(collection.collectionType.iconRef()))
+                }
+            }, modifier = Modifier.width(48.dp),
+                update = {
+                    it.setImageDrawable(it.context.getDrawable(collection.collectionType.iconRef()))
+                })
+        }
+    }
+}
+
+@Composable
+fun UpcomingCollectionItem(collection: Collection) {
     Card(
         elevation = 12.dp,
         modifier = Modifier.fillMaxWidth().padding(6.dp),
@@ -71,38 +135,41 @@ fun CollectionItem(collection: Collection) {
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(horizontal = 8.dp)
+            modifier = Modifier.padding(8.dp)
         ) {
             AndroidView(viewBlock = {
                 ImageView(it).apply {
                     setImageDrawable(it.getDrawable(collection.collectionType.iconRef()))
                 }
-            }, modifier = Modifier.width(24.dp),
-            update = {
-                it.setImageDrawable(it.context.getDrawable(collection.collectionType.iconRef()))
-            })
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(16.dp)
-            ) {
-                Text(collection.fraction.name.nl.capitalize(), fontWeight = FontWeight.Bold)
+            }, modifier = Modifier.width(32.dp),
+                update = {
+                    it.setImageDrawable(it.context.getDrawable(collection.collectionType.iconRef()))
+                }
+            )
+            Text(
+                collection.fraction.name.nl.capitalize(),
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(start = 16.dp),
+                fontSize = 18.sp
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            collection.timestamp.toInstant().toLocalDateTime(TimeZone.currentSystemDefault()).let {
                 Text(
-                    "CollectionId: ${collection.id}\nAddressId: ${collection.addressId}",
-                    fontSize = 10.sp
+                    text = "${it.dayOfMonth}-${it.monthNumber}-${it.year}",
+                    fontSize = 12.sp,
+                    color = textSecondary
                 )
-                val timeStamp = fullFormat.parse(collection.timestamp.substringBefore('.')).time
-                Text(compactFormat.format(timeStamp), fontSize = 10.sp)
             }
         }
     }
 }
 
 @Composable
-fun EmptyCollections(address: Address) {
+fun EmptyCollections(address: Address) { // TODO
     Card(
         elevation = 12.dp,
         modifier = Modifier.fillMaxWidth().padding(12.dp),
-        shape = RoundedCornerShape(8.dp)
+        shape = RoundedCornerShape(8.dp),
     ) {
         Text(
             "No collections available for ${address.street.names.nl} ${address.houseNumber}.",
