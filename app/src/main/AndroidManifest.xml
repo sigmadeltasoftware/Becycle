@@ -19,7 +19,7 @@
 
         <activity
             android:name=".SplashScreenActivity"
-            android:theme="@style/Theme.Becycle.NoActionBar">
+            android:theme="@style/Theme.Becycle.SplashScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

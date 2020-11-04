@@ -3,9 +3,7 @@ package be.sigmadelta.common.collections
 import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.util.*
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.datetime.*
-import kotlinx.serialization.Serializable
 import org.kodein.db.DB
 import org.kodein.db.deleteAll
 import org.kodein.db.find
@@ -15,15 +13,10 @@ class CollectionsRepository(private val db: DB, private val collectionsApi: Coll
 
     suspend fun searchUpcomingCollections(
         address: Address,
-        referenceDate: Instant = Clock.System.now()
+        referenceDate: Instant = yesterday()
     ): Flow<Response<CollectionOverview>> = networkBoundResource(
         shouldFetch = { overview ->
             (overview.upcoming?.filter {
-                println(
-                    "it: ${
-                        it.timestamp.toInstant().toEpochMilliseconds()
-                    } > referenceDate: ${referenceDate.toEpochMilliseconds()}"
-                )
                 it.timestamp.toInstant().toEpochMilliseconds() > referenceDate.toEpochMilliseconds()
             }?.size ?: 0 +
                     (overview.today?.size ?: 0) +
@@ -35,9 +28,16 @@ class CollectionsRepository(private val db: DB, private val collectionsApi: Coll
         query = {
             val list = db.find<Collection>().all()
                 .useModels { it.toList() }
-                .filter { it.timestamp.toInstant() > referenceDate }
+                .apply {
+                    println("searchUpcomingCollections - nonfiltered query = ${this.map { it.timestamp }}")
+                }
+                .filter { it.timestamp.toInstant() >= referenceDate }.apply {
+                    this.forEach {
+                        println("timestamp >= referencedate ? ${it.timestamp} --> ${it.timestamp.toInstant() >= referenceDate}")
+                    }
+                }
                 .filter { it.addressId == address.id }.apply {
-                    println("searchUpcomingCollections - query = $this")
+                    println("searchUpcomingCollections - query = ${this.map { it.timestamp }}")
                 }
                 .sortedBy { it.timestamp.toInstant() }
                 .apply {
@@ -53,7 +53,12 @@ class CollectionsRepository(private val db: DB, private val collectionsApi: Coll
                     .isTomorrow()
             }
             val todayTomorrow = today.toMutableList().apply { addAll(tomorrow) }
-            val upcoming = list.toMutableList().apply { removeAll(todayTomorrow) }
+            val upcoming = list.toMutableList().apply { removeAll(todayTomorrow) }.subList(0, 5)
+            println("""
+                today: $today
+                tomorrow: $tomorrow
+                upcoming: $upcoming
+            """.trimIndent())
             CollectionOverview(
                 today.nullOnEmpty(),
                 tomorrow.nullOnEmpty(),

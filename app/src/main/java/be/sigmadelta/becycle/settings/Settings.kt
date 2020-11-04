@@ -16,7 +16,6 @@ import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import be.sigmadelta.becycle.BuildConfig
 import be.sigmadelta.becycle.R
 import be.sigmadelta.becycle.common.Destination
@@ -97,13 +96,13 @@ fun SettingsMenuItem(
         Column {
             Text(
                 title,
-                fontSize = 16.sp,
+                fontSize = regularFontSize,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(top = 16.dp, start = 16.dp)
             )
             Text(
                 subtitle,
-                fontSize = 12.sp,
+                fontSize = subTextFontSize,
                 modifier = Modifier.padding(bottom = 16.dp, start = 16.dp)
             )
         }
@@ -196,13 +195,13 @@ fun SettingsFooter(
     modifier = Modifier.padding(bottom = 8.dp)) {
         Text(
             text = "Version: V${BuildConfig.VERSION_NAME}",
-            fontSize = 10.sp,
+            fontSize = minimalFontSize,
             fontWeight = FontWeight.Bold,
             color = textPrimary
         )
         Text(
             text = "Created by",
-            fontSize = 10.sp,
+            fontSize = minimalFontSize,
             fontWeight = FontWeight.Bold,
             color = textSecondary
         )

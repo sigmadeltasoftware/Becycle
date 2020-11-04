@@ -278,11 +278,7 @@ fun Main(
                 onSearchZipCode = addressViewModel::searchZipCode,
                 onSearchStreet = addressViewModel::searchStreets,
                 onValidateAddress = addressViewModel::validateAddress,
-                onAddressRemove = {
-                    addressViewModel.removeAddress(it)
-                    collectionsViewModel.removeCollections(it)
-                    actions.pressOnBack()
-                },
+                onAddressRemove = null,
                 onBackClicked = { actions.pressOnBack() }
             )
         )

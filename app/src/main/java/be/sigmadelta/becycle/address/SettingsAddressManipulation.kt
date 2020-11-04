@@ -19,9 +19,10 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import be.sigmadelta.becycle.R
 import be.sigmadelta.becycle.common.ui.theme.errorColor
+import be.sigmadelta.becycle.common.ui.theme.regularFontSize
+import be.sigmadelta.becycle.common.ui.theme.subTextFontSize
 import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.becycle.common.ui.widgets.DropDownTextField
 import be.sigmadelta.common.address.Address
@@ -42,7 +43,7 @@ fun SettingsAddressManipulation(
     var selectedZipCode by remember { mutableStateOf<ZipCodeItem?>(null) }
     var isInvalidZipCodeInput by remember { mutableStateOf(false) }
     var selectedStreet by remember { mutableStateOf<Street?>(null) }
-    var selectedHouseNumber by remember { mutableStateOf<String>("") }
+    var selectedHouseNumber by remember { mutableStateOf("") }
 
     val streetFocusRequester = FocusRequester()
     val houseNumberFocusRequester = FocusRequester()
@@ -128,7 +129,7 @@ fun SettingsAddressManipulation(
                             )
                         },
                         modifier = Modifier.fillMaxWidth()
-                            .padding(vertical = 8.dp)
+                            .padding(vertical = 16.dp)
                             .align(Alignment.CenterHorizontally),
                         enabled = selectedZipCode != null && selectedStreet != null && selectedHouseNumber.isInt()
                     ) {
@@ -165,18 +166,22 @@ fun SettingsAddressManipulation(
 
 @Composable
 fun ZipCodeItemLayout(zipCodeItem: ZipCodeItem) {
-    Text(zipCodeItem.code, fontWeight = FontWeight.Bold)
+    Text(
+        zipCodeItem.code,
+        fontWeight = FontWeight.Bold,
+        fontSize = regularFontSize
+    )
     Text(
         zipCodeItem.names.firstOrNull()?.nl + if (zipCodeItem.city.name == zipCodeItem.names.firstOrNull()?.nl) "" else " (${zipCodeItem.city.name})",
-        fontSize = 10.sp,
+        fontSize = subTextFontSize,
     )
     Divider(modifier = Modifier.fillMaxWidth())
 }
 
 @Composable
 fun StreetLayout(street: Street) {
-    Text(street.names.nl, fontWeight = FontWeight.Bold)
-    Text(street.id, fontSize = 10.sp)
+    Text(street.names.nl, fontWeight = FontWeight.Bold, fontSize = regularFontSize)
+    Text(street.id, fontSize = subTextFontSize)
     Divider(modifier = Modifier.fillMaxWidth())
 }
 

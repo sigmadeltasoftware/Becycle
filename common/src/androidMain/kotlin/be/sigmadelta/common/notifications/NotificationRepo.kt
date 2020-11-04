@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.graphics.BitmapFactory
 import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
@@ -17,7 +18,6 @@ import be.sigmadelta.common.collections.CollectionType
 import be.sigmadelta.common.collections.CollectionsRepository
 import be.sigmadelta.common.db.appCtx
 import be.sigmadelta.common.util.Response
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.datetime.*
 import org.kodein.db.DB
@@ -115,12 +115,14 @@ actual class NotificationRepo(
                                 response.body.tomorrow?.filterByEnabledNotifications(requireNotNull(props))
                                     ?.forEach {
 
-                                        // if (now is later than notification time) {
                                         val builder =
                                             NotificationCompat.Builder(appCtx, notif_chan_id)
-                                                .setContentTitle("You have a collection tomorrow for ${it.fraction.logo.toCollectionType().name}")
-                                                .setSmallIcon(R.drawable.notification_icon_background)
+                                                .setContentTitle("Collection planned")
+                                                .setSmallIcon(preferences.androidNotificationIconRef)
                                                 .setPriority(NotificationCompat.PRIORITY_HIGH)
+                                                .setStyle(NotificationCompat.BigTextStyle()
+                                                    .setBigContentTitle("Collection for ${addr.fullAddress}")
+                                                    .bigText("You have a ${it.fraction.name.nl} collection tomorrow for ${addr.fullAddress}"))
 
                                         with(NotificationManagerCompat.from(appCtx)) {
                                             // notificationId is a unique int for each notification that you must define
