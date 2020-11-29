@@ -5,6 +5,7 @@ import be.sigmadelta.becycle.address.AddressViewModel
 import be.sigmadelta.becycle.accesstoken.AccessTokenViewModel
 import be.sigmadelta.becycle.collections.CollectionsViewModel
 import be.sigmadelta.becycle.common.analytics.AnalyticsTracker
+import be.sigmadelta.becycle.notification.NotificationViewModel
 import be.sigmadelta.common.Preferences
 import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.db.getApplicationFilesDirectoryPath
@@ -48,6 +49,7 @@ val coreModule = module {
     single { Preferences() }
     single { NotificationRepo(androidContext(), get()) }
     single { AnalyticsTracker(FirebaseAnalytics.getInstance(androidContext())) }
+    viewModel { NotificationViewModel(get(), get()) }
 }
 
 val sessionStorage = module {

@@ -29,6 +29,7 @@ import be.sigmadelta.becycle.common.ui.util.ViewState
 import be.sigmadelta.becycle.common.ui.widgets.BecycleProgressIndicator
 import be.sigmadelta.becycle.common.util.PowerUtil
 import be.sigmadelta.becycle.home.Home
+import be.sigmadelta.becycle.notification.NotificationViewModel
 import be.sigmadelta.becycle.notification.SettingsNotifications
 import be.sigmadelta.becycle.settings.Settings
 import be.sigmadelta.common.Preferences
@@ -54,6 +55,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     private val notificationRepo: NotificationRepo by inject()
     private val addressViewModel: AddressViewModel by viewModel()
     private val collectionsViewModel: CollectionsViewModel by viewModel()
+    private val notificationViewModel: NotificationViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,6 +84,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
                 MainLayout(
                     addressViewModel,
                     collectionsViewModel,
+                    notificationViewModel,
                     preferences,
                     onBackPressedDispatcher
                 )
@@ -89,6 +92,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         }
 
         notificationRepo.scheduleWorker()
+        notificationViewModel.loadNotificationProps()
     }
 }
 
@@ -97,6 +101,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 fun MainLayout(
     addressViewModel: AddressViewModel,
     collectionsViewModel: CollectionsViewModel,
+    notificationViewModel: NotificationViewModel,
     preferences: Preferences,
     backPressedDispatcher: OnBackPressedDispatcher
 ) {
@@ -110,8 +115,8 @@ fun MainLayout(
     if ((addressViewModel.addressesViewState.value as? ListViewState.Success)?.payload?.isNotEmpty() == true
         && nav.current != Destination.Settings
         && nav.current != Destination.SettingsAddressManipulation
-        && preferences.isFirstRun)
-    {
+        && preferences.isFirstRun
+    ) {
         MaterialDialog(ContextAmbient.current).show {
             cornerRadius(16f)
             title(text = "Battery Optimisations")
@@ -140,7 +145,8 @@ fun MainLayout(
                         actions,
                         preferences,
                         addressViewModel,
-                        collectionsViewModel
+                        collectionsViewModel,
+                        notificationViewModel
                     )
                 },
                 bottomBar = {
@@ -195,7 +201,8 @@ fun Main(
     actions: Actions,
     preferences: Preferences,
     addressViewModel: AddressViewModel,
-    collectionsViewModel: CollectionsViewModel
+    collectionsViewModel: CollectionsViewModel,
+    notificationViewModel: NotificationViewModel
 ) {
 
     val addresses by addressViewModel.addressesViewState.collectAsState()
@@ -203,6 +210,7 @@ fun Main(
     val zipCodeItemsViewState by addressViewModel.zipCodeItemsViewState.collectAsState()
     val streetsViewState by addressViewModel.streetsViewState.collectAsState()
     val validation by addressViewModel.validationViewState.collectAsState()
+    val notificationProps by notificationViewModel.notificationPropsViewState.collectAsState()
 
     when (nav.current) {
         Destination.Home -> Home(
@@ -259,9 +267,14 @@ fun Main(
         }
 
 
-        Destination.SettingsNotifications -> SettingsNotifications(addresses) {
-            actions.goTo(Destination.SettingsAddressManipulation)
-        }
+        Destination.SettingsNotifications -> SettingsNotifications(
+            addresses,
+            notificationProps,
+            {
+                actions.goTo(Destination.SettingsAddressManipulation)
+            },
+            notificationViewModel::setTomorrowAlarmTime
+        )
 
 
         Destination.SettingsAddresses -> SettingsAddressOverview(

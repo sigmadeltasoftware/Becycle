@@ -14,7 +14,8 @@
     </style>
 
     <style name="Theme.Becycle.SplashScreen" parent="Theme.Becycle.NoActionBar">
-        <item name="background">@drawable/splash</item>
+        <item name="android:windowBackground">@drawable/splash_window_bg</item>
+        <item name="background">@drawable/splash_window_bg</item>
     </style>
 
     <style name="timePickerTheme" parent="@style/ThemeOverlay.MaterialComponents.Dialog">

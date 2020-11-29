@@ -27,7 +27,4 @@ class Preferences {
     // - Make notification persistent
     // - Snooze notification from within drawer itself (5min - 1h)
     // - Same day/day before
-    fun get() {
-
-    }
 }

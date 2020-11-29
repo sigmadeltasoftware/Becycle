@@ -4,10 +4,7 @@ import android.app.TimePickerDialog
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Icon
 import androidx.compose.foundation.Text
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,67 +12,92 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ContextAmbient
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.work.WorkManager
 import be.sigmadelta.becycle.R
 import be.sigmadelta.becycle.address.AddressSwitcher
+import be.sigmadelta.becycle.common.ui.theme.*
 import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.common.address.Address
-import be.sigmadelta.common.notifications.NotificationRepo
+import be.sigmadelta.common.notifications.NotificationProps
 import be.sigmadelta.common.util.addLeadingZeroBelow10
 
 @Composable
 fun SettingsNotifications(
     addresses: ListViewState<Address>,
-    onGoToAddressInput: () -> Unit
+    notificationProps: ListViewState<NotificationProps>,
+    onGoToAddressInput: () -> Unit,
+    onTomorrowAlarmTimeSelected: (addressId: String, alarmTime: String) -> Unit
 ) {
     var selectedTabIx by remember { mutableStateOf(0) }
 
     Column {
         AddressSwitcher(selectedTabIx, addresses, onGoToAddressInput) { ix -> selectedTabIx = ix }
 
+        Text(
+            text = "Schedule notifications",
+            modifier = Modifier.padding(start = 16.dp, top = 16.dp),
+            fontSize = titleFontSize,
+            color = textPrimary,
+            fontWeight = FontWeight.Bold
+        )
         Crossfade(selectedTabIx) { newIx ->
-            (addresses as? ListViewState.Success)?.let {
-                if (it.payload.size > newIx) {
-                    NotificationSettings(address = it.payload[newIx])
+            (addresses as? ListViewState.Success)?.payload?.let { addresses ->
+                if (addresses.size > newIx) {
+                    (notificationProps as? ListViewState.Success)?.payload?.let { props ->
+                        props.firstOrNull { it.addressId == addresses[newIx].id }?.let {
+                            NotificationSettings(it) { alarmTime ->
+                                onTomorrowAlarmTimeSelected(addresses[newIx].id, alarmTime)
+                            }
+                        }
+                    }
                 }
             }
         }
-
-        val notifWorker = WorkManager.getInstance(ContextAmbient.current)
-            .getWorkInfosByTag(NotificationRepo.WORK_NAME)
-        Text(text = "NotifWorker is cancelled: ${notifWorker.isCancelled}")
-        Text(text = "NotifWorker is done: ${notifWorker.isDone}")
     }
 }
 
 @Composable
-fun NotificationSettings(address: Address) {
-    var notificationTime by remember { mutableStateOf("07:00") }
+fun NotificationSettings(
+    notificationProps: NotificationProps,
+    onTomorrowAlarmTimeSelected: (String) -> Unit
+) {
+    var notificationTimeToday by remember { mutableStateOf(notificationProps.genericTodayAlarmTime) }
+    var notificationTimeTomorrow by remember { mutableStateOf(notificationProps.genericTomorrowAlarmTime) }
     val ctx = ContextAmbient.current
 
-    Text("Enable notifications for")
     Row(modifier = Modifier.padding(16.dp)) {
-        Text(
-            text = "A day up front:",
-            modifier = Modifier.align(alignment = Alignment.CenterVertically)
-        )
+        Column(modifier = Modifier.align(alignment = Alignment.CenterVertically)) {
+            Text(
+                text = "Tomorrow:",
+                fontSize = regularFontSize,
+                fontWeight = FontWeight.Bold,
+                color = textPrimary
+            )
+            Text(
+                text = "Notification for tomorrow's collection",
+                fontSize = subTextFontSize,
+                color = textSecondary,
+                modifier = Modifier.width(240.dp)
+            )
+        }
         Spacer(modifier = Modifier.weight(1f))
         Button(onClick = {
             TimePickerDialog(
                 ctx,
                 R.style.timePickerTheme,
                 { _, hr, min ->
-                    notificationTime = "${addLeadingZeroBelow10(hr)}:${addLeadingZeroBelow10(min)}"
+                    notificationTimeTomorrow = "${addLeadingZeroBelow10(hr)}:${addLeadingZeroBelow10(min)}"
+                    onTomorrowAlarmTimeSelected(notificationTimeTomorrow)
                 },
-                notificationTime.substringBefore(":").toInt(),
-                notificationTime.substringAfter(":").toInt(),
+                notificationTimeTomorrow.substringBefore(":").toInt(),
+                notificationTimeTomorrow.substringAfter(":").toInt(),
                 true
             ).show()
-        }, modifier = Modifier.padding(16.dp).align(alignment = Alignment.CenterVertically)) {
+        }, modifier = Modifier.align(alignment = Alignment.CenterVertically)) {
             Row {
                 Icon(vectorResource(id = R.drawable.ic_notification))
-                Text(text = notificationTime, color = Color.White)
+                Text(text = notificationTimeTomorrow, color = Color.White, fontWeight = FontWeight.SemiBold)
             }
         }
     }

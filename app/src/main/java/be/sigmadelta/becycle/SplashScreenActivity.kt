@@ -1,19 +1,12 @@
 package be.sigmadelta.becycle
 
 import android.content.Intent
-import android.graphics.drawable.Animatable2
-import android.graphics.drawable.AnimatedVectorDrawable
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
-import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.Text
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,23 +15,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.VerticalGradient
 import androidx.compose.ui.platform.ContextAmbient
 import androidx.compose.ui.platform.setContent
-import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import be.sigmadelta.becycle.common.ui.util.ViewState
 import be.sigmadelta.becycle.accesstoken.AccessTokenViewModel
 import be.sigmadelta.becycle.baseheaders.BaseHeadersViewModel
 import be.sigmadelta.becycle.baseheaders.BaseHeadersViewState
 import be.sigmadelta.becycle.common.ui.theme.*
+import be.sigmadelta.becycle.common.ui.util.ViewState
 import be.sigmadelta.becycle.common.ui.widgets.BecycleProgressIndicator
 import be.sigmadelta.common.Preferences
 import be.sigmadelta.common.util.SessionStorage
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -55,21 +44,19 @@ class SplashScreenActivity : AppCompatActivity(), CoroutineScope by MainScope() 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContent {
+            BecycleTheme {
+                remember { error }
+                SplashScreenLayout()
+                if (error != null) {
+                    error?.let { ErrorLayout(msg = it) }
+                }
+            }
+        }
         launch {
             baseHeadersViewModel.baseHeadersViewState.collect { viewState ->
                 when (viewState) {
                     is BaseHeadersViewState.Empty -> {
-                        setContent {
-                            BecycleTheme {
-                                remember { error }
-
-                                if (error == null) {
-                                    SplashScreenLayout()
-                                } else {
-                                    error?.let { ErrorLayout(msg = it) }
-                                }
-                            }
-                        }
                     }
                     is BaseHeadersViewState.Error -> error = viewState.msg ?: "An error occurred!"
                     is BaseHeadersViewState.Headers -> {
@@ -86,8 +73,11 @@ class SplashScreenActivity : AppCompatActivity(), CoroutineScope by MainScope() 
                     is ViewState.Success -> {
                         Log.d(TAG, "Received Access token: ${result.payload}")
                         sessionStorage.accessToken = result.payload.accessToken
-                        startActivity(Intent(this@SplashScreenActivity, MainActivity::class.java))
-                        finish()
+                        launch(Dispatchers.IO) {
+                            delay(1400)
+                            startActivity(Intent(this@SplashScreenActivity, MainActivity::class.java))
+                            finish()
+                        }
                     }
                     is ViewState.Error -> error = result.error?.localizedMessage
                 }
@@ -123,7 +113,7 @@ fun SplashScreenLayout() {
     ) {
         Text(
             style = TextStyle(fontFamily = montserrat),
-            text = "Becycle",
+            text = ContextAmbient.current.getString(R.string.app_name),
             fontSize = splashScreenLogoFontSize,
             fontWeight = FontWeight.Bold,
             color = primaryAccent,

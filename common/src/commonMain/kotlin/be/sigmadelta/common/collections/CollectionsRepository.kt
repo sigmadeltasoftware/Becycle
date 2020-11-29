@@ -53,7 +53,8 @@ class CollectionsRepository(private val db: DB, private val collectionsApi: Coll
                     .isTomorrow()
             }
             val todayTomorrow = today.toMutableList().apply { addAll(tomorrow) }
-            val upcoming = list.toMutableList().apply { removeAll(todayTomorrow) }.subList(0, 5)
+            val upcoming = list.toMutableList().apply { removeAll(todayTomorrow) }
+            val upcomingSubListSize = if (upcoming.size > 5) 5 else upcoming.size
             println("""
                 today: $today
                 tomorrow: $tomorrow
@@ -62,7 +63,7 @@ class CollectionsRepository(private val db: DB, private val collectionsApi: Coll
             CollectionOverview(
                 today.nullOnEmpty(),
                 tomorrow.nullOnEmpty(),
-                upcoming.nullOnEmpty()
+                upcoming.subList(0, upcomingSubListSize).nullOnEmpty()
             )
         },
         fetch = {
