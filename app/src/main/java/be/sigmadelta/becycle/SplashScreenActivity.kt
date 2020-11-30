@@ -4,6 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Text
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -41,18 +43,22 @@ class SplashScreenActivity : AppCompatActivity(), CoroutineScope by MainScope() 
     private val prefs: Preferences by inject()
 
     private var error by mutableStateOf<String?>(null)
+    private var showSplashScreen by mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             BecycleTheme {
                 remember { error }
-                SplashScreenLayout()
+                Crossfade(current = showSplashScreen, animation = tween(durationMillis = 800) ) {
+                    SplashScreenLayout(it)
+                }
                 if (error != null) {
                     error?.let { ErrorLayout(msg = it) }
                 }
             }
         }
+        showSplashScreen = true
         launch {
             baseHeadersViewModel.baseHeadersViewState.collect { viewState ->
                 when (viewState) {
@@ -98,28 +104,30 @@ class SplashScreenActivity : AppCompatActivity(), CoroutineScope by MainScope() 
 
 
 @Composable
-fun SplashScreenLayout() {
-    Column(
-        modifier = Modifier.background(
-            VerticalGradient(
-                colors = listOf(
-                    Color.White,
-                    secondaryAccent
-                ), startY = 0f, endY = 500f
+fun SplashScreenLayout(show: Boolean) {
+    if (show) {
+        Column(
+            modifier = Modifier.background(
+                VerticalGradient(
+                    colors = listOf(
+                        Color.White,
+                        secondaryAccent
+                    ), startY = 0f, endY = 500f
+                )
+            ).fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                style = TextStyle(fontFamily = montserrat),
+                text = ContextAmbient.current.getString(R.string.app_name),
+                fontSize = splashScreenLogoFontSize,
+                fontWeight = FontWeight.Bold,
+                color = primaryAccent,
+                modifier = Modifier.padding(bottom = 16.dp).padding(horizontal = 16.dp)
             )
-        ).fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            style = TextStyle(fontFamily = montserrat),
-            text = ContextAmbient.current.getString(R.string.app_name),
-            fontSize = splashScreenLogoFontSize,
-            fontWeight = FontWeight.Bold,
-            color = primaryAccent,
-            modifier = Modifier.padding(bottom = 16.dp).padding(horizontal = 16.dp)
-        )
-        BecycleProgressIndicator(modifier = Modifier.height(180.dp).padding(16.dp))
+            BecycleProgressIndicator(modifier = Modifier.height(180.dp).padding(16.dp))
+        }
     }
 }
 

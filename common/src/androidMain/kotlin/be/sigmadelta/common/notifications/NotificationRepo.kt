@@ -16,8 +16,10 @@ import be.sigmadelta.common.address.AddressRepository
 import be.sigmadelta.common.collections.Collection
 import be.sigmadelta.common.collections.CollectionType
 import be.sigmadelta.common.collections.CollectionsRepository
+import be.sigmadelta.common.date.Time
 import be.sigmadelta.common.db.appCtx
 import be.sigmadelta.common.util.Response
+import be.sigmadelta.common.util.toTime
 import kotlinx.coroutines.flow.collect
 import kotlinx.datetime.*
 import org.kodein.db.DB
@@ -56,10 +58,15 @@ actual class NotificationRepo(
             address.zipCodeItem.code,
             address.street.names,
             CollectionType.values().map {
-                CollectionNotificationProps(it, true, DEFAULT_TODAY_TIME, DEFAULT_TOMORROW_TIME)
+                CollectionNotificationProps(
+                    it,
+                    true,
+                    Time.parseHhMm(DEFAULT_TODAY_TIME)!!,
+                    Time.parseHhMm(DEFAULT_TOMORROW_TIME)!!
+                )
             },
-            DEFAULT_TODAY_TIME,
-            DEFAULT_TOMORROW_TIME
+            Time.parseHhMm(DEFAULT_TODAY_TIME)!!,
+            Time.parseHhMm(DEFAULT_TOMORROW_TIME)!!
         )
 
         val findPrevious = db.find<NotificationProps>().byIndex("addressId", address.id)
@@ -75,7 +82,7 @@ actual class NotificationRepo(
     fun getAllNotificationProps() = db.find<NotificationProps>()
         .all().useModels { it.toList() }
 
-    fun updateTomorrowAlarmTime(addressId: String, alarmTime: String) {
+    fun updateTomorrowAlarmTime(addressId: String, alarmTime: Time) {
         val cursor = db.find<NotificationProps>().byIndex("addressId", addressId)
         if (cursor.isValid()) {
             Log.d(TAG, "updateTomorrowAlarmTime(): Cursor is valid, updating time to $alarmTime")
@@ -100,7 +107,7 @@ actual class NotificationRepo(
         }
     }
 
-    class NotificationWorker(
+    private class NotificationWorker(
         appCtx: Context,
         workerParams: WorkerParameters
     ) : CoroutineWorker(appCtx, workerParams), KoinComponent {
@@ -125,36 +132,35 @@ actual class NotificationRepo(
                         when (response) {
                             is Response.Success -> {
                                 val now = Clock.System.now()
-                                    .toLocalDateTime(TimeZone.currentSystemDefault())
+                                    .toLocalDateTime(TimeZone.currentSystemDefault()).toTime()
 
-                                Log.d(TAG, "searchUpcomingCollections(): ${response.body}")
-
-                                response.body.tomorrow?.filterByEnabledNotifications(
-                                    requireNotNull(
-                                        props
-                                    )
+                                Log.d(
+                                    TAG,
+                                    "doWork() - searchUpcomingCollections(): ${response.body}"
                                 )
-                                    ?.forEach {
+                                response.body.tomorrow?.filterByEnabledNotifications(
+                                    requireNotNull(props)
+                                )?.forEach {
+                                    val builder = NotificationCompat.Builder(appCtx, notif_chan_id)
+                                        .setContentTitle("Collection planned")
+                                        .setSmallIcon(preferences.androidNotificationIconRef)
+                                        .setPriority(NotificationCompat.PRIORITY_HIGH)
+                                        .setStyle(
+                                            NotificationCompat.BigTextStyle()
+                                                .setBigContentTitle("Collection for ${addr.fullAddress}")
+                                                .bigText("You have a ${it.fraction.name.nl} collection tomorrow")
+                                        )
 
-                                        val builder =
-                                            NotificationCompat.Builder(appCtx, notif_chan_id)
-                                                .setContentTitle("Collection planned")
-                                                .setSmallIcon(preferences.androidNotificationIconRef)
-                                                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                                                .setStyle(
-                                                    NotificationCompat.BigTextStyle()
-                                                        .setBigContentTitle("Collection for ${addr.fullAddress}")
-                                                        .bigText("You have a ${it.fraction.name.nl} collection tomorrow")
-                                                )
-
+                                    if (now.hasPassed(props.genericTomorrowAlarmTime)) { // TODO: Test
                                         with(NotificationManagerCompat.from(appCtx)) {
                                             // notificationId is a unique int for each notification that you must define
                                             notify(Random(2).nextInt(), builder.build())
                                         }
-                                        // }
                                     }
+                                }
                             }
                             is Response.Error -> Result.failure()
+                            is Response.Loading -> Unit
                         }
                     }
                 }

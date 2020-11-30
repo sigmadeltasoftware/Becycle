@@ -1,5 +1,6 @@
 package be.sigmadelta.common.util
 
+import be.sigmadelta.common.date.Time
 import kotlinx.datetime.*
 
 fun addLeadingZeroBelow10(value: Int) = if (value < 10) "0$value" else value
@@ -20,3 +21,11 @@ fun LocalDateTime.isTomorrow(): Boolean {
 }
 
 fun yesterday() = Instant.fromEpochSeconds(Clock.System.now().epochSeconds - 86400)
+
+// TODO: Look at how 12/24 hour systems are handled by KotlinX.DateTime
+fun LocalDateTime.toTime() = Time(this.hour, this.minute)
+
+fun Time.toLocalDateTime(): LocalDateTime {
+    val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+    return LocalDateTime(now.year, now.month, now.dayOfMonth, hours, mins)
+}

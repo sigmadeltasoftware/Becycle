@@ -44,14 +44,18 @@ class Actions(private val nav: Navigator<Destination>) {
     }
 
     fun goToRecycleWebsite(context: Context) {
-        context.startActivity(Intent(Intent.ACTION_VIEW).apply {
-            data = Uri.parse("https://www.recycleapp.be")
-        })
+        context.openLink("https://www.recycleapp.be")
     }
 
     fun goToSigmaDeltaWebsite(context: Context) {
-        context.startActivity(Intent(Intent.ACTION_VIEW).apply {
-            data = Uri.parse("https://www.sigmadelta.be")
-        })
+        context.openLink("https://www.sigmadelta.be")
+    }
+
+    fun goToNotificationsDocumentation(context: Context) {
+        context.openLink("https://developer.android.com/training/monitoring-device-state/doze-standby")
     }
 }
+
+private fun Context.openLink(url: String) = startActivity(Intent(Intent.ACTION_VIEW).apply {
+    data = Uri.parse(url)
+})

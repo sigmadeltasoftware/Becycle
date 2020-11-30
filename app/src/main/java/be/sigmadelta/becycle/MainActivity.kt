@@ -266,15 +266,41 @@ fun Main(
             }
         }
 
-
-        Destination.SettingsNotifications -> SettingsNotifications(
-            addresses,
-            notificationProps,
-            {
-                actions.goTo(Destination.SettingsAddressManipulation)
-            },
-            notificationViewModel::setTomorrowAlarmTime
-        )
+        Destination.SettingsNotifications -> {
+            val ctx = ContextAmbient.current
+            SettingsNotifications(
+                addresses,
+                notificationProps,
+                {
+                    actions.goTo(Destination.SettingsAddressManipulation)
+                },
+                notificationViewModel::setTomorrowAlarmTime,
+                {
+                    MaterialDialog(ctx, BottomSheet()).show {
+                        cornerRadius(16f)
+                        title(text = "Notification Info")
+                        message(
+                            text =
+                            """
+                            Due to constraints set by the Android operating system for the power-saving 'Doze' mode,
+                            we are only able to check whether a notification should be triggered every 15 minutes.
+                            This also implies that there is a 15 minute error margin window for the notification time
+                            you have selected. 
+                            
+                            Should your notification reminder be set to 09:00, the latest you can expect your notification
+                            to be triggered is 09:15 (worst case).
+                        """.trimIndent()
+                        )
+                        positiveButton(text = "More information") {
+                            actions.goToNotificationsDocumentation(ctx)
+                        }
+                        negativeButton(text = "OK") {
+                            dismiss()
+                        }
+                    }
+                }
+            )
+        }
 
 
         Destination.SettingsAddresses -> SettingsAddressOverview(

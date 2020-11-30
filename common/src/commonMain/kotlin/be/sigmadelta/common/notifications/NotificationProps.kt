@@ -1,6 +1,7 @@
 package be.sigmadelta.common.notifications
 
 import be.sigmadelta.common.collections.CollectionType
+import be.sigmadelta.common.date.Time
 import be.sigmadelta.common.util.TranslationContainer
 import kotlinx.serialization.Serializable
 import org.kodein.db.indexSet
@@ -14,8 +15,8 @@ data class NotificationProps (
     val zipCode: String,
     val streetName: TranslationContainer,
     val collectionSettings: List<CollectionNotificationProps>,
-    val genericTodayAlarmTime: String,
-    val genericTomorrowAlarmTime: String
+    val genericTodayAlarmTime: Time,
+    val genericTomorrowAlarmTime: Time
 ): Metadata {
     override fun indexes() = indexSet("addressId" to addressId)
 }
@@ -24,6 +25,6 @@ data class NotificationProps (
 data class CollectionNotificationProps(
     val type: CollectionType?,
     val enabled: Boolean,
-    val todayAlarmTime: String,
-    val tomorrowAlarmTime: String
+    val todayAlarmTime: Time,
+    val tomorrowAlarmTime: Time
 )

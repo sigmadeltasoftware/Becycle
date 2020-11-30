@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import be.sigmadelta.becycle.common.analytics.AnalyticsTracker
 import be.sigmadelta.becycle.common.ui.util.ListViewState
+import be.sigmadelta.common.date.Time
 import be.sigmadelta.common.notifications.NotificationProps
 import be.sigmadelta.common.notifications.NotificationRepo
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,7 +24,7 @@ class NotificationViewModel(
         notificationPropsViewState.value = ListViewState.Success(notificationProps)
     }
 
-    fun setTomorrowAlarmTime(addressId: String, alarmTime: String) {
+    fun setTomorrowAlarmTime(addressId: String, alarmTime: Time) {
         Log.d(TAG, "updateTomorrowAlarmTime(): addressId: $addressId - alarmTime: $alarmTime")
         notificationRepo.updateTomorrowAlarmTime(addressId, alarmTime)
         loadNotificationProps()

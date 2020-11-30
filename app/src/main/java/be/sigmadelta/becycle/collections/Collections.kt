@@ -140,7 +140,7 @@ fun UpcomingCollectionItem(collection: Collection) {
                 ImageView(it).apply {
                     setImageDrawable(it.getDrawable(collection.collectionType.iconRef()))
                 }
-            }, modifier = Modifier.width(32.dp),
+            }, modifier = Modifier.width(36.dp),
                 update = {
                     it.setImageDrawable(it.context.getDrawable(collection.collectionType.iconRef()))
                 }
