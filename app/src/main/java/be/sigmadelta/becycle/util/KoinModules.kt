@@ -44,10 +44,16 @@ private val db = DB.factory
         root<NotificationProps>()
     }, org.kodein.db.orm.kotlinx.KotlinxSerializer())
 
+private val notificationDb = DB.factory
+    .inDir(getApplicationFilesDirectoryPath())
+    .open("becycle_notification_db", TypeTable {
+
+    }, org.kodein.db.orm.kotlinx.KotlinxSerializer())
+
 val coreModule = module {
     single { db }
     single { Preferences() }
-    single { NotificationRepo(androidContext(), get()) }
+    single { NotificationRepo(androidContext(), get(), notificationDb) }
     single { AnalyticsTracker(FirebaseAnalytics.getInstance(androidContext())) }
     viewModel { NotificationViewModel(get(), get()) }
 }

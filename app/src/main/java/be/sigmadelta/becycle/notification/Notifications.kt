@@ -15,6 +15,8 @@ import androidx.compose.ui.platform.ContextAmbient
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.work.WorkManager
+import be.sigmadelta.becycle.BuildConfig
 import be.sigmadelta.becycle.R
 import be.sigmadelta.becycle.address.AddressSwitcher
 import be.sigmadelta.becycle.common.ui.theme.*
@@ -22,6 +24,7 @@ import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.date.Time
 import be.sigmadelta.common.notifications.NotificationProps
+import be.sigmadelta.common.notifications.NotificationRepo
 
 @Composable
 fun SettingsNotifications(
@@ -64,6 +67,13 @@ fun SettingsNotifications(
                     }
                 }
             }
+        }
+
+        if (BuildConfig.DEBUG) {
+            val notifWorker = WorkManager.getInstance(ContextAmbient.current)
+                .getWorkInfosByTag(NotificationRepo.WORK_NAME)
+            Text(text = "NotifWorker is cancelled: ${notifWorker.isCancelled}")
+            Text(text = "NotifWorker is done: ${notifWorker.isDone}")
         }
     }
 }

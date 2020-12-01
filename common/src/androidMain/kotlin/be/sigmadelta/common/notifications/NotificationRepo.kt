@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
-import android.graphics.BitmapFactory
 import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
@@ -30,13 +29,13 @@ import org.kodein.memory.util.UUID
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import java.util.concurrent.TimeUnit
-import kotlin.random.Random
 
 private const val TAG = "NotificationRepo"
 
 actual class NotificationRepo(
     private val context: Context,
-    private val db: DB
+    private val db: DB,
+    private val notificationDb: DB
 ) {
 
     init {
@@ -82,6 +81,12 @@ actual class NotificationRepo(
     fun getAllNotificationProps() = db.find<NotificationProps>()
         .all().useModels { it.toList() }
 
+    fun putTriggeredNotificationId(date: LocalDateTime, id: Int) {
+        notificationDb.put(createNotificationIdLabel(date, id))
+    }
+
+    fun getTriggeredNotificationIds() = notificationDb.find<String>().all().useModels { it.toList() }
+
     fun updateTomorrowAlarmTime(addressId: String, alarmTime: Time) {
         val cursor = db.find<NotificationProps>().byIndex("addressId", addressId)
         if (cursor.isValid()) {
@@ -107,7 +112,7 @@ actual class NotificationRepo(
         }
     }
 
-    private class NotificationWorker(
+    class NotificationWorker(
         appCtx: Context,
         workerParams: WorkerParameters
     ) : CoroutineWorker(appCtx, workerParams), KoinComponent {
@@ -127,36 +132,23 @@ actual class NotificationRepo(
             } else {
 
                 addressRepo.getAddresses().forEach { addr ->
-                    val props = notificationRepo.getNotificationProps(addr)
                     collectionRepo.searchUpcomingCollections(addr).collect { response ->
                         when (response) {
                             is Response.Success -> {
-                                val now = Clock.System.now()
-                                    .toLocalDateTime(TimeZone.currentSystemDefault()).toTime()
-
                                 Log.d(
                                     TAG,
                                     "doWork() - searchUpcomingCollections(): ${response.body}"
                                 )
-                                response.body.tomorrow?.filterByEnabledNotifications(
-                                    requireNotNull(props)
-                                )?.forEach {
-                                    val builder = NotificationCompat.Builder(appCtx, notif_chan_id)
-                                        .setContentTitle("Collection planned")
-                                        .setSmallIcon(preferences.androidNotificationIconRef)
-                                        .setPriority(NotificationCompat.PRIORITY_HIGH)
-                                        .setStyle(
-                                            NotificationCompat.BigTextStyle()
-                                                .setBigContentTitle("Collection for ${addr.fullAddress}")
-                                                .bigText("You have a ${it.fraction.name.nl} collection tomorrow")
-                                        )
 
-                                    if (now.hasPassed(props.genericTomorrowAlarmTime)) { // TODO: Test
-                                        with(NotificationManagerCompat.from(appCtx)) {
-                                            // notificationId is a unique int for each notification that you must define
-                                            notify(Random(2).nextInt(), builder.build())
-                                        }
-                                    }
+                                Log.d(
+                                    TAG,
+                                    "doWork(): tomorrow = ${response.body.tomorrow?.map { it.collectionType }}"
+                                )
+                                response.body.tomorrow?.let {
+                                    createTomorrowNotifications(
+                                        it,
+                                        addr
+                                    )
                                 }
                             }
                             is Response.Error -> Result.failure()
@@ -169,6 +161,59 @@ actual class NotificationRepo(
         } catch (e: Throwable) {
             Log.e(TAG, e.localizedMessage)
             Result.retry()
+        }
+
+        private fun createTomorrowNotifications(
+            collections: List<Collection>,
+            address: Address
+        ) {
+            val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+            val now = today.toTime()
+            val props = requireNotNull(notificationRepo.getNotificationProps(address))
+
+            var text = ""
+            val triggerNotification = when (collections.size) {
+                0 -> false // Do nothing when empty
+                1 -> {
+                    text = "You have a ${collections.first().fraction.name.nl} collection tomorrow"
+                    true
+                }
+                else -> {
+                    text = "You have multiple collections tomorrow"
+                    true
+                }
+            }
+
+            Log.e(TAG, """
+                createTomorrowNotifications(): 
+                triggerNotification = $triggerNotification
+                now.hasPassed(props.genericTomorrowAlarmTime) = ${now.hasPassed(props.genericTomorrowAlarmTime)}
+                now = $now
+                props.genericTomorrowAlarmTime = ${props.genericTomorrowAlarmTime}
+            """.trimIndent())
+
+            if (triggerNotification && now.hasPassed(props.genericTomorrowAlarmTime)) { // TODO: Test
+                with(NotificationManagerCompat.from(appCtx)) {
+                    val builder = NotificationCompat.Builder(appCtx, notif_chan_id)
+                        .setContentTitle("Collection Tomorrow!")
+                        .setSmallIcon(preferences.androidNotificationIconRef)
+                        .setPriority(NotificationCompat.PRIORITY_HIGH)
+                        .setStyle(
+                            NotificationCompat.BigTextStyle()
+                                .setBigContentTitle("Collection for ${address.fullAddress}")
+                                .bigText(text)
+                        )
+
+                    // Every Address will only have 1 notification, this can change once multiple collection notifications are introduced
+                    val notificationId = address.id.hashCode()
+
+                    val idList = notificationRepo.getTriggeredNotificationIds()
+                    if (idList.contains(createNotificationIdLabel(today, notificationId)).not()) {
+                        notify(notificationId, builder.build())
+                        notificationRepo.putTriggeredNotificationId(today, notificationId)
+                    }
+                }
+            }
         }
     }
 
@@ -190,3 +235,6 @@ private fun List<Collection>.filterByEnabledNotifications(props: NotificationPro
     }.apply {
         Log.d(TAG, "filterByEnabledNotifications(): $this")
     }
+
+private fun createNotificationIdLabel(date: LocalDateTime, id: Int) =
+    "${date.dayOfYear}${date.year}-$id"
