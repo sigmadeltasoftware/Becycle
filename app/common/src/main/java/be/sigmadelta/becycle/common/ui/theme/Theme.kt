@@ -34,6 +34,6 @@ fun BecycleTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composabl
     MaterialTheme(
         colors = colors,
         content = content,
-        typography = Typography(defaultFontFamily = FontFamily.SansSerif)
+        typography = Typography(defaultFontFamily = montserrat)
     )
 }

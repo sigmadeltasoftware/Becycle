@@ -1,38 +1,35 @@
 package be.sigmadelta.becycle
 
 import android.content.Intent
-import android.graphics.drawable.Animatable2
-import android.graphics.drawable.AnimatedVectorDrawable
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
-import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Text
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.ExperimentalFocus
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.VerticalGradient
 import androidx.compose.ui.platform.ContextAmbient
 import androidx.compose.ui.platform.setContent
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
-import be.sigmadelta.becycle.common.ui.util.ViewState
-import be.sigmadelta.becycle.common.ui.theme.BecycleTheme
 import be.sigmadelta.becycle.accesstoken.AccessTokenViewModel
 import be.sigmadelta.becycle.baseheaders.BaseHeadersViewModel
 import be.sigmadelta.becycle.baseheaders.BaseHeadersViewState
-import be.sigmadelta.becycle.common.ui.theme.errorColor
+import be.sigmadelta.becycle.common.ui.theme.*
+import be.sigmadelta.becycle.common.ui.util.ViewState
 import be.sigmadelta.becycle.common.ui.widgets.BecycleProgressIndicator
+import be.sigmadelta.common.Preferences
 import be.sigmadelta.common.util.SessionStorage
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -43,26 +40,29 @@ class SplashScreenActivity : AppCompatActivity(), CoroutineScope by MainScope() 
     private val baseHeadersViewModel: BaseHeadersViewModel by viewModel()
     private val accessTokenViewModel: AccessTokenViewModel by viewModel()
     private val sessionStorage: SessionStorage by inject()
+    private val prefs: Preferences by inject()
 
     private var error by mutableStateOf<String?>(null)
+    private var showSplashScreen by mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContent {
+            BecycleTheme {
+                remember { error }
+                Crossfade(current = showSplashScreen, animation = tween(durationMillis = 800) ) {
+                    SplashScreenLayout(it)
+                }
+                if (error != null) {
+                    error?.let { ErrorLayout(msg = it) }
+                }
+            }
+        }
+        showSplashScreen = true
         launch {
             baseHeadersViewModel.baseHeadersViewState.collect { viewState ->
                 when (viewState) {
                     is BaseHeadersViewState.Empty -> {
-                        setContent {
-                            BecycleTheme {
-                                remember { error }
-
-                                if (error == null) {
-                                    SplashScreenLayout()
-                                } else {
-                                    error?.let { ErrorLayout(msg = it) }
-                                }
-                            }
-                        }
                     }
                     is BaseHeadersViewState.Error -> error = viewState.msg ?: "An error occurred!"
                     is BaseHeadersViewState.Headers -> {
@@ -79,8 +79,11 @@ class SplashScreenActivity : AppCompatActivity(), CoroutineScope by MainScope() 
                     is ViewState.Success -> {
                         Log.d(TAG, "Received Access token: ${result.payload}")
                         sessionStorage.accessToken = result.payload.accessToken
-                        startActivity(Intent(this@SplashScreenActivity, MainActivity::class.java))
-                        finish()
+                        launch(Dispatchers.IO) {
+                            delay(1400)
+                            startActivity(Intent(this@SplashScreenActivity, MainActivity::class.java))
+                            finish()
+                        }
                     }
                     is ViewState.Error -> error = result.error?.localizedMessage
                 }
@@ -88,6 +91,10 @@ class SplashScreenActivity : AppCompatActivity(), CoroutineScope by MainScope() 
         }
 
         baseHeadersViewModel.getBaseHeaders()
+
+        if (prefs.androidNotificationIconRef == 0) {
+            prefs.androidNotificationIconRef = R.drawable.ic_becycle
+        }
     }
 
     companion object {
@@ -97,14 +104,30 @@ class SplashScreenActivity : AppCompatActivity(), CoroutineScope by MainScope() 
 
 
 @Composable
-fun SplashScreenLayout() {
-    Column(
-        modifier = Modifier.fillMaxWidth().fillMaxHeight(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text("Becycle")
-        BecycleProgressIndicator(modifier = Modifier.height(180.dp).padding(16.dp))
+fun SplashScreenLayout(show: Boolean) {
+    if (show) {
+        Column(
+            modifier = Modifier.background(
+                VerticalGradient(
+                    colors = listOf(
+                        Color.White,
+                        secondaryAccent
+                    ), startY = 0f, endY = 500f
+                )
+            ).fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                style = TextStyle(fontFamily = montserrat),
+                text = ContextAmbient.current.getString(R.string.app_name),
+                fontSize = splashScreenLogoFontSize,
+                fontWeight = FontWeight.Bold,
+                color = primaryAccent,
+                modifier = Modifier.padding(bottom = 16.dp).padding(horizontal = 16.dp)
+            )
+            BecycleProgressIndicator(modifier = Modifier.height(180.dp).padding(16.dp))
+        }
     }
 }
 

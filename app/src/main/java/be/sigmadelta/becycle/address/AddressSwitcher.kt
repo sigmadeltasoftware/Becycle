@@ -19,7 +19,6 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import be.sigmadelta.becycle.R
 import be.sigmadelta.becycle.common.ui.theme.*
 import be.sigmadelta.becycle.common.ui.util.ListViewState
@@ -55,11 +54,12 @@ fun AddressSwitcher(
                         Text(
                             it.zipCodeItem.code,
                             fontWeight = FontWeight.Bold,
+                            fontSize = titleFontSize,
                             color = if (selectedTabIx == ix) primaryAccent else unselectedColor
                         )
                         Text(
                             "${it.street.names.nl} ${it.houseNumber}",
-                            fontSize = 10.sp,
+                            fontSize = subTextFontSize,
                             color = if (selectedTabIx == ix) primaryAccent else unselectedColor,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -70,13 +70,12 @@ fun AddressSwitcher(
                 if (addresses.payload.size < 2) {
                     Tab(selected = false, onClick = onGoToAddressInput) {
                         Column(
-                            verticalArrangement = Arrangement.Center,
-                            modifier = Modifier.padding(top = 8.dp)
+                            modifier = Modifier.padding(16.dp)
                         ) {
                             Text(
                                 text = "Add Address",
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 14.sp,
+                                fontSize = regularFontSize,
                                 color = unselectedColor
                             )
                             Icon(

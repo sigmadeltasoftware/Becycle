@@ -1,11 +1,11 @@
 object Properties {
     const val applicationId = "be.sigmadelta.becycle"
     const val versionCode = 1
-    const val versionName = "1.0"
+    const val versionName = "0.1-alpha"
 }
 
 object Versions {
-    const val gradleTools = "4.2.0-alpha14"
+    const val gradleTools = "4.2.0-alpha16"
     const val compileSdk = 30
     const val targetSdk = compileSdk
     const val minSdk = 24

@@ -13,6 +13,11 @@
         <item name="windowNoTitle">true</item>
     </style>
 
+    <style name="Theme.Becycle.SplashScreen" parent="Theme.Becycle.NoActionBar">
+        <item name="android:windowBackground">@drawable/splash_window_bg</item>
+        <item name="background">@drawable/splash_window_bg</item>
+    </style>
+
     <style name="timePickerTheme" parent="@style/ThemeOverlay.MaterialComponents.Dialog">
         <item name="colorControlActivated">#13DC98</item>
         <item name="colorAccent">#13DC98</item>

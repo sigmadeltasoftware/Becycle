@@ -12,7 +12,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import be.sigmadelta.becycle.common.ui.theme.*
 import be.sigmadelta.becycle.common.ui.util.iconRef
@@ -67,7 +66,7 @@ fun CollectionTitle(
     ) {
         Text(
             text = title,
-            fontSize = 24.sp,
+            fontSize = titleFontSize,
             color = textPrimary,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(top = 16.dp, start = 8.dp, bottom = 16.dp)
@@ -76,7 +75,7 @@ fun CollectionTitle(
         date?.let {
             Text(
                 text = "${it.dayOfMonth}-${it.monthNumber}-${it.year}",
-                fontSize = 12.sp,
+                fontSize = subTextFontSize,
                 color = textSecondary
             )
         }
@@ -87,7 +86,7 @@ fun CollectionTitle(
 fun NoCollectionsSubtitle() {
     Text(
         text = "No scheduled collections",
-        fontSize = 18.sp,
+        fontSize = regularFontSize,
         color = textSecondary,
         modifier = Modifier.padding(start = 8.dp),
         fontWeight = FontWeight.SemiBold
@@ -109,7 +108,7 @@ fun CollectionItem(collection: Collection, isTomorrow: Boolean = false) {
             Text(
                 collection.fraction.name.nl.capitalize(),
                 fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
+                fontSize = regularFontSize,
                 color = if (isTomorrow) primaryAccent else textPrimary,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
@@ -141,22 +140,22 @@ fun UpcomingCollectionItem(collection: Collection) {
                 ImageView(it).apply {
                     setImageDrawable(it.getDrawable(collection.collectionType.iconRef()))
                 }
-            }, modifier = Modifier.width(32.dp),
+            }, modifier = Modifier.width(36.dp),
                 update = {
                     it.setImageDrawable(it.context.getDrawable(collection.collectionType.iconRef()))
                 }
             )
             Text(
                 collection.fraction.name.nl.capitalize(),
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.padding(start = 16.dp),
-                fontSize = 18.sp
+                fontSize = regularFontSize
             )
             Spacer(modifier = Modifier.weight(1f))
             collection.timestamp.toInstant().toLocalDateTime(TimeZone.currentSystemDefault()).let {
                 Text(
                     text = "${it.dayOfMonth}-${it.monthNumber}-${it.year}",
-                    fontSize = 12.sp,
+                    fontSize = subTextFontSize,
                     color = textSecondary
                 )
             }
