@@ -4,14 +4,9 @@ import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.util.ApiResponse
 import be.sigmadelta.common.util.SearchQueryResult
 import be.sigmadelta.common.util.SessionStorage
-import be.sigmadelta.common.util.getApi
 import io.ktor.client.*
 import io.ktor.client.request.*
 import kotlinx.serialization.Serializable
-import org.kodein.db.Index
-import org.kodein.db.model.orm.Metadata
-import org.kodein.memory.util.UUID
-import kotlin.random.Random
 
 class CollectionsApi(
     private val baseUrl: String,

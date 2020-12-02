@@ -25,3 +25,5 @@ gradle-app.setting
 /build
 /captures
 
+# Keystore props
+app/keystore.properties

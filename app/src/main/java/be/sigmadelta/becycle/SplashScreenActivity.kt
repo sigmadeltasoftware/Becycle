@@ -9,6 +9,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Text
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.Button
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,11 +28,13 @@ import be.sigmadelta.becycle.common.ui.theme.*
 import be.sigmadelta.becycle.common.ui.util.ViewState
 import be.sigmadelta.becycle.common.ui.widgets.BecycleProgressIndicator
 import be.sigmadelta.common.Preferences
+import be.sigmadelta.common.util.AuthorizationKeyExpiredException
 import be.sigmadelta.common.util.SessionStorage
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import java.net.UnknownHostException
 
 @ExperimentalFocus
 @ExperimentalCoroutinesApi
@@ -42,19 +45,24 @@ class SplashScreenActivity : AppCompatActivity(), CoroutineScope by MainScope() 
     private val sessionStorage: SessionStorage by inject()
     private val prefs: Preferences by inject()
 
-    private var error by mutableStateOf<String?>(null)
+    private var error by mutableStateOf<Throwable?>(null)
     private var showSplashScreen by mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val errorActions = ErrorActions(
+            onAuthKeyExpired = { restart() },
+            onNoValidConnection = { restart() }
+        )
+
         setContent {
             BecycleTheme {
                 remember { error }
-                Crossfade(current = showSplashScreen, animation = tween(durationMillis = 800) ) {
-                    SplashScreenLayout(it)
-                }
-                if (error != null) {
-                    error?.let { ErrorLayout(msg = it) }
+                Column {
+                    Crossfade(current = showSplashScreen, animation = tween(durationMillis = 800)) {
+                        SplashScreenLayout(it, error, errorActions)
+                    }
                 }
             }
         }
@@ -64,7 +72,7 @@ class SplashScreenActivity : AppCompatActivity(), CoroutineScope by MainScope() 
                 when (viewState) {
                     is BaseHeadersViewState.Empty -> {
                     }
-                    is BaseHeadersViewState.Error -> error = viewState.msg ?: "An error occurred!"
+                    is BaseHeadersViewState.Error -> error = viewState.error
                     is BaseHeadersViewState.Headers -> {
                         sessionStorage.baseHeaders = viewState.headers
                         accessTokenViewModel.getAccessToken()
@@ -81,11 +89,16 @@ class SplashScreenActivity : AppCompatActivity(), CoroutineScope by MainScope() 
                         sessionStorage.accessToken = result.payload.accessToken
                         launch(Dispatchers.IO) {
                             delay(1400)
-                            startActivity(Intent(this@SplashScreenActivity, MainActivity::class.java))
+                            startActivity(
+                                Intent(
+                                    this@SplashScreenActivity,
+                                    MainActivity::class.java
+                                )
+                            )
                             finish()
                         }
                     }
-                    is ViewState.Error -> error = result.error?.localizedMessage
+                    is ViewState.Error -> error = result.error
                 }
             }
         }
@@ -97,6 +110,11 @@ class SplashScreenActivity : AppCompatActivity(), CoroutineScope by MainScope() 
         }
     }
 
+    private fun restart() {
+        startActivity(Intent(this, SplashScreenActivity::class.java))
+        finish()
+    }
+
     companion object {
         const val TAG = "SplashScreenActivity"
     }
@@ -104,7 +122,7 @@ class SplashScreenActivity : AppCompatActivity(), CoroutineScope by MainScope() 
 
 
 @Composable
-fun SplashScreenLayout(show: Boolean) {
+fun SplashScreenLayout(show: Boolean, error: Throwable?, actions: ErrorActions) {
     if (show) {
         Column(
             modifier = Modifier.background(
@@ -127,15 +145,32 @@ fun SplashScreenLayout(show: Boolean) {
                 modifier = Modifier.padding(bottom = 16.dp).padding(horizontal = 16.dp)
             )
             BecycleProgressIndicator(modifier = Modifier.height(180.dp).padding(16.dp))
+            error?.let {
+                Log.e("SplashScreenLayout", it.localizedMessage ?: "Error Occurred")
+                ErrorLayout(it, actions)
+            }
         }
     }
 }
 
 @Composable
-fun ErrorLayout(msg: String) {
-//    TODO("Make a more aesthetic/informative error")
-    Text(
-        msg,
-        color = errorColor
-    )
+fun ErrorLayout(error: Throwable, actions: ErrorActions) = when (error) {
+    is AuthorizationKeyExpiredException -> actions.onAuthKeyExpired()
+    is UnknownHostException -> {
+        Text(
+            text = "Please check your connection and try launching the app again",
+            modifier = Modifier.padding(16.dp),
+            color = errorColor
+        )
+        Button(onClick = { actions.onNoValidConnection() }) {
+            Text(text = "Retry connecting")
+        }
+    }
+    else -> Text(error.localizedMessage, color = errorColor)
 }
+
+data class ErrorActions(
+    val onAuthKeyExpired: () -> Unit,
+    val onNoValidConnection: () -> Unit
+)
+

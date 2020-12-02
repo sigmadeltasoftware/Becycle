@@ -40,7 +40,7 @@ class BaseHeadersViewModel(
                     ))
                 }
                 is Response.Error -> {
-                    baseHeadersViewState.value = BaseHeadersViewState.Error(it.error?.message)
+                    baseHeadersViewState.value = BaseHeadersViewState.Error(it.error)
                     Log.d(TAG, "Error occurred: ${it.error}")
                     analTracker.log(ANAL_TAG, "getBaseHeaders_error", it.error?.message)
 
@@ -59,5 +59,5 @@ sealed class BaseHeadersViewState {
     object Empty: BaseHeadersViewState()
     object Loading: BaseHeadersViewState()
     data class Headers(val headers: List<Header>) : BaseHeadersViewState()
-    data class Error(val msg: String?): BaseHeadersViewState()
+    data class Error(val error: Throwable?): BaseHeadersViewState()
 }

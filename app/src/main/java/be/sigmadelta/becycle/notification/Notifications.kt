@@ -32,7 +32,8 @@ fun SettingsNotifications(
     notificationProps: ListViewState<NotificationProps>,
     onGoToAddressInput: () -> Unit,
     onTomorrowAlarmTimeSelected: (addressId: String, alarmTime: Time) -> Unit,
-    onNotificationsInfoClicked: () -> Unit
+    onNotificationsInfoClicked: () -> Unit,
+    onReloadNotificationPropsWhenEmpty: () -> Unit
 ) {
     var selectedTabIx by remember { mutableStateOf(0) }
 
@@ -63,6 +64,10 @@ fun SettingsNotifications(
                             NotificationSettings(it) { alarmTime ->
                                 onTomorrowAlarmTimeSelected(addresses[newIx].id, alarmTime)
                             }
+                        }
+
+                        if (props.isNullOrEmpty()) {
+                            onReloadNotificationPropsWhenEmpty()
                         }
                     }
                 }

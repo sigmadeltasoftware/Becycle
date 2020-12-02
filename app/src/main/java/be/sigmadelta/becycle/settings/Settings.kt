@@ -31,14 +31,16 @@ fun Settings(
     shouldShowAutoStarterWarning: Boolean,
     onAutoStarterClicked: () -> Unit,
     onSigmaDeltaLogoClicked: () -> Unit,
-    onNotificationSwitchAction: ((Boolean) -> Unit)? = null
+    onSendFeedbackClicked: () -> Unit,
+    onNotificationSwitchAction: ((Boolean) -> Unit)? = null,
 ) {
     Column(modifier = Modifier.padding(bottom = bottomNavigationMargin)) {
         SettingsMenuItem(
             title = "Address(es)",
             subtitle = "Manage your address(es) here",
             R.drawable.ic_home,
-            onClickAction = { goTo(Destination.SettingsAddresses) })
+            onClickAction = { goTo(Destination.SettingsAddresses) }
+        )
         SettingsMenuItemDivider()
         SettingsMenuItem(
             title = "Notifications",
@@ -51,15 +53,17 @@ fun Settings(
 
         if (shouldShowBatteryOptimisationWarning) {
             NotificationSettingsBatteryOptimisationWarning(
-               onDisableBatteryOptimisationClicked = { onDisableBatteryOptimisationClicked() },
+                onDisableBatteryOptimisationClicked = { onDisableBatteryOptimisationClicked() },
                 onGetDisableBatteryOptimisationInfoClicked = { onGetDisableBatteryOptimisationInfoClicked() }
             )
         }
-//        if (shouldShowAutoStarterWarning) {
-//            NotificationSettingsAutoStarterWarning {
-//                onAutoStarterClicked()
-//            }
-//        }
+        SettingsMenuItemDivider()
+        SettingsMenuItem(
+            title = "Send Feedback",
+            subtitle = "Mail us any feedback such as bugs and/or feature requests",
+            icon = R.drawable.ic_mail,
+            onClickAction = { onSendFeedbackClicked() }
+        )
 
         Spacer(modifier = Modifier.weight(1f))
 
@@ -191,8 +195,10 @@ fun NotificationSettingsAutoStarterWarning(
 fun SettingsFooter(
     onSigmaDeltaLogoClicked: () -> Unit
 ) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally,
-    modifier = Modifier.padding(bottom = 8.dp)) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.padding(bottom = 8.dp)
+    ) {
         Text(
             text = "Version: V${BuildConfig.VERSION_NAME}",
             fontSize = minimalFontSize,

@@ -1,4 +1,4 @@
-object Properties {
+object BecProperties {
     const val applicationId = "be.sigmadelta.becycle"
     const val versionCode = 1
     const val versionName = "0.1-alpha"

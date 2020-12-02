@@ -1,8 +1,9 @@
 package be.sigmadelta.becycle
 
 import android.annotation.SuppressLint
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.OnBackPressedDispatcher
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Icon
@@ -19,7 +20,7 @@ import androidx.compose.ui.platform.ContextAmbient
 import androidx.compose.ui.platform.setContent
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
-import be.sigmadelta.becycle.accesstoken.AccessTokenViewModel
+import androidx.core.content.ContextCompat
 import be.sigmadelta.becycle.address.*
 import be.sigmadelta.becycle.collections.CollectionsViewModel
 import be.sigmadelta.becycle.common.*
@@ -35,7 +36,6 @@ import be.sigmadelta.becycle.settings.Settings
 import be.sigmadelta.common.Preferences
 import be.sigmadelta.common.notifications.NotificationRepo
 import be.sigmadelta.common.util.AuthorizationKeyExpiredException
-import be.sigmadelta.common.util.SessionStorage
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.bottomsheets.BottomSheet
 import com.judemanutd.autostarter.AutoStartPermissionHelper
@@ -49,8 +49,6 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 @ExperimentalCoroutinesApi
 class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
-    private val accessTokenViewModel: AccessTokenViewModel by viewModel()
-    private val sessionStorage: SessionStorage by inject()
     private val preferences: Preferences by inject()
     private val notificationRepo: NotificationRepo by inject()
     private val addressViewModel: AddressViewModel by viewModel()
@@ -62,21 +60,11 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
         // Add observers for access token expiration
         launch {
-            accessTokenViewModel.accessTokenViewState.collect {
-                when (it) {
-                    is ViewState.Success -> {
-                        sessionStorage.accessToken = it.payload.accessToken
-                        Toast.makeText(
-                            this@MainActivity,
-                            "Access token refreshed, please try again",
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
-                    is ViewState.Error -> TODO("Failed to get new access token, try again later")
-                }
-            }
-            addressViewModel.addressesViewState.observeForAutKeyErrors { accessTokenViewModel.getAccessToken() }
-//            collectionsViewModel.collectionsViewState.observeForAutKeyErrors { accessTokenViewModel.getAccessToken() } // TODO
+            // TODO: Handle this better through a separate viewState in AddressViewModel
+            addressViewModel.zipCodeItemsViewState.observeForAutKeyErrors { restartAppForTokenRefresh() }
+            addressViewModel.streetsViewState.observeForAutKeyErrors { restartAppForTokenRefresh() }
+            addressViewModel.addressesViewState.observeForAutKeyErrors { restartAppForTokenRefresh() }
+            collectionsViewModel.collectionsViewState.observeForAuthKeyErrors { restartAppForTokenRefresh() }
         }
 
         setContent {
@@ -93,6 +81,11 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
         notificationRepo.scheduleWorker()
         notificationViewModel.loadNotificationProps()
+    }
+
+    private fun restartAppForTokenRefresh() {
+        startActivity(Intent(this@MainActivity, SplashScreenActivity::class.java))
+        finish()
     }
 }
 
@@ -260,7 +253,15 @@ fun Main(
                 { autoStarter.getAutoStartPermission(ctx) },
                 onSigmaDeltaLogoClicked = {
                     actions.goToSigmaDeltaWebsite(ctx)
-                }) {
+                },
+                onSendFeedbackClicked = {
+                    val mailIntent = Intent(Intent.ACTION_VIEW)
+                    val data =
+                        Uri.parse("mailto:?subject=" + "subject text" + "&body=" + "body text " + "&to=" + "destination@mail.com")
+                    mailIntent.data = data
+                    ContextCompat.startActivity(ctx, Intent.createChooser(mailIntent, "Send mail..."), null)
+                }
+            ) {
                 preferences.notificationsEnabled = it
                 notificationSwitchState = it
             }
@@ -298,6 +299,9 @@ fun Main(
                             dismiss()
                         }
                     }
+                },
+                onReloadNotificationPropsWhenEmpty = {
+                    notificationViewModel.loadNotificationProps()
                 }
             )
         }
@@ -410,6 +414,14 @@ private fun resetViewStates(addressViewModel: AddressViewModel) = addressViewMod
 suspend fun <T> StateFlow<ListViewState<T>>.observeForAutKeyErrors(getAccessToken: () -> Unit) =
     collect {
         if (it is ListViewState.Error && it.error is AuthorizationKeyExpiredException) {
+            getAccessToken()
+        }
+    }
+
+@ExperimentalCoroutinesApi
+suspend fun <T> StateFlow<T>.observeForAuthKeyErrors(getAccessToken: () -> Unit) =
+    collect {
+        if (it is ViewState.Error<*> && it.error is AuthorizationKeyExpiredException) {
             getAccessToken()
         }
     }
