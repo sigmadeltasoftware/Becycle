@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.OnBackPressedDispatcher
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Icon
@@ -38,6 +39,7 @@ import be.sigmadelta.common.notifications.NotificationRepo
 import be.sigmadelta.common.util.AuthorizationKeyExpiredException
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.bottomsheets.BottomSheet
+import com.github.aakira.napier.Napier
 import com.judemanutd.autostarter.AutoStartPermissionHelper
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.StateFlow
@@ -50,7 +52,6 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
     private val preferences: Preferences by inject()
-    private val notificationRepo: NotificationRepo by inject()
     private val addressViewModel: AddressViewModel by viewModel()
     private val collectionsViewModel: CollectionsViewModel by viewModel()
     private val notificationViewModel: NotificationViewModel by viewModel()
@@ -79,8 +80,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
             }
         }
 
-        notificationRepo.scheduleWorker()
         notificationViewModel.loadNotificationProps()
+        notificationViewModel.scheduleWorker()
     }
 
     private fun restartAppForTokenRefresh() {
@@ -218,6 +219,7 @@ fun Main(
             val autoStarter = AutoStartPermissionHelper.getInstance()
             var notificationSwitchState by remember { mutableStateOf(preferences.notificationsEnabled) }
 
+            Napier.e("triggeredNotifications: ${notificationViewModel.getTriggeredNotificationIds()}")
             Settings(
                 actions.goTo,
                 notificationSwitchState,
@@ -257,9 +259,9 @@ fun Main(
                 onSendFeedbackClicked = {
                     val mailIntent = Intent(Intent.ACTION_VIEW)
                     val data =
-                        Uri.parse("mailto:?subject=" + "subject text" + "&body=" + "body text " + "&to=" + "destination@mail.com")
+                        Uri.parse("mailto:?subject=Becycle-Feedback&to=info@sigmadelta.be")
                     mailIntent.data = data
-                    ContextCompat.startActivity(ctx, Intent.createChooser(mailIntent, "Send mail..."), null)
+                    ContextCompat.startActivity(ctx, Intent.createChooser(mailIntent, "Send Feedback"), null)
                 }
             ) {
                 preferences.notificationsEnabled = it

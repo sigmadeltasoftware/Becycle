@@ -31,6 +31,7 @@ object Versions {
     const val settings_prefs = "0.6.2"
     const val workmanager = "2.4.0"
     const val autostarter = "1.0.8"
+    const val napier = "1.5.0-alpha1"
     const val material_dialogs = "3.3.0"
     const val firebase_bom = "25.12.0"
 }
@@ -96,4 +97,5 @@ object Util {
     const val slf4j = "org.slf4j:slf4j-simple:${Versions.slf4j}"
     const val prefs = "com.russhwolf:multiplatform-settings-no-arg:${Versions.settings_prefs}"
     const val autoStarter = "com.github.judemanutd:autostarter:${Versions.autostarter}"
+    const val napier = "com.github.aakira:napier:${Versions.napier}"
 }

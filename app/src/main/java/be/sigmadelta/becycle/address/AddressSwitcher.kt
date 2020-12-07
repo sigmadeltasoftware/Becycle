@@ -24,6 +24,7 @@ import be.sigmadelta.becycle.common.ui.theme.*
 import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.becycle.common.ui.widgets.BecycleProgressIndicator
 import be.sigmadelta.common.address.Address
+import com.github.aakira.napier.Napier
 
 @Composable
 fun AddressSwitcher(
@@ -88,7 +89,7 @@ fun AddressSwitcher(
                 }
             }
             is ListViewState.Error -> {
-                Log.e("AddressSwitcher", addresses.error?.localizedMessage.toString())
+                Napier.e( addresses.error?.localizedMessage.toString())
                 Text("Unable to retrieve address data", color = errorColor)
             }
         }

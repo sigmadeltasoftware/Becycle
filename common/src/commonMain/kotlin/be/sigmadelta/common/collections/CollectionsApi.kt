@@ -4,6 +4,7 @@ import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.util.ApiResponse
 import be.sigmadelta.common.util.SearchQueryResult
 import be.sigmadelta.common.util.SessionStorage
+import com.github.aakira.napier.Napier
 import io.ktor.client.*
 import io.ktor.client.request.*
 import kotlinx.serialization.Serializable
@@ -28,7 +29,7 @@ class CollectionsApi(
             // NOTE: I had to construct the url manually here as Ktor would use character encoding on the streetId parameter, which would cause the API request to fail
             // creating the request post encoding, makes sure that the parameter stays intact
         }
-        println("getCollections() - response = $response")
+        Napier.d("response = $response")
         val result = SearchQueryResult(
             response.items.map { it.toCollection(address) },
             response.total,

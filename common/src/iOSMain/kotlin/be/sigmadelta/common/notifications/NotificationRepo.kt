@@ -1,6 +1,6 @@
 package be.sigmadelta.common.notifications
 
 actual class NotificationRepo {
-    actual fun scheduleWorker() {
+    actual suspend fun scheduleWorker() {
     }
 }

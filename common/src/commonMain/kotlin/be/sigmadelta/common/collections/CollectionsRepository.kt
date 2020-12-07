@@ -2,6 +2,7 @@ package be.sigmadelta.common.collections
 
 import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.util.*
+import com.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.*
 import org.kodein.db.DB
@@ -13,31 +14,36 @@ class CollectionsRepository(private val db: DB, private val collectionsApi: Coll
 
     suspend fun searchUpcomingCollections(
         address: Address,
-        referenceDate: Instant = yesterday()
+        referenceDate: Instant = yesterday(),
+        shouldNotFetch: Boolean = false
     ): Flow<Response<CollectionOverview>> = networkBoundResource(
         shouldFetch = { overview ->
-            (overview.upcoming?.filter {
+            val upcomingSize = overview.upcoming?.filter {
                 it.timestamp.toInstant().toEpochMilliseconds() > referenceDate.toEpochMilliseconds()
-            }?.size ?: 0 +
-                    (overview.today?.size ?: 0) +
-                    (overview.tomorrow?.size ?: 0)
-                    < TOTAL_ITEMS_RETURN).apply {
-                println("searchUpcomingCollections - shouldFetch = $this")
-            }
+            }?.size ?: 0
+
+            val todaySize = overview.today?.size ?: 0
+            val tomorrowSize = overview.tomorrow?.size ?: 0
+
+            (upcomingSize + todaySize + tomorrowSize < TOTAL_ITEMS_RETURN).apply {
+                Napier.d(
+                    """
+                    searchUpcomingCollections():
+                    shouldFetch = $todaySize + $tomorrowSize + $upcomingSize < $TOTAL_ITEMS_RETURN ($this) || shouldNotFetch = $shouldNotFetch
+                    ==> shouldFetch = $this && ${shouldNotFetch.not()}
+                    """.trimIndent()
+                )
+            } && shouldNotFetch.not()
         },
         query = {
             val list = db.find<Collection>().all()
                 .useModels { it.toList() }
                 .apply {
-                    println("searchUpcomingCollections - nonfiltered query = ${this.map { it.timestamp }}")
+                    Napier.d("nonfiltered query = ${this.map { it.timestamp }}")
                 }
-                .filter { it.timestamp.toInstant() >= referenceDate }.apply {
-                    this.forEach {
-                        println("timestamp >= referencedate ? ${it.timestamp} --> ${it.timestamp.toInstant() >= referenceDate}")
-                    }
-                }
+                .filter { it.timestamp.toInstant() >= referenceDate }
                 .filter { it.addressId == address.id }.apply {
-                    println("searchUpcomingCollections - query = ${this.map { it.timestamp }}")
+                    Napier.d("query = ${this.map { "${it.collectionType}_${it.timestamp}" }}")
                 }
                 .sortedBy { it.timestamp.toInstant() }
                 .apply {
@@ -55,11 +61,13 @@ class CollectionsRepository(private val db: DB, private val collectionsApi: Coll
             val todayTomorrow = today.toMutableList().apply { addAll(tomorrow) }
             val upcoming = list.toMutableList().apply { removeAll(todayTomorrow) }
             val upcomingSubListSize = if (upcoming.size > 5) 5 else upcoming.size
-            println("""
-                today: $today
-                tomorrow: $tomorrow
-                upcoming: $upcoming
-            """.trimIndent())
+            Napier.d(
+                """
+                today: size = ${today.size} || $today
+                tomorrow: size = ${tomorrow.size} || $tomorrow
+                upcoming: size = ${upcoming.size} || $upcoming
+            """.trimIndent()
+            )
             CollectionOverview(
                 today.nullOnEmpty(),
                 tomorrow.nullOnEmpty(),

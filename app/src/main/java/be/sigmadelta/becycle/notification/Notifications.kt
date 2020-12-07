@@ -75,10 +75,13 @@ fun SettingsNotifications(
         }
 
         if (BuildConfig.DEBUG) {
-            val notifWorker = WorkManager.getInstance(ContextAmbient.current)
-                .getWorkInfosByTag(NotificationRepo.WORK_NAME)
-            Text(text = "NotifWorker is cancelled: ${notifWorker.isCancelled}")
-            Text(text = "NotifWorker is done: ${notifWorker.isDone}")
+            val workInfos = WorkManager.getInstance(ContextAmbient.current)
+                .getWorkInfosForUniqueWork(NotificationRepo.WORK_NAME)
+                .get()
+            if (workInfos.size == 1) {
+                Text(text = "NotifWorker state: ${workInfos[0].state}")
+                Text(text = "NotifWorker id(s): ${workInfos[0].id}")
+            }
         }
     }
 }

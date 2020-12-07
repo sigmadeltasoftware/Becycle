@@ -1,5 +1,9 @@
 package be.sigmadelta.becycle.util
 
+import android.app.PendingIntent
+import android.content.Intent
+import androidx.compose.ui.focus.ExperimentalFocus
+import be.sigmadelta.becycle.SplashScreenActivity
 import be.sigmadelta.becycle.baseheaders.BaseHeadersViewModel
 import be.sigmadelta.becycle.address.AddressViewModel
 import be.sigmadelta.becycle.accesstoken.AccessTokenViewModel
@@ -17,6 +21,7 @@ import be.sigmadelta.common.baseheader.BaseHeadersRepository
 import be.sigmadelta.common.accesstoken.AccessTokenRepository
 import be.sigmadelta.common.collections.CollectionsApi
 import be.sigmadelta.common.collections.CollectionsRepository
+import be.sigmadelta.common.notifications.NotificationLabel
 import be.sigmadelta.common.notifications.NotificationProps
 import be.sigmadelta.common.notifications.NotificationRepo
 import be.sigmadelta.common.util.AuthorizationKeyExpiredException
@@ -47,12 +52,14 @@ private val db = DB.factory
 private val notificationDb = DB.factory
     .inDir(getApplicationFilesDirectoryPath())
     .open("becycle_notification_db", TypeTable {
-
+        root<NotificationLabel>()
     }, org.kodein.db.orm.kotlinx.KotlinxSerializer())
 
+@ExperimentalFocus
 val coreModule = module {
     single { db }
     single { Preferences() }
+    single { PendingIntent.getActivity(androidContext(), 0, Intent(androidContext(), SplashScreenActivity::class.java), 0) }
     single { NotificationRepo(androidContext(), get(), notificationDb) }
     single { AnalyticsTracker(FirebaseAnalytics.getInstance(androidContext())) }
     viewModel { NotificationViewModel(get(), get()) }

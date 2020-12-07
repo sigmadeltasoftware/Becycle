@@ -1,6 +1,7 @@
 package be.sigmadelta.common.date
 
 import be.sigmadelta.common.util.addLeadingZeroBelow10
+import com.github.aakira.napier.Napier
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -13,7 +14,8 @@ data class Time(val hours: Int, val mins: Int) {
         fun parseHhMm(hhMm: String): Time? = try {
             Time(hhMm.substringBefore(":").toInt(), hhMm.substringAfter(":").toInt())
         } catch (e: NumberFormatException) {
-            print(e.message)
+            Napier.e(e.message ?: "NumberFormatException for $hhMm")
+            e.printStackTrace()
             null
         }
     }

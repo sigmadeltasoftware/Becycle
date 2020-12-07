@@ -30,6 +30,7 @@ import be.sigmadelta.becycle.common.ui.widgets.BecycleProgressIndicator
 import be.sigmadelta.common.Preferences
 import be.sigmadelta.common.util.AuthorizationKeyExpiredException
 import be.sigmadelta.common.util.SessionStorage
+import com.github.aakira.napier.Napier
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import org.koin.android.ext.android.inject
@@ -85,7 +86,7 @@ class SplashScreenActivity : AppCompatActivity(), CoroutineScope by MainScope() 
             accessTokenViewModel.accessTokenViewState.collect { result ->
                 when (result) {
                     is ViewState.Success -> {
-                        Log.d(TAG, "Received Access token: ${result.payload}")
+                        Napier.d("Received Access token: ${result.payload}")
                         sessionStorage.accessToken = result.payload.accessToken
                         launch(Dispatchers.IO) {
                             delay(1400)
@@ -146,7 +147,7 @@ fun SplashScreenLayout(show: Boolean, error: Throwable?, actions: ErrorActions) 
             )
             BecycleProgressIndicator(modifier = Modifier.height(180.dp).padding(16.dp))
             error?.let {
-                Log.e("SplashScreenLayout", it.localizedMessage ?: "Error Occurred")
+                Napier.e( it.localizedMessage ?: "Error Occurred")
                 ErrorLayout(it, actions)
             }
         }

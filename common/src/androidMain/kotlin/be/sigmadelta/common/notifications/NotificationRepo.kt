@@ -3,6 +3,7 @@ package be.sigmadelta.common.notifications
 import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
 import android.os.Build
 import android.util.Log
@@ -19,6 +20,7 @@ import be.sigmadelta.common.date.Time
 import be.sigmadelta.common.db.appCtx
 import be.sigmadelta.common.util.Response
 import be.sigmadelta.common.util.toTime
+import com.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.collect
 import kotlinx.datetime.*
 import org.kodein.db.DB
@@ -42,12 +44,17 @@ actual class NotificationRepo(
         createNotificationChannel(appCtx)
     }
 
-    actual fun scheduleWorker() {
-        Log.e(TAG, "scheduleWorker()")
+    actual suspend fun scheduleWorker() {
+        val workManager = WorkManager.getInstance(context)
+        workManager.cancelAllWorkByTag(WORK_NAME).await().let {
+            Napier.d("cancelAllWorkByTag result = $it")
+        }
+        workManager.pruneWork().await().let {
+            Napier.d("pruneWork result = $it")
+        }
         val workBuilder = PeriodicWorkRequestBuilder<NotificationWorker>(15, TimeUnit.MINUTES)
             .build()
-        WorkManager.getInstance(context)
-            .enqueueUniquePeriodicWork(WORK_NAME, ExistingPeriodicWorkPolicy.KEEP, workBuilder)
+        workManager.enqueueUniquePeriodicWork(WORK_NAME, ExistingPeriodicWorkPolicy.KEEP, workBuilder)
     }
 
     fun insertDefaultNotificationProps(address: Address) {
@@ -71,7 +78,7 @@ actual class NotificationRepo(
         val findPrevious = db.find<NotificationProps>().byIndex("addressId", address.id)
         db.deleteAll(findPrevious)
         db.put(notificationProps)
-        Log.e(TAG, "insertDefaultNotificationProps() - notificationProps: $notificationProps")
+        Napier.d("notificationProps: $notificationProps")
     }
 
     fun getNotificationProps(address: Address) = db.find<NotificationProps>()
@@ -81,21 +88,21 @@ actual class NotificationRepo(
     fun getAllNotificationProps() = db.find<NotificationProps>()
         .all().useModels { it.toList() }
 
-    fun putTriggeredNotificationId(date: LocalDateTime, id: Int) {
-        notificationDb.put(createNotificationIdLabel(date, id))
+    fun putTriggeredNotificationId(label: NotificationLabel) {
+        notificationDb.put(label)
     }
 
-    fun getTriggeredNotificationIds() = notificationDb.find<String>().all().useModels { it.toList() }
+    fun getTriggeredNotificationIds() = notificationDb.find<NotificationLabel>().all().useModels { it.toList() }
 
     fun updateTomorrowAlarmTime(addressId: String, alarmTime: Time) {
         val cursor = db.find<NotificationProps>().byIndex("addressId", addressId)
         if (cursor.isValid()) {
-            Log.d(TAG, "updateTomorrowAlarmTime(): Cursor is valid, updating time to $alarmTime")
+            Napier.d("Cursor is valid, updating time to $alarmTime")
             val updatedModel = cursor.model().copy(genericTomorrowAlarmTime = alarmTime)
             db.deleteAll(cursor)
             db.put(updatedModel)
         } else {
-            Log.e(TAG, "updateTomorrowAlarmTime(): Cursor is invalid!")
+            Napier.e("Cursor is invalid!")
         }
     }
 
@@ -121,37 +128,31 @@ actual class NotificationRepo(
         private val addressRepo: AddressRepository by inject()
         private val collectionRepo: CollectionsRepository by inject()
         private val notificationRepo: NotificationRepo by inject()
+        private val notificationIntent: PendingIntent by inject()
 
         override suspend fun doWork() = try {
             if (preferences.notificationsEnabled.not()) {
-                Log.d(
-                    "NotificationWorker",
-                    "Notifications are disabled, not triggering anything"
-                )
+                Napier.d("Notifications are disabled, not triggering anything")
                 Result.success()
             } else {
 
                 addressRepo.getAddresses().forEach { addr ->
-                    collectionRepo.searchUpcomingCollections(addr).collect { response ->
+                    collectionRepo.searchUpcomingCollections(addr, shouldNotFetch = true).collect { response ->
                         when (response) {
                             is Response.Success -> {
-                                Log.d(
-                                    TAG,
-                                    "doWork() - searchUpcomingCollections(): ${response.body}"
-                                )
+                                Napier.d("searchUpcomingCollections(): ${response.body}")
 
-                                Log.d(
-                                    TAG,
-                                    "doWork(): tomorrow = ${response.body.tomorrow?.map { it.collectionType }}"
-                                )
-                                response.body.tomorrow?.let {
+                                val tomorrowNotifications = response.body.tomorrow
+                                Napier.d("tomorrow = ${tomorrowNotifications?.map { it.collectionType }}")
+
+                                tomorrowNotifications?.let {
                                     createTomorrowNotifications(
                                         it,
                                         addr
                                     )
                                 }
                             }
-                            is Response.Error -> Result.failure()
+                            is Response.Error -> Napier.d(response.error?.localizedMessage ?: "Error occurred during searchUpcomingCollections")
                             is Response.Loading -> Unit
                         }
                     }
@@ -159,7 +160,7 @@ actual class NotificationRepo(
                 Result.success()
             }
         } catch (e: Throwable) {
-            Log.e(TAG, e.localizedMessage)
+            Napier.e(e.localizedMessage)
             Result.retry()
         }
 
@@ -171,28 +172,34 @@ actual class NotificationRepo(
             val now = today.toTime()
             val props = requireNotNull(notificationRepo.getNotificationProps(address))
 
-            var text = ""
-            val triggerNotification = when (collections.size) {
-                0 -> false // Do nothing when empty
-                1 -> {
-                    text = "You have a ${collections.first().fraction.name.nl} collection tomorrow"
-                    true
-                }
-                else -> {
-                    text = "You have multiple collections tomorrow"
-                    true
-                }
+            val (text, hasCollectionTomorrow) =  when (collections.size) {
+                0 -> "" to false // Do nothing when empty
+                1 -> "You have a ${collections.first().fraction.name.nl} collection tomorrow" to true
+                else -> "You have multiple collections tomorrow" to true
             }
 
-            Log.e(TAG, """
+            val notificationId = address.id.hashCode()
+            val idList = notificationRepo.getTriggeredNotificationIds()
+            val notificationIdLabel = createNotificationIdLabel(today, notificationId)
+            val notificationWasntTriggeredBefore = idList.map{ it.id }.contains(notificationIdLabel).not()
+
+            Napier.d("""
                 createTomorrowNotifications(): 
-                triggerNotification = $triggerNotification
+                hasCollectionTomorrow = $hasCollectionTomorrow
                 now.hasPassed(props.genericTomorrowAlarmTime) = ${now.hasPassed(props.genericTomorrowAlarmTime)}
                 now = $now
                 props.genericTomorrowAlarmTime = ${props.genericTomorrowAlarmTime}
+                notificationIdLabel = $notificationIdLabel
+                idList = $idList
+                notificationWasntTriggeredBefore = $notificationWasntTriggeredBefore
             """.trimIndent())
 
-            if (triggerNotification && now.hasPassed(props.genericTomorrowAlarmTime)) { // TODO: Test
+            if (
+                hasCollectionTomorrow &&
+                notificationWasntTriggeredBefore &&
+                now.hasPassed(props.genericTomorrowAlarmTime)
+            ) {
+                notificationRepo.putTriggeredNotificationId(NotificationLabel(notificationIdLabel))
                 with(NotificationManagerCompat.from(appCtx)) {
                     val builder = NotificationCompat.Builder(appCtx, notif_chan_id)
                         .setContentTitle("Collection Tomorrow!")
@@ -203,15 +210,12 @@ actual class NotificationRepo(
                                 .setBigContentTitle("Collection for ${address.fullAddress}")
                                 .bigText(text)
                         )
+                        .setAutoCancel(true)
+                        .setContentIntent(notificationIntent)
 
                     // Every Address will only have 1 notification, this can change once multiple collection notifications are introduced
-                    val notificationId = address.id.hashCode()
 
-                    val idList = notificationRepo.getTriggeredNotificationIds()
-                    if (idList.contains(createNotificationIdLabel(today, notificationId)).not()) {
-                        notify(notificationId, builder.build())
-                        notificationRepo.putTriggeredNotificationId(today, notificationId)
-                    }
+                    notify(notificationId, builder.build())
                 }
             }
         }
@@ -233,7 +237,7 @@ private fun List<Collection>.filterByEnabledNotifications(props: NotificationPro
             .firstOrNull { it.type == collection.collectionType }
             ?.enabled == true
     }.apply {
-        Log.d(TAG, "filterByEnabledNotifications(): $this")
+        Napier.d("filterByEnabledNotifications(): $this")
     }
 
 private fun createNotificationIdLabel(date: LocalDateTime, id: Int) =

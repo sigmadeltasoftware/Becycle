@@ -7,8 +7,8 @@ import android.net.Uri
 import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
-import android.util.Log
 import androidx.core.content.ContextCompat
+import com.github.aakira.napier.Napier
 
 class PowerUtil {
     companion object {
@@ -29,10 +29,7 @@ class PowerUtil {
                     intent.data = Uri.parse("package:${context.packageName}")
                     ContextCompat.startActivity(context, intent, null)
                 } catch (e: ActivityNotFoundException) {
-                    Log.e(
-                        "PowerUtil",
-                        e.localizedMessage ?: "Activity not found for battery optimization"
-                    )
+                    Napier.e(e.localizedMessage ?: "Activity not found for battery optimization")
                     e.printStackTrace()
                 }
             }

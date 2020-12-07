@@ -80,6 +80,7 @@ kotlin {
                 // Util
                 api (Util.slf4j) // Necessary for HttpClient logging
                 api (Util.prefs) // Multiplatform preferences
+                api(Util.napier) // Napier logging
             }
         }
 

@@ -14,6 +14,7 @@ import be.sigmadelta.common.address.ZipCodeItem
 import be.sigmadelta.common.notifications.NotificationRepo
 import be.sigmadelta.common.util.InvalidAddressException
 import be.sigmadelta.common.util.Response
+import com.github.aakira.napier.Napier
 import io.ktor.client.features.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -53,7 +54,7 @@ class AddressViewModel(
 
     fun loadSavedAddresses() = viewModelScope.launch {
         val addresses = addressRepository.getAddresses()
-        Log.d(TAG, "loadSavedAddresses(): $addresses")
+        Napier.d("loadSavedAddresses(): $addresses")
         analTracker.log(ANAL_TAG, "loadSavedAddresses", "Address count: ${addresses.size}")
         addressesViewState.value = ListViewState.Success(addresses)
     }
