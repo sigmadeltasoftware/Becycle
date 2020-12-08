@@ -1,30 +1,23 @@
 plugins {
-    id 'com.android.library'
-    id 'kotlin-android'
-    id 'kotlin-android-extensions'
+    id("com.android.library")
+    id("kotlin-android")
+    id("kotlin-android-extensions")
 }
 
 android {
-    compileSdkVersion Versions.compileSdk
-    buildToolsVersion Versions.buildTools
+    compileSdkVersion(Versions.compileSdk)
+    buildToolsVersion(Versions.buildTools)
 
-
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-    }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = "1.8"
     }
 
     androidExtensions {
-        features = ["parcelize"]
+        features = setOf("parcelize")
     }
 
     composeOptions {
@@ -38,19 +31,20 @@ android {
 
     // Needed to enforce androidx.core:core version (1.5.0-alpha3) for DisplayInsets.kt
     configurations.all {
-        resolutionStrategy.force Android.core
+        resolutionStrategy.force(Android.core)
     }
-    configure(android.lintOptions) {
-        // Disable this once KMM is not alpha anymore, now it triggers too much errors on external dependencies
-        abortOnError false
-    }
+
+//    configure(android.lintOptions) {
+//        // Disable this once KMM is not alpha anymore, now it triggers too much errors on external dependencies
+//        abortOnError = false
+//    }
 }
 
 // Add against compose errors with kotlin compilers
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions {
-        jvmTarget = "1.8"
-        freeCompilerArgs += ["-Xallow-jvm-ir-dependencies", "-Xskip-prerelease-check"]
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
+        freeCompilerArgs = listOf("-Xallow-jvm-ir-dependencies", "-Xskip-prerelease-check")
     }
 }
 
@@ -75,7 +69,7 @@ dependencies {
     api(AndroidUi.material_dialogs_core)
     api(AndroidUi.material_dialogs_bottomsheet)
 
-    api platform(Firebase.bom)
+    api(platform(Firebase.bom))
     api(Firebase.analytics)
     api(Firebase.crashlytics)
 }

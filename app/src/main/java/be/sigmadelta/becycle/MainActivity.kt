@@ -4,11 +4,8 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.OnBackPressedDispatcher
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.Icon
-import androidx.compose.foundation.Text
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.*
@@ -35,7 +32,6 @@ import be.sigmadelta.becycle.notification.NotificationViewModel
 import be.sigmadelta.becycle.notification.SettingsNotifications
 import be.sigmadelta.becycle.settings.Settings
 import be.sigmadelta.common.Preferences
-import be.sigmadelta.common.notifications.NotificationRepo
 import be.sigmadelta.common.util.AuthorizationKeyExpiredException
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.bottomsheets.BottomSheet
@@ -47,6 +43,7 @@ import kotlinx.coroutines.flow.collect
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
+@ExperimentalMaterialApi
 @ExperimentalFocus
 @ExperimentalCoroutinesApi
 class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
@@ -90,6 +87,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     }
 }
 
+@ExperimentalMaterialApi
 @ExperimentalFocus
 @Composable
 fun MainLayout(
@@ -187,6 +185,7 @@ fun MainLayout(
     }
 }
 
+@ExperimentalMaterialApi
 @SuppressLint("SetJavaScriptEnabled")
 @ExperimentalFocus
 @Composable
@@ -261,7 +260,11 @@ fun Main(
                     val data =
                         Uri.parse("mailto:?subject=Becycle-Feedback&to=info@sigmadelta.be")
                     mailIntent.data = data
-                    ContextCompat.startActivity(ctx, Intent.createChooser(mailIntent, "Send Feedback"), null)
+                    ContextCompat.startActivity(
+                        ctx,
+                        Intent.createChooser(mailIntent, "Send Feedback"),
+                        null
+                    )
                 }
             ) {
                 preferences.notificationsEnabled = it
@@ -334,20 +337,22 @@ fun Main(
                 addresses,
                 zipCodeItemsViewState,
                 streetsViewState,
-                addressViewModel::searchZipCode,
-                addressViewModel::searchStreets,
-                {
-                    addressViewModel.validateExistingAddress(it)
-                    collectionsViewModel.removeCollections(it)
-                    collectionsViewModel.searchCollections(it)
-                },
-                {
-                    addressViewModel.removeAddress(it)
-                    collectionsViewModel.removeCollections(it)
-                    collectionsViewModel.searchCollections(it)
-                    actions.pressOnBack()
-                },
-                { actions.pressOnBack() }
+                SettingsAddressEditRemovalActions(
+                    addressViewModel::searchZipCode,
+                    addressViewModel::searchStreets,
+                    {
+                        addressViewModel.validateExistingAddress(it)
+                        collectionsViewModel.removeCollections(it)
+                        collectionsViewModel.searchCollections(it)
+                    },
+                    {
+                        addressViewModel.removeAddress(it)
+                        collectionsViewModel.removeCollections(it)
+                        collectionsViewModel.searchCollections(it)
+                        actions.pressOnBack()
+                    },
+                    { actions.pressOnBack() }
+                )
             )
         }
     }

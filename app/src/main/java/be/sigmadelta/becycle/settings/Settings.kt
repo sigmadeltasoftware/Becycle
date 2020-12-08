@@ -2,12 +2,12 @@ package be.sigmadelta.becycle.settings
 
 import android.widget.Toast
 import androidx.annotation.DrawableRes
-import androidx.compose.foundation.*
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
-import androidx.compose.material.Divider
-import androidx.compose.material.Switch
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -115,7 +115,7 @@ fun SettingsMenuItem(
             Switch(
                 checked = switchState == true,
                 onCheckedChange = switchAction,
-                color = primaryAccent,
+                colors = SwitchConstants.defaultColors(checkedThumbColor = primaryAccent),
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 32.dp)
                     .align(Alignment.CenterVertically)
             )
@@ -151,7 +151,7 @@ fun NotificationSettingsBatteryOptimisationWarning(
             )
             Button(
                 onClick = { onDisableBatteryOptimisationClicked() },
-                backgroundColor = errorColor,
+                colors = ButtonConstants.defaultButtonColors(backgroundColor = errorColor),
                 modifier = Modifier.padding(start = 16.dp)
             ) {
                 Text(text = "DISABLE BATTERY OPTIMISATIONS", color = primaryBackgroundColor)
@@ -182,7 +182,7 @@ fun NotificationSettingsAutoStarterWarning(
             )
             Button(
                 onClick = { onAutoStarterClicked() },
-                backgroundColor = errorColor,
+                colors = ButtonConstants.defaultButtonColors(backgroundColor = errorColor),
                 modifier = Modifier.padding(start = 16.dp)
             ) {
                 Text(text = "GIVE HIGHER PRIORITY", color = primaryBackgroundColor)

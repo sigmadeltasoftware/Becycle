@@ -1,6 +1,7 @@
 package be.sigmadelta.becycle.address
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.focus.ExperimentalFocus
 import be.sigmadelta.becycle.common.ui.util.ListViewState
@@ -8,6 +9,7 @@ import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.address.Street
 import be.sigmadelta.common.address.ZipCodeItem
 
+@ExperimentalMaterialApi
 @ExperimentalFocus
 @Composable
 fun SettingsAddressEditRemoval(
@@ -15,11 +17,7 @@ fun SettingsAddressEditRemoval(
     addresses: ListViewState<Address>,
     zipCodeItemViewState: ListViewState<ZipCodeItem>,
     streetsViewState: ListViewState<Street>,
-    onSearchZipCode: (String) -> Unit,
-    onSearchStreet: (String, ZipCodeItem) -> Unit,
-    onAddressChanged: (Address) -> Unit,
-    onAddressRemove: (Address) -> Unit,
-    onBackClicked: () -> Unit
+    actions: SettingsAddressEditRemovalActions
 ) {
     when (addresses) {
         is ListViewState.Error -> TODO()
@@ -31,10 +29,10 @@ fun SettingsAddressEditRemoval(
                         zipCodeItemsViewState = zipCodeItemViewState,
                         streetsViewState = streetsViewState,
                         SettingsAddressManipulationActions(
-                            onSearchZipCode = onSearchZipCode,
-                            onSearchStreet = onSearchStreet,
+                            onSearchZipCode = actions.onSearchZipCode,
+                            onSearchStreet = actions.onSearchStreet,
                             onValidateAddress = { zipCodeItem, street, houseNumber ->
-                                onAddressChanged(
+                                actions.onAddressChanged(
                                     it.copy(
                                         zipCodeItem = zipCodeItem,
                                         street = street,
@@ -42,8 +40,8 @@ fun SettingsAddressEditRemoval(
                                     )
                                 )
                             },
-                            onAddressRemove = onAddressRemove,
-                            onBackClicked = onBackClicked
+                            onAddressRemove = actions.onAddressRemove,
+                            onBackClicked = actions.onBackClicked
                         ),
                         "Edit Address",
                         it,
@@ -53,3 +51,11 @@ fun SettingsAddressEditRemoval(
         }
     }
 }
+
+data class SettingsAddressEditRemovalActions (
+    val onSearchZipCode: (String) -> Unit,
+    val onSearchStreet: (String, ZipCodeItem) -> Unit,
+    val onAddressChanged: (Address) -> Unit,
+    val onAddressRemove: (Address) -> Unit,
+    val onBackClicked: () -> Unit
+)

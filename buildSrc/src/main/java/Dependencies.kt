@@ -15,13 +15,13 @@ object Versions {
 
     const val kotlin = "1.4.10"
     const val kotlinCoroutines = "1.3.9-native-mt-2"
-    const val ktor = "1.4.0"
-    const val kotlinxSerialization = "1.0.0-RC"
+    const val ktor = "1.4.3"
+    const val kotlinxSerialization = "1.0.1"
     const val koin = "3.0.0-alpha-4"
-    const val core = "1.5.0-alpha02"
+    const val core = "1.5.0-alpha05"
     const val core_ktx = core
     const val lifecycle = "2.2.0"
-    const val compose = "1.0.0-alpha04"
+    const val compose = "1.0.0-alpha07"
     const val junit = "4.12"
     const val material = "1.2.1"
     const val appcompat = "1.2.0"

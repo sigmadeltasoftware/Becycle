@@ -4,7 +4,9 @@ import android.util.Log
 import androidx.core.os.bundleOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import be.sigmadelta.becycle.common.analytics.AnalTag
 import be.sigmadelta.becycle.common.analytics.AnalyticsTracker
+import be.sigmadelta.becycle.common.analytics.UserProps
 import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.becycle.common.ui.util.toViewState
 import be.sigmadelta.common.address.Address
@@ -47,7 +49,11 @@ class AddressViewModel(
             createDefaultNotificationSettings(address)
         }
 
-        analTracker.log(ANAL_TAG, if (addressExists) "updateAddress" else "saveAddress", address.fullAddress)
+        analTracker.userProp(UserProps.ZIPCODE, address.zipCodeItem.code)
+        analTracker.log(AnalTag.SAVE_ADDRESS) {
+            param("type", if (addressExists) "updateAddress" else "saveAddress")
+            param("address", address.fullAddress)
+        }
 
         loadSavedAddresses()
     }
@@ -55,35 +61,41 @@ class AddressViewModel(
     fun loadSavedAddresses() = viewModelScope.launch {
         val addresses = addressRepository.getAddresses()
         Napier.d("loadSavedAddresses(): $addresses")
-        analTracker.log(ANAL_TAG, "loadSavedAddresses", "Address count: ${addresses.size}")
+        analTracker.log(AnalTag.LOAD_SAVED_ADDRESSES) {
+            param("address_count", addresses.size.toString())
+        }
         addressesViewState.value = ListViewState.Success(addresses)
     }
 
     fun clearAllAddresses() = viewModelScope.launch {
         addressRepository.removeAddresses()
-        analTracker.log(ANAL_TAG, "clearAllAddresses", null)
+        analTracker.log(AnalTag.CLEAR_ALL_ADDRESSES)
         loadSavedAddresses()
     }
 
     fun removeAddress(address: Address) = viewModelScope.launch {
         addressRepository.removeAddress(address)
-        analTracker.log(ANAL_TAG, "removeAddress", address.toString())
+        analTracker.log(AnalTag.REMOVE_ADDRESS) {
+            param("address", address.fullAddress)
+        }
         loadSavedAddresses()
     }
 
     fun searchZipCode(searchQuery: String) = viewModelScope.launch {
         addressRepository.searchZipCodes(searchQuery).collect {
             zipCodeItemsViewState.value = it.toViewState()
-            analTracker.log(ANAL_TAG, "searchZipCode", searchQuery)
+            analTracker.log(AnalTag.SEARCH_ZIP_CODE) {
+                param("query", searchQuery)
+            }
         }
     }
 
     fun searchStreets(searchQuery: String, zipCodeItem: ZipCodeItem) = viewModelScope.launch {
         addressRepository.searchStreets(searchQuery, zipCodeItem).collect {
-            analTracker.log(ANAL_TAG, bundleOf(
-                Pair("searchStreets_searchQuery", searchQuery),
-                Pair("searchStreets_zipCodeItem", zipCodeItem.toString())
-            ))
+            analTracker.log(AnalTag.SEARCH_STREETS) {
+                param("query", searchQuery)
+                param("zipcode", zipCodeItem.code)
+            }
             streetsViewState.value = it.toViewState()
         }
     }
@@ -93,15 +105,17 @@ class AddressViewModel(
             validationViewState.value = when (it) {
                 is Response.Loading -> ValidationViewState.Loading
                 is Response.Success -> {
-                    analTracker.log(ANAL_TAG, bundleOf(
-                        Pair("validateAddress_zipCodeItem", zipCodeItem.code),
-                        Pair("validateAddress_street", street.names.nl),
-                        Pair("validateAddress_houseNumber", houseNumber)
-                    ))
+                    analTracker.log(AnalTag.VALIDATE_ADDRESS){
+                        param("zipcode", zipCodeItem.code)
+                        param("street", street.names.nl)
+                        param("houseNumber", houseNumber.toString())
+                    }
                     ValidationViewState.Success(it.body)
                 }
                 is Response.Error -> {
-                    analTracker.log(ANAL_TAG, "validateAddress_error", it.error?.localizedMessage)
+                    analTracker.log(AnalTag.VALIDATE_ADDRESS) {
+                        param("error", it.error?.localizedMessage ?: "")
+                    }
                     when (it.error) {
                         is ClientRequestException -> ValidationViewState.InvalidCombination
                         is InvalidAddressException -> ValidationViewState.InvalidAddressSpecified
@@ -117,11 +131,15 @@ class AddressViewModel(
             validationViewState.value = when (it) {
                 is Response.Loading -> ValidationViewState.Loading
                 is Response.Success -> {
-                    analTracker.log(ANAL_TAG, "validateExistingAddress", address.toString())
+                    analTracker.log(AnalTag.VALIDATE_EXISTING_ADDRESS) {
+                        param("address", address.fullAddress)
+                    }
                     ValidationViewState.Success(it.body)
                 }
                 is Response.Error -> {
-                    analTracker.log(ANAL_TAG, "validateExistingAddress_error", it.error?.localizedMessage)
+                    analTracker.log(AnalTag.VALIDATE_EXISTING_ADDRESS) {
+                        param("error", it.error?.localizedMessage ?: "")
+                    }
                     when (it.error) {
                         is ClientRequestException -> ValidationViewState.InvalidCombination
                         is InvalidAddressException -> ValidationViewState.InvalidAddressSpecified
@@ -136,22 +154,17 @@ class AddressViewModel(
         validationViewState.value = ValidationViewState.Empty
         zipCodeItemsViewState.value = ListViewState.Empty()
         streetsViewState.value = ListViewState.Empty()
-        analTracker.log(ANAL_TAG, "resetAll", null)
+        analTracker.log(AnalTag.RESET_ALL)
     }
 
     fun resetValidation() {
         validationViewState.value = ValidationViewState.Empty
-        analTracker.log(ANAL_TAG, "resetValidation", null)
+        analTracker.log(AnalTag.RESET_VALIDATION)
     }
 
     private fun createDefaultNotificationSettings(address: Address) {
         notificationRepo.insertDefaultNotificationProps(address)
-        analTracker.log(ANAL_TAG, "createDefaultNotificationSettings", address.fullAddress)
-    }
-
-    companion object {
-        private const val TAG = "AddressViewModel"
-        private const val ANAL_TAG = "AddressVM"
+        analTracker.log(AnalTag.CREATE_DEFAULT_NOTIFICATION_SETTINGS)
     }
 }
 

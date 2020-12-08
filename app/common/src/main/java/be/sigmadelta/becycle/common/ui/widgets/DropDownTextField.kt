@@ -1,6 +1,5 @@
 package be.sigmadelta.becycle.common.ui.widgets
 
-import androidx.compose.foundation.Text
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -8,7 +7,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.preferredHeight
 import androidx.compose.foundation.lazy.LazyColumnFor
 import androidx.compose.foundation.lazy.LazyItemScope
-import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -46,7 +46,7 @@ fun <T> DropDownTextField(
         TextField(
             modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
             backgroundColor = Color.White,
-            keyboardType = keyboardType,
+            keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
             label = {
                 if (itemListViewState !is ListViewState.Error) {
                     Text(text = label)

@@ -2,6 +2,7 @@ package be.sigmadelta.becycle.collections
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import be.sigmadelta.becycle.common.analytics.AnalTag
 import be.sigmadelta.becycle.common.analytics.AnalyticsTracker
 import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.becycle.common.ui.util.ViewState
@@ -28,19 +29,26 @@ class CollectionsViewModel(
         address: Address,
     ) = viewModelScope.launch {
         collectionsRepository.searchUpcomingCollections(address).collect {
-            analTracker.log(ANAL_TAG,
-                "searchCollections_${when (it) {
-                    is Response.Success -> "success"
-                    is Response.Error -> "error"
-                    is Response.Loading -> "loading"
-                }}",
-                when(it){
-                    is Response.Loading -> null
-                    is Response.Success -> {
-                        "Upcoming: ${it.body.upcoming ?: 0}\nToday: ${it.body.today ?: 0}\n Tomorrow: ${it.body.tomorrow ?: 0}"
-                    }
-                    is Response.Error -> it.error?.localizedMessage
-                })
+            if (it !is Response.Loading) {
+                analTracker.log(AnalTag.SEARCH_COLLECTIONS) {
+                    param(
+                        "state", when (it) {
+                            is Response.Success -> "success"
+                            is Response.Error -> "error"
+                            is Response.Loading -> "loading"
+                        }
+                    )
+                    param(
+                        "value", when (it) {
+                            is Response.Loading -> ""
+                            is Response.Success -> {
+                                "Upcoming: ${it.body.upcoming ?: 0}\nToday: ${it.body.today ?: 0}\n Tomorrow: ${it.body.tomorrow ?: 0}"
+                            }
+                            is Response.Error -> it.error?.localizedMessage ?: ""
+                        }
+                    )
+                }
+            }
 
             collectionsViewState.value = it.toViewState()
         }
@@ -48,10 +56,8 @@ class CollectionsViewModel(
 
     fun removeCollections(address: Address) = viewModelScope.launch {
         collectionsRepository.removeCollections(address)
-    }
-
-    companion object {
-        private const val TAG = "CollectionsViewModel"
-        private const val ANAL_TAG = "CollectionsVM"
+        analTracker.log(AnalTag.REMOVE_COLLECTIONS) {
+            param("address", address.fullAddress)
+        }
     }
 }
