@@ -34,6 +34,7 @@ object Versions {
     const val napier = "1.5.0-alpha1"
     const val material_dialogs = "3.3.0"
     const val firebase_bom = "25.12.0"
+    const val calendar_view_android = "1.0.0"
 }
 
 object Kotlin {
@@ -74,6 +75,7 @@ object Android {
 object AndroidUi {
     const val material_dialogs_core = "com.afollestad.material-dialogs:core:${Versions.material_dialogs}"
     const val material_dialogs_bottomsheet = "com.afollestad.material-dialogs:bottomsheets:${Versions.material_dialogs}"
+    const val calendar_view = "com.github.kizitonwose:CalendarView:${Versions.calendar_view_android}"
 }
 
 object Firebase {

@@ -20,6 +20,9 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import be.sigmadelta.becycle.address.*
+import be.sigmadelta.becycle.calendar.Calendar
+import be.sigmadelta.becycle.calendar.CalendarActions
+import be.sigmadelta.becycle.calendar.CalendarComposables
 import be.sigmadelta.becycle.collections.CollectionsViewModel
 import be.sigmadelta.becycle.common.*
 import be.sigmadelta.becycle.common.ui.theme.*
@@ -154,6 +157,12 @@ fun MainLayout(
                             selected = nav.current == Destination.Home,
                             onClick = { actions.goTo(Destination.Home) })
                         BottomNavigationItem(
+                            icon = { Icon(asset = vectorResource(id = R.drawable.ic_calendar)) },
+                            selectedContentColor = primaryAccent,
+                            unselectedContentColor = unselectedColor,
+                            selected = nav.current == Destination.Calendar,
+                            onClick = { actions.goTo(Destination.Calendar) })
+                        BottomNavigationItem(
                             icon = { Icon(asset = vectorResource(id = R.drawable.ic_settings)) },
                             selectedContentColor = primaryAccent,
                             unselectedContentColor = unselectedColor,
@@ -211,6 +220,16 @@ fun Main(
             collectionOverview,
             { actions.goTo(Destination.SettingsAddressManipulation) },
             { address -> collectionsViewModel.searchCollections(address) }
+        )
+
+        Destination.Calendar -> Calendar(
+            actions = CalendarActions(
+                onCalendarUpdated = {}
+            ),
+            composables = CalendarComposables(
+                calendarItem = {},
+                priorMonthCalendarItem = {}
+            )
         )
 
         Destination.Settings -> {

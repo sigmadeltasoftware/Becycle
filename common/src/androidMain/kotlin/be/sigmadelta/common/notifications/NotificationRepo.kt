@@ -180,7 +180,7 @@ actual class NotificationRepo(
 
             val notificationId = address.id.hashCode()
             val idList = notificationRepo.getTriggeredNotificationIds()
-            val notificationIdLabel = createNotificationIdLabel(today, notificationId)
+            val notificationIdLabel = createNotificationIdLabel(today, notificationId, props.genericTomorrowAlarmTime)
             val notificationWasntTriggeredBefore = idList.map{ it.id }.contains(notificationIdLabel).not()
 
             Napier.d("""
@@ -200,6 +200,7 @@ actual class NotificationRepo(
                 now.hasPassed(props.genericTomorrowAlarmTime)
             ) {
                 notificationRepo.putTriggeredNotificationId(NotificationLabel(notificationIdLabel))
+
                 with(NotificationManagerCompat.from(appCtx)) {
                     val builder = NotificationCompat.Builder(appCtx, notif_chan_id)
                         .setContentTitle("Collection Tomorrow!")
@@ -240,5 +241,5 @@ private fun List<Collection>.filterByEnabledNotifications(props: NotificationPro
         Napier.d("filterByEnabledNotifications(): $this")
     }
 
-private fun createNotificationIdLabel(date: LocalDateTime, id: Int) =
-    "${date.dayOfYear}${date.year}-$id"
+private fun createNotificationIdLabel(date: LocalDateTime, id: Int, time: Time) =
+    "${date.dayOfYear}${date.year}-$id-${time.hhmm}"

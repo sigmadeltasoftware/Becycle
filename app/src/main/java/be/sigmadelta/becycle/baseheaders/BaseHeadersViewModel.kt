@@ -44,7 +44,6 @@ class BaseHeadersViewModel(
                     analTracker.log(AnalTag.GET_BASE_HEADERS) {
                         param("error", it.error?.message ?: "")
                     }
-
                 }
             }
         }
