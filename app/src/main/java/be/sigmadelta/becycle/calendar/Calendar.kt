@@ -1,73 +1,99 @@
 package be.sigmadelta.becycle.calendar
 
-import android.view.View
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.Button
 import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.draw.drawOpacity
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.ui.tooling.preview.Preview
-import be.sigmadelta.becycle.R
-import be.sigmadelta.becycle.common.ui.theme.secondaryAccent
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import java.time.DayOfWeek
 import java.time.YearMonth
 import java.util.*
 
-val dayList = DayOfWeek.values().map { it.name.substring(0, 3).capitalize(Locale.ROOT) }
-val dayWeight = 1 / dayList.size.toFloat()
+const val dayWeight = 1 / 7f
 
+@ExperimentalCoroutinesApi
 @Composable
 fun Calendar(
-    actions: CalendarActions,
-    composables: CalendarComposables
+    widgets: CalendarWidgets,
+    monthFlow: StateFlow<YearMonth>
 ) {
-    val month = YearMonth.now().minusMonths(3)
+    val month = monthFlow.collectAsState().value
 
     Column {
-        CalendarHeader()
-        CalendarMonth(month, composables)
+        CalendarHeader(month, widgets)
+        CalendarMonth(month, widgets)
     }
 }
 
 @Composable
-fun CalendarHeader() {
-
+fun CalendarHeader(
+    month: YearMonth,
+    widgets: CalendarWidgets
+) {
     Card {
-        Row(
-            modifier = Modifier.fillMaxWidth(1f).padding(vertical = 16.dp),
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            dayList.forEach {
-                Text(
-                    it,
-                    modifier = Modifier.weight(dayWeight),
-                    textAlign = TextAlign.Center
-                )
+            widgets.header(month)
+
+            Row(
+                modifier = Modifier.fillMaxWidth(1f).padding(bottom = 16.dp),
+            ) {
+                DayOfWeek.values().forEach {
+                    Box(
+                        modifier = Modifier.weight(dayWeight).align(Alignment.CenterVertically),
+                        alignment = Alignment.Center
+                    ) {
+                        widgets.headerDayItem(it)
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-fun CalendarMonth(month: YearMonth, composables: CalendarComposables) {
+fun CalendarMonth(month: YearMonth, widgets: CalendarWidgets) {
 
     val firstDayOffset = month.atDay(1).dayOfWeek.ordinal
     val monthLength = month.lengthOfMonth()
-    val lastDayCount = monthLength - if (month.isLeapYear) 29 else 28
-    val weekCount =
-        monthLength / 7 + if (monthLength % 7 > 0) (firstDayOffset + lastDayCount) / 7 else 0
+    val priorMonthLength = month.minusMonths(1).lengthOfMonth()
+    val lastDayCount = (monthLength + firstDayOffset) % 7
+    val weekCount = (firstDayOffset + monthLength) / 7
+
+    println(
+        """
+    month = ${month.month.name}
+    firstDayOffset = $firstDayOffset
+    monthLength = $monthLength
+    lastDayCount = $lastDayCount
+    weekCount = $weekCount
+    ---------------------
+    """.trimIndent()
+    )
 
     for (i in 0..weekCount) {
         CalendarWeek(
             startDayOffSet = firstDayOffset,
-            endDayCount = if (i == weekCount) lastDayCount else 7,
+            endDayCount = lastDayCount,
             monthWeekNumber = i,
             weekCount = weekCount,
-            composables = composables
+            priorMonthLength = priorMonthLength,
+            widgets = widgets
         )
     }
 }
@@ -78,20 +104,24 @@ fun CalendarWeek(
     endDayCount: Int,
     monthWeekNumber: Int,
     weekCount: Int,
-    composables: CalendarComposables
+    priorMonthLength: Int,
+    widgets: CalendarWidgets
 ) {
     Row {
         if (monthWeekNumber == 0) {
             for (i in 0 until startDayOffSet) {
-                Box(modifier = Modifier.weight(dayWeight)) {
-                    composables.priorMonthCalendarItem()
+                Box(
+                    modifier = Modifier.weight(dayWeight).align(Alignment.CenterVertically),
+                    alignment = Alignment.Center
+                ) {
+                    widgets.priorMonthDayItem((priorMonthLength - (startDayOffSet - i - 1)).toString())
                 }
             }
         }
 
         val endDay = when (monthWeekNumber) {
             0 -> 7 - startDayOffSet
-            weekCount -> endDayCount + startDayOffSet + 1
+            weekCount -> endDayCount
             else -> 7
         }
 
@@ -102,15 +132,21 @@ fun CalendarWeek(
                 (i + (7 * monthWeekNumber) - startDayOffSet).toString()
             }
 
-            Box(modifier = Modifier.weight(dayWeight)) {
-                composables.calendarItem(day)
+            Box(
+                modifier = Modifier.weight(dayWeight).align(Alignment.CenterVertically),
+                alignment = Alignment.Center
+            ) {
+                widgets.dayItem(day)
             }
         }
 
-        if (monthWeekNumber == weekCount) {
-            for (i in 0 until (7 - endDayCount - startDayOffSet - 1)) {
-                Box(modifier = Modifier.weight(dayWeight)) {
-                    composables.nextMonthCalendarItem()
+        if (monthWeekNumber == weekCount && endDayCount > 0) {
+            for (i in 0 until (7 - endDayCount)) {
+                Box(
+                    modifier = Modifier.weight(dayWeight).align(Alignment.CenterVertically),
+                    alignment = Alignment.Center
+                ) {
+                    widgets.nextMonthDayItem((i + 1).toString())
                 }
             }
         }
@@ -118,7 +154,7 @@ fun CalendarWeek(
 }
 
 @Composable
-fun CalendarDay(text: String, modifier: Modifier) {
+fun CalendarDay(text: String, modifier: Modifier = Modifier.padding(4.dp).fillMaxWidth()) {
     Text(
         text,
         modifier = modifier,
@@ -126,32 +162,56 @@ fun CalendarDay(text: String, modifier: Modifier) {
     )
 }
 
-data class CalendarActions(
-    val onCalendarUpdated: (View) -> Unit
+data class CalendarWidgets(
+    val header: @Composable (YearMonth) -> Unit,
+    val headerDayItem: @Composable (DayOfWeek) -> Unit,
+    val dayItem: @Composable (day: String) -> Unit,
+    val priorMonthDayItem: @Composable (day: String) -> Unit,
+    val nextMonthDayItem: @Composable (day: String) -> Unit = priorMonthDayItem
 )
 
-data class CalendarComposables(
-    val calendarItem: @Composable (day: String) -> Unit,
-    val priorMonthCalendarItem: @Composable () -> Unit,
-    val nextMonthCalendarItem: @Composable () -> Unit = priorMonthCalendarItem
-)
-
+@ExperimentalCoroutinesApi
 @Preview
 @Composable
 fun previewCalendar() {
-    Calendar(
-        actions = CalendarActions(
-            onCalendarUpdated = {}
-        ),
-        composables = CalendarComposables(
-            calendarItem = { day ->
-                CalendarDay(text = day, modifier = Modifier.padding(4.dp).fillMaxWidth())
-            },
-            priorMonthCalendarItem = {
-                IconButton(onClick = {}) {
-                    Icon(asset = vectorResource(id = R.drawable.ic_info), tint = secondaryAccent)
+
+    val monthFlow = MutableStateFlow(YearMonth.now())
+
+    Column {
+        Calendar(
+            monthFlow = monthFlow,
+            widgets = CalendarWidgets(
+                header = { month ->
+                    Text(
+                        text = "${month.month.name.toLowerCase().capitalize()} ${month.year}",
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        style = TextStyle(fontWeight = FontWeight.SemiBold, fontSize = 22.sp)
+                    )
+                },
+                headerDayItem = { dayOfWeek ->
+                    CalendarDay(text = dayOfWeek.name.substring(0, 3).capitalize(Locale.ROOT))
+                },
+                dayItem = { day ->
+                    CalendarDay(text = day)
+                },
+                priorMonthDayItem = { day ->
+                    CalendarDay(
+                        text = day,
+                        modifier = Modifier.padding(4.dp).fillMaxWidth().drawOpacity(0.4f)
+                    )
                 }
-            }
+            )
         )
-    )
+        Button(onClick = {
+            monthFlow.value = monthFlow.value.plusMonths(1)
+        }, modifier = Modifier.padding(top = 16.dp)) {
+            Text(text = "Increment")
+        }
+
+        Button(onClick = {
+            monthFlow.value = monthFlow.value.minusMonths(1)
+        }, modifier = Modifier.padding(top = 16.dp)) {
+            Text(text = "Decrement")
+        }
+    }
 }

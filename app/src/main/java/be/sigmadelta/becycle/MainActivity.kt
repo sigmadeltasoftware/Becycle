@@ -21,8 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import be.sigmadelta.becycle.address.*
 import be.sigmadelta.becycle.calendar.Calendar
-import be.sigmadelta.becycle.calendar.CalendarActions
-import be.sigmadelta.becycle.calendar.CalendarComposables
+import be.sigmadelta.becycle.calendar.CalendarWidgets
 import be.sigmadelta.becycle.collections.CollectionsViewModel
 import be.sigmadelta.becycle.common.*
 import be.sigmadelta.becycle.common.ui.theme.*
@@ -41,10 +40,12 @@ import com.afollestad.materialdialogs.bottomsheets.BottomSheet
 import com.github.aakira.napier.Napier
 import com.judemanutd.autostarter.AutoStartPermissionHelper
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import java.time.YearMonth
 
 @ExperimentalMaterialApi
 @ExperimentalFocus
@@ -223,12 +224,12 @@ fun Main(
         )
 
         Destination.Calendar -> Calendar(
-            actions = CalendarActions(
-                onCalendarUpdated = {}
-            ),
-            composables = CalendarComposables(
-                calendarItem = {},
-                priorMonthCalendarItem = {}
+            monthFlow = MutableStateFlow(YearMonth.now()),
+            widgets = CalendarWidgets(
+                header = {},
+                headerDayItem = {},
+                dayItem = {},
+                priorMonthDayItem = {}
             )
         )
 
