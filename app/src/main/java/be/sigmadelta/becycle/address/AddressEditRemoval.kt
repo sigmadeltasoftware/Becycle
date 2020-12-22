@@ -3,14 +3,12 @@ package be.sigmadelta.becycle.address
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.focus.ExperimentalFocus
 import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.address.Street
 import be.sigmadelta.common.address.ZipCodeItem
 
 @ExperimentalMaterialApi
-@ExperimentalFocus
 @Composable
 fun SettingsAddressEditRemoval(
     addressId: String,

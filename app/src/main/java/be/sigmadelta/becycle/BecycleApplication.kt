@@ -2,7 +2,6 @@ package be.sigmadelta.becycle
 
 import android.app.Application
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.ui.focus.ExperimentalFocus
 import be.sigmadelta.becycle.util.*
 import be.sigmadelta.common.db.appCtx
 import be.sigmadelta.common.util.initLogger
@@ -13,7 +12,6 @@ import org.koin.core.context.startKoin
 import org.koin.core.logger.EmptyLogger
 
 @ExperimentalMaterialApi
-@ExperimentalFocus
 class BecycleApplication : Application() {
 
     override fun onCreate() {

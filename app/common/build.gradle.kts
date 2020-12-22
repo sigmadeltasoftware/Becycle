@@ -68,7 +68,7 @@ dependencies {
 
     api(AndroidUi.material_dialogs_core)
     api(AndroidUi.material_dialogs_bottomsheet)
-    api(AndroidUi.calendar_view)
+    api(AndroidUi.calpose)
 
     api(platform(Firebase.bom))
     api(Firebase.analytics)

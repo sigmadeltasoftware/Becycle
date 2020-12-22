@@ -72,7 +72,7 @@ fun AddressSwitcher(
                                 color = unselectedColor
                             )
                             Icon(
-                                asset = vectorResource(id = R.drawable.ic_add),
+                                imageVector = vectorResource(id = R.drawable.ic_add),
                                 tint = primaryAccent,
                                 modifier = Modifier.align(Alignment.CenterHorizontally)
                             )

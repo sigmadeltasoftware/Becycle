@@ -11,7 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.ContextAmbient
+import androidx.compose.ui.platform.AmbientContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -52,7 +52,7 @@ fun SettingsNotifications(
             )
             Spacer(modifier = Modifier.weight(1f))
             IconButton(onClick = { onNotificationsInfoClicked() }) {
-                Icon(asset = vectorResource(id = R.drawable.ic_info), tint = secondaryAccent)
+                Icon(imageVector = vectorResource(id = R.drawable.ic_info), tint = secondaryAccent)
             }
         }
 
@@ -75,7 +75,7 @@ fun SettingsNotifications(
         }
 
         if (BuildConfig.DEBUG) {
-            val workInfos = WorkManager.getInstance(ContextAmbient.current)
+            val workInfos = WorkManager.getInstance(AmbientContext.current)
                 .getWorkInfosForUniqueWork(NotificationRepo.WORK_NAME)
                 .get()
             if (workInfos.size == 1) {
@@ -93,7 +93,7 @@ fun NotificationSettings(
 ) {
     var notificationTimeToday by remember { mutableStateOf(notificationProps.genericTodayAlarmTime) }
     var notificationTimeTomorrow by remember { mutableStateOf(notificationProps.genericTomorrowAlarmTime) }
-    val ctx = ContextAmbient.current
+    val ctx = AmbientContext.current
 
     Row(modifier = Modifier.padding(16.dp)) {
         Column(modifier = Modifier.align(alignment = Alignment.CenterVertically)) {

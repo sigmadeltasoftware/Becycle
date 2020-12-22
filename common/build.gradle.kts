@@ -14,7 +14,9 @@ android {
         targetSdkVersion(Versions.targetSdk)
         versionCode = BecProperties.versionCode
         versionName = BecProperties.versionName
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles("consumer-rules.pro")
     }
 
     compileOptions {

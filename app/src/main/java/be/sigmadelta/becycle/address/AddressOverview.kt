@@ -3,6 +3,7 @@ package be.sigmadelta.becycle.address
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyColumnForIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -54,7 +55,7 @@ fun SettingsAddressOverview(
                 },
                 navigationIcon = {
                     Icon(
-                        asset = vectorResource(id = R.drawable.ic_back),
+                        imageVector = vectorResource(id = R.drawable.ic_back),
                         modifier = Modifier.clickable(onClick = onBackClicked).padding(start = 8.dp)
                     )
                 }
@@ -66,10 +67,12 @@ fun SettingsAddressOverview(
                 is ListViewState.Loading -> BecycleProgressIndicator()
                 is ListViewState.Success -> Column {
                     addressCount = addresses.payload.size
-                    LazyColumnForIndexed(items = addresses.payload) { ix, addr ->
-                        SettingsAddressOverviewItem(addr, onEditAddressClicked)
-                        if (ix < addresses.payload.size - 1) {
-                            Divider()
+                    LazyColumn {
+                        itemsIndexed(addresses.payload) { ix, addr ->
+                            SettingsAddressOverviewItem(addr, onEditAddressClicked)
+                            if (ix < addresses.payload.size - 1) {
+                                Divider()
+                            }
                         }
                     }
                     AddAddressItem(onAddAddressClicked = onAddAddressClicked)
@@ -106,7 +109,7 @@ fun SettingsAddressOverviewItem(
         }
         Spacer(modifier = Modifier.weight(1f))
         Icon(
-            asset = vectorResource(id = R.drawable.ic_edit),
+            imageVector = vectorResource(id = R.drawable.ic_edit),
             modifier = Modifier.padding(32.dp),
             tint = unselectedColor
         )
@@ -121,7 +124,7 @@ fun AddAddressItem(onAddAddressClicked: () -> Unit) {
     ) {
         Spacer(modifier = Modifier.weight(1f))
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(asset = vectorResource(id = R.drawable.ic_add))
+            Icon(imageVector = vectorResource(id = R.drawable.ic_add))
             Text(text = "Add Address", modifier = Modifier.padding(start = 16.dp), fontSize = regularFontSize)
         }
         Spacer(modifier = Modifier.weight(1f))

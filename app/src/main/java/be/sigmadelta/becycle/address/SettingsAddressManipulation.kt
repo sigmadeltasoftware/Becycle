@@ -9,11 +9,10 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.ExperimentalFocus
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.ContextAmbient
+import androidx.compose.ui.platform.AmbientContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -31,7 +30,6 @@ import com.afollestad.materialdialogs.MaterialDialog
 import org.koin.ext.isInt
 
 @ExperimentalMaterialApi
-@ExperimentalFocus
 @Composable
 fun SettingsAddressManipulation(
     zipCodeItemsViewState: ListViewState<ZipCodeItem>,
@@ -54,7 +52,7 @@ fun SettingsAddressManipulation(
                 title = { Text(text = appBarTitle ?: "Create Address") },
                 navigationIcon = {
                     Icon(
-                        asset = vectorResource(id = R.drawable.ic_back),
+                        imageVector = vectorResource(id = R.drawable.ic_back),
                         modifier = Modifier.clickable(onClick = actions.onBackClicked)
                             .padding(start = 8.dp)
                     )
@@ -137,7 +135,7 @@ fun SettingsAddressManipulation(
                     }
 
                     actions.onAddressRemove?.let {
-                        val ctx = ContextAmbient.current
+                        val ctx = AmbientContext.current
                         Button(
                             modifier = Modifier.align(Alignment.CenterHorizontally).fillMaxWidth(),
                             onClick = {

@@ -12,16 +12,15 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.savedinstancestate.rememberSavedInstanceState
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.focus.ExperimentalFocus
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.ContextAmbient
+import androidx.compose.ui.platform.AmbientContext
 import androidx.compose.ui.platform.setContent
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import be.sigmadelta.becycle.address.*
-import be.sigmadelta.becycle.calendar.Calendar
-import be.sigmadelta.becycle.calendar.CalendarWidgets
+import be.sigmadelta.becycle.calendar.CalendarView
+import be.sigmadelta.becycle.calendar.CalendarViewActions
 import be.sigmadelta.becycle.collections.CollectionsViewModel
 import be.sigmadelta.becycle.common.*
 import be.sigmadelta.becycle.common.ui.theme.*
@@ -40,15 +39,12 @@ import com.afollestad.materialdialogs.bottomsheets.BottomSheet
 import com.github.aakira.napier.Napier
 import com.judemanutd.autostarter.AutoStartPermissionHelper
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import java.time.YearMonth
 
 @ExperimentalMaterialApi
-@ExperimentalFocus
 @ExperimentalCoroutinesApi
 class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
@@ -92,7 +88,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 }
 
 @ExperimentalMaterialApi
-@ExperimentalFocus
 @Composable
 fun MainLayout(
     addressViewModel: AddressViewModel,
@@ -108,12 +103,14 @@ fun MainLayout(
 
     val actions = remember(nav) { Actions(nav) }
 
+    val AmbientAddress = ambientOf { addressViewModel.addressesViewState.value }
+
     if ((addressViewModel.addressesViewState.value as? ListViewState.Success)?.payload?.isNotEmpty() == true
         && nav.current != Destination.Settings
         && nav.current != Destination.SettingsAddressManipulation
         && preferences.isFirstRun
     ) {
-        MaterialDialog(ContextAmbient.current).show {
+        MaterialDialog(AmbientContext.current).show {
             cornerRadius(16f)
             title(text = "Battery Optimisations")
             message(text = "Due to Android's aggressive battery optimisations, notification reminders might not work on your device.\n\nWould you like disable the battery optimisations for this app to make sure the reminders are allowed to trigger?")
@@ -132,7 +129,9 @@ fun MainLayout(
         }
     }
 
-    Providers(BackDispatcherAmbient provides backPressedDispatcher) {
+    Providers(
+        BackDispatcherAmbient provides backPressedDispatcher
+    ) {
         ProvideDisplayInsets {
             Scaffold(
                 bodyContent = { _ ->
@@ -146,31 +145,31 @@ fun MainLayout(
                     )
                 },
                 bottomBar = {
-                    val ctx = ContextAmbient.current
+                    val ctx = AmbientContext.current
                     BottomNavigation(
                         backgroundColor = primaryBackgroundColor,
                         elevation = 8.dp,
                     ) {
                         BottomNavigationItem(
-                            icon = { Icon(asset = vectorResource(id = R.drawable.ic_home)) },
+                            icon = { Icon(vectorResource(id = R.drawable.ic_home)) },
                             selectedContentColor = primaryAccent,
                             unselectedContentColor = unselectedColor,
                             selected = nav.current == Destination.Home,
                             onClick = { actions.goTo(Destination.Home) })
                         BottomNavigationItem(
-                            icon = { Icon(asset = vectorResource(id = R.drawable.ic_calendar)) },
+                            icon = { Icon(vectorResource(id = R.drawable.ic_calendar)) },
                             selectedContentColor = primaryAccent,
                             unselectedContentColor = unselectedColor,
                             selected = nav.current == Destination.Calendar,
                             onClick = { actions.goTo(Destination.Calendar) })
                         BottomNavigationItem(
-                            icon = { Icon(asset = vectorResource(id = R.drawable.ic_settings)) },
+                            icon = { Icon(vectorResource(id = R.drawable.ic_settings)) },
                             selectedContentColor = primaryAccent,
                             unselectedContentColor = unselectedColor,
                             selected = nav.current.toString().contains("Settings"), // TODO?
                             onClick = { actions.goTo(Destination.Settings) })
                         BottomNavigationItem(
-                            icon = { Icon(asset = vectorResource(id = R.drawable.ic_web)) },
+                            icon = { Icon(vectorResource(id = R.drawable.ic_web)) },
                             selectedContentColor = primaryAccent,
                             unselectedContentColor = unselectedColor,
                             selected = false,
@@ -195,9 +194,9 @@ fun MainLayout(
     }
 }
 
+@ExperimentalCoroutinesApi
 @ExperimentalMaterialApi
 @SuppressLint("SetJavaScriptEnabled")
-@ExperimentalFocus
 @Composable
 fun Main(
     nav: Navigator<Destination>,
@@ -223,18 +222,15 @@ fun Main(
             { address -> collectionsViewModel.searchCollections(address) }
         )
 
-        Destination.Calendar -> Calendar(
-            monthFlow = MutableStateFlow(YearMonth.now()),
-            widgets = CalendarWidgets(
-                header = {},
-                headerDayItem = {},
-                dayItem = {},
-                priorMonthDayItem = {}
-            )
-        )
+        Destination.Calendar -> CalendarView(collectionOverview, addresses, CalendarViewActions(
+            onGoToAddressInput = {
+                actions.goTo(Destination.SettingsAddressManipulation)
+            },
+            onSearchCollectionsForAddress = collectionsViewModel::searchCollections
+        ))
 
         Destination.Settings -> {
-            val ctx = ContextAmbient.current
+            val ctx = AmbientContext.current
             val autoStarter = AutoStartPermissionHelper.getInstance()
             var notificationSwitchState by remember { mutableStateOf(preferences.notificationsEnabled) }
 
@@ -293,7 +289,7 @@ fun Main(
         }
 
         Destination.SettingsNotifications -> {
-            val ctx = ContextAmbient.current
+            val ctx = AmbientContext.current
             SettingsNotifications(
                 addresses,
                 notificationProps,

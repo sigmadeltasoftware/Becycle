@@ -1,7 +1,7 @@
 object BecProperties {
     const val applicationId = "be.sigmadelta.becycle"
     const val versionCode = 3
-    const val versionName = "0.2-alpha"
+    const val versionName = "0.3-alpha"
 }
 
 object Versions {
@@ -13,7 +13,7 @@ object Versions {
     const val google_gms = "4.3.4"
     const val firebase_crashlytics_gradle = "2.3.0"
 
-    const val kotlin = "1.4.10"
+    const val kotlin = "1.4.21"
     const val kotlinCoroutines = "1.3.9-native-mt-2"
     const val ktor = "1.4.3"
     const val kotlinxSerialization = "1.0.1"
@@ -21,7 +21,8 @@ object Versions {
     const val core = "1.5.0-alpha05"
     const val core_ktx = core
     const val lifecycle = "2.2.0"
-    const val compose = "1.0.0-alpha07"
+    const val compose = "1.0.0-alpha09"
+    const val composeUiTooling = "1.0.0-alpha07"
     const val junit = "4.12"
     const val material = "1.2.1"
     const val appcompat = "1.2.0"
@@ -34,7 +35,7 @@ object Versions {
     const val napier = "1.5.0-alpha1"
     const val material_dialogs = "3.3.0"
     const val firebase_bom = "25.12.0"
-    const val calendar_view_android = "1.0.0"
+    const val calpose = "1.0.1"
 }
 
 object Kotlin {
@@ -55,7 +56,7 @@ object Ktor {
 object Compose {
     const val ui = "androidx.compose.ui:ui:${Versions.compose}"
     const val uiGraphics = "androidx.compose.ui:ui-graphics:${Versions.compose}"
-    const val uiTooling = "androidx.ui:ui-tooling:${Versions.compose}"
+    const val uiTooling = "androidx.ui:ui-tooling:${Versions.composeUiTooling}"
     const val foundationLayout = "androidx.compose.foundation:foundation-layout:${Versions.compose}"
     const val material = "androidx.compose.material:material:${Versions.compose}"
     const val runtimeLiveData =  "androidx.compose.runtime:runtime-livedata:${Versions.compose}"
@@ -75,7 +76,7 @@ object Android {
 object AndroidUi {
     const val material_dialogs_core = "com.afollestad.material-dialogs:core:${Versions.material_dialogs}"
     const val material_dialogs_bottomsheet = "com.afollestad.material-dialogs:bottomsheets:${Versions.material_dialogs}"
-    const val calendar_view = "com.github.kizitonwose:CalendarView:${Versions.calendar_view_android}"
+    const val calpose = "com.github.sigmadeltasoftware:CalPose:${Versions.calpose}"
 }
 
 object Firebase {

@@ -14,10 +14,9 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.ExperimentalFocus
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.VerticalGradient
-import androidx.compose.ui.platform.ContextAmbient
+import androidx.compose.ui.platform.AmbientContext
 import androidx.compose.ui.platform.setContent
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -39,7 +38,6 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.net.UnknownHostException
 
 @ExperimentalMaterialApi
-@ExperimentalFocus
 @ExperimentalCoroutinesApi
 class SplashScreenActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
@@ -142,7 +140,7 @@ fun SplashScreenLayout(show: Boolean, error: Throwable?, actions: ErrorActions) 
         ) {
             Text(
                 style = TextStyle(fontFamily = montserrat),
-                text = ContextAmbient.current.getString(R.string.app_name),
+                text = AmbientContext.current.getString(R.string.app_name),
                 fontSize = splashScreenLogoFontSize,
                 fontWeight = FontWeight.Bold,
                 color = primaryAccent,

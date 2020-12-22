@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.preferredHeight
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyColumnFor
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.text.KeyboardOptions
@@ -12,7 +13,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.ExperimentalFocus
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -24,7 +24,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-@ExperimentalFocus
 @Composable
 fun <T> DropDownTextField(
     itemListViewState: ListViewState<T>,
@@ -82,13 +81,18 @@ fun <T> DropDownTextField(
             when (itemListViewState) {
                 is ListViewState.Loading -> BecycleProgressIndicator()
                 is ListViewState.Success -> {
-                    LazyColumnFor(
+                    LazyColumn(
                         modifier = Modifier.preferredHeight(150.dp).padding(start = 16.dp)
                             .padding(vertical = 4.dp),
-                        items = itemListViewState.payload,
-                        itemContent = {
-                            Column(modifier = Modifier.clickable(onClick = { itemSelectedAction(it) })) {
-                                itemLayout(it)
+                        content = {
+                            items(itemListViewState.payload) {
+                                Column(modifier = Modifier.clickable(onClick = {
+                                    itemSelectedAction(
+                                        it
+                                    )
+                                })) {
+                                    itemLayout(it)
+                                }
                             }
                         }
                     )
