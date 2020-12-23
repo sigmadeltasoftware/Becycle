@@ -12,33 +12,28 @@ import be.sigmadelta.becycle.collections.EmptyCollections
 import be.sigmadelta.becycle.common.ui.theme.bottomNavigationMargin
 import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.becycle.common.ui.util.ViewState
+import be.sigmadelta.becycle.common.util.AmbientAddress
+import be.sigmadelta.becycle.common.util.AmbientTabIndex
 import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.collections.CollectionOverview
 
 @Composable
 fun Home(
-    addresses: ListViewState<Address>,
     collectionOverview: ViewState<CollectionOverview>,
-    onGoToAddressInput: () -> Unit,
-    onLoadCollections: (Address) -> Unit
+    actions: HomeActions
 ) {
     var isInitialized by remember { mutableStateOf(false) }
+    val selectedTabIx = AmbientTabIndex.current
 
-    when (addresses) {
+    when (val addresses = AmbientAddress.current) {
         is ListViewState.Success -> if (addresses.payload.isEmpty()) {
-            onGoToAddressInput()
+            actions.onGoToAddressInput()
         } else {
-            var selectedTabIx by remember { mutableStateOf(0) }
 
             Column {
                 AddressSwitcher(
-                    selectedTabIx = selectedTabIx,
-                    addresses = addresses,
-                    onGoToAddressInput = onGoToAddressInput,
-                    onTabSelected = { ix ->
-                        selectedTabIx = ix
-                        onLoadCollections(addresses.payload[selectedTabIx])
-                    }
+                    onGoToAddressInput = actions.onGoToAddressInput,
+                    onTabSelected = { ix -> actions.onTabSelected(ix) }
                 )
                 HomeLayout(
                     collectionOverview,
@@ -46,9 +41,9 @@ fun Home(
                 )
             }
 
-            if (isInitialized.not() && addresses.payload.firstOrNull() != null) {
-                addresses.payload.firstOrNull()?.let { onLoadCollections(it) }
+            if (isInitialized.not()) {
                 isInitialized = true
+                actions.onLoadCollections(addresses.payload[selectedTabIx])
             }
         }
 
@@ -71,3 +66,9 @@ fun HomeLayout(
         }
     }
 }
+
+data class HomeActions(
+    val onGoToAddressInput: () -> Unit,
+    val onLoadCollections: (Address) -> Unit,
+    val onTabSelected: (Int) -> Unit
+)

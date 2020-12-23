@@ -21,24 +21,22 @@ import be.sigmadelta.becycle.R
 import be.sigmadelta.becycle.address.AddressSwitcher
 import be.sigmadelta.becycle.common.ui.theme.*
 import be.sigmadelta.becycle.common.ui.util.ListViewState
-import be.sigmadelta.common.address.Address
+import be.sigmadelta.becycle.common.util.AmbientAddress
+import be.sigmadelta.becycle.common.util.AmbientTabIndex
 import be.sigmadelta.common.date.Time
 import be.sigmadelta.common.notifications.NotificationProps
 import be.sigmadelta.common.notifications.NotificationRepo
 
 @Composable
 fun SettingsNotifications(
-    addresses: ListViewState<Address>,
     notificationProps: ListViewState<NotificationProps>,
-    onGoToAddressInput: () -> Unit,
-    onTomorrowAlarmTimeSelected: (addressId: String, alarmTime: Time) -> Unit,
-    onNotificationsInfoClicked: () -> Unit,
-    onReloadNotificationPropsWhenEmpty: () -> Unit
+    actions: SettingsNotificationsActions
 ) {
-    var selectedTabIx by remember { mutableStateOf(0) }
+    val selectedTabIx = AmbientTabIndex.current
+    val addresses = AmbientAddress.current
 
     Column {
-        AddressSwitcher(selectedTabIx, addresses, onGoToAddressInput) { ix -> selectedTabIx = ix }
+        AddressSwitcher(actions.onGoToAddressInput) { ix -> actions.onTabSelected(ix) }
 
         Row(
             modifier = Modifier.padding(horizontal = 16.dp).padding(top = 16.dp),
@@ -51,7 +49,7 @@ fun SettingsNotifications(
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.weight(1f))
-            IconButton(onClick = { onNotificationsInfoClicked() }) {
+            IconButton(onClick = { actions.onNotificationsInfoClicked() }) {
                 Icon(imageVector = vectorResource(id = R.drawable.ic_info), tint = secondaryAccent)
             }
         }
@@ -62,12 +60,12 @@ fun SettingsNotifications(
                     (notificationProps as? ListViewState.Success)?.payload?.let { props ->
                         props.firstOrNull { it.addressId == addresses[newIx].id }?.let {
                             NotificationSettings(it) { alarmTime ->
-                                onTomorrowAlarmTimeSelected(addresses[newIx].id, alarmTime)
+                                actions.onTomorrowAlarmTimeSelected(addresses[newIx].id, alarmTime)
                             }
                         }
 
                         if (props.isNullOrEmpty()) {
-                            onReloadNotificationPropsWhenEmpty()
+                            actions.onReloadNotificationPropsWhenEmpty()
                         }
                     }
                 }
@@ -131,4 +129,12 @@ fun NotificationSettings(
         }
     }
 }
+
+data class SettingsNotificationsActions(
+    val onGoToAddressInput: () -> Unit,
+    val onTomorrowAlarmTimeSelected: (addressId: String, alarmTime: Time) -> Unit,
+    val onNotificationsInfoClicked: () -> Unit,
+    val onReloadNotificationPropsWhenEmpty: () -> Unit,
+    val onTabSelected: (Int) -> Unit
+)
 

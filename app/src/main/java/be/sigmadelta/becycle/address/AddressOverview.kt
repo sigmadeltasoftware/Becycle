@@ -18,14 +18,12 @@ import be.sigmadelta.becycle.R
 import be.sigmadelta.becycle.common.ui.theme.*
 import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.becycle.common.ui.widgets.BecycleProgressIndicator
+import be.sigmadelta.becycle.common.util.AmbientAddress
 import be.sigmadelta.common.address.Address
 
 @Composable
 fun SettingsAddressOverview(
-    addresses: ListViewState<Address>,
-    onEditAddressClicked: (Address) -> Unit,
-    onAddAddressClicked: () -> Unit,
-    onBackClicked: () -> Unit
+    actions: AddressOverviewActions
 ) {
     var addressCount by remember { mutableStateOf(0) }
 
@@ -56,26 +54,26 @@ fun SettingsAddressOverview(
                 navigationIcon = {
                     Icon(
                         imageVector = vectorResource(id = R.drawable.ic_back),
-                        modifier = Modifier.clickable(onClick = onBackClicked).padding(start = 8.dp)
+                        modifier = Modifier.clickable(onClick = actions.onBackClicked).padding(start = 8.dp)
                     )
                 }
             )
         },
         bodyContent = {
-            when (addresses) {
+            when (val addresses = AmbientAddress.current) {
                 is ListViewState.Empty -> Unit
                 is ListViewState.Loading -> BecycleProgressIndicator()
                 is ListViewState.Success -> Column {
                     addressCount = addresses.payload.size
                     LazyColumn {
                         itemsIndexed(addresses.payload) { ix, addr ->
-                            SettingsAddressOverviewItem(addr, onEditAddressClicked)
+                            SettingsAddressOverviewItem(addr, actions.onEditAddressClicked)
                             if (ix < addresses.payload.size - 1) {
                                 Divider()
                             }
                         }
                     }
-                    AddAddressItem(onAddAddressClicked = onAddAddressClicked)
+                    AddAddressItem(onAddAddressClicked = actions.onAddAddressClicked)
                 }
                 is ListViewState.Error -> Text(text = "ERROR: ${addresses.error?.localizedMessage}")
             }
@@ -125,8 +123,18 @@ fun AddAddressItem(onAddAddressClicked: () -> Unit) {
         Spacer(modifier = Modifier.weight(1f))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(imageVector = vectorResource(id = R.drawable.ic_add))
-            Text(text = "Add Address", modifier = Modifier.padding(start = 16.dp), fontSize = regularFontSize)
+            Text(
+                text = "Add Address",
+                modifier = Modifier.padding(start = 16.dp),
+                fontSize = regularFontSize
+            )
         }
         Spacer(modifier = Modifier.weight(1f))
     }
 }
+
+data class AddressOverviewActions(
+    val onEditAddressClicked: (Address) -> Unit,
+    val onAddAddressClicked: () -> Unit,
+    val onBackClicked: () -> Unit
+)

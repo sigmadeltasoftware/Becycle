@@ -20,6 +20,7 @@ import be.sigmadelta.becycle.address.AddressSwitcher
 import be.sigmadelta.becycle.common.ui.theme.*
 import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.becycle.common.ui.util.ViewState
+import be.sigmadelta.becycle.common.util.AmbientTabIndex
 import be.sigmadelta.calpose.Calpose
 import be.sigmadelta.calpose.WEIGHT_7DAY_WEEK
 import be.sigmadelta.calpose.model.CalposeActions
@@ -47,11 +48,9 @@ fun CalendarView(
     actions: CalendarViewActions
 ) {
 
-    var selectedTabIx by remember { mutableStateOf(0) }
-
     val collectionSet = MutableStateFlow<Set<CalposeDate>>(setOf())
     val collections = collectionSet.collectAsState().value
-    val selection = MutableStateFlow(CalposeDate(0, DayOfWeek.MONDAY, YearMonth.of(1,1)))
+    val selection = MutableStateFlow(CalposeDate(0, DayOfWeek.MONDAY, YearMonth.of(1, 1)))
     val monthFlow = MutableStateFlow(YearMonth.now())
 
     when (collectionOverview) {
@@ -60,15 +59,13 @@ fun CalendarView(
     }
 
     Column {
-        AddressSwitcher(selectedTabIx, addresses, actions.onGoToAddressInput) {
-            ix -> selectedTabIx = ix
-            (addresses as? ListViewState.Success)?.payload?.get(ix)?.let {
-                actions.onSearchCollectionsForAddress(it)
-            }
-        }
+        AddressSwitcher(
+            onGoToAddressInput = actions.onGoToAddressInput,
+            onTabSelected = { ix -> actions.onTabSelected(ix) }
+        )
 
         Calpose(
-            month = monthFlow.value,
+            month = monthFlow.collectAsState().value,
 
             actions = CalposeActions(
                 onClickedPreviousMonth = { monthFlow.value = monthFlow.value.minusMonths(1) },
@@ -170,10 +167,12 @@ fun EventColumn(collections: Set<CalposeDate>) {
 
 data class CalendarViewActions(
     val onGoToAddressInput: () -> Unit,
-    val onSearchCollectionsForAddress: (Address) -> Unit
+    val onSearchCollectionsForAddress: (Address) -> Unit,
+    val onTabSelected: (Int) -> Unit
 )
 
-private fun CollectionOverview.toSelectionSet(): Set<CalposeDate> = mutableSetOf<Collection>().apply {
+private fun CollectionOverview.toSelectionSet(): Set<CalposeDate> =
+    mutableSetOf<Collection>().apply {
         addAll(today ?: setOf())
         addAll(tomorrow ?: setOf())
         addAll(upcoming ?: setOf())

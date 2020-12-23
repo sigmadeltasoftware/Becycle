@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import be.sigmadelta.becycle.common.ui.util.ListViewState
+import be.sigmadelta.becycle.common.util.AmbientAddress
 import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.address.Street
 import be.sigmadelta.common.address.ZipCodeItem
@@ -12,12 +13,12 @@ import be.sigmadelta.common.address.ZipCodeItem
 @Composable
 fun SettingsAddressEditRemoval(
     addressId: String,
-    addresses: ListViewState<Address>,
     zipCodeItemViewState: ListViewState<ZipCodeItem>,
     streetsViewState: ListViewState<Street>,
     actions: SettingsAddressEditRemovalActions
 ) {
-    when (addresses) {
+
+    when (val addresses = AmbientAddress.current) {
         is ListViewState.Error -> TODO()
 
         is ListViewState.Success -> {

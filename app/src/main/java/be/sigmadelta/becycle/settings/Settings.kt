@@ -115,7 +115,7 @@ fun SettingsMenuItem(
             Switch(
                 checked = switchState == true,
                 onCheckedChange = switchAction,
-                colors = SwitchConstants.defaultColors(checkedThumbColor = primaryAccent),
+                colors = SwitchDefaults.colors(checkedThumbColor = primaryAccent),
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 32.dp)
                     .align(Alignment.CenterVertically)
             )

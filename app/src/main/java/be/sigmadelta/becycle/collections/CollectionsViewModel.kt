@@ -27,8 +27,11 @@ class CollectionsViewModel(
 
     fun searchCollections(
         address: Address,
+        shouldNotFetch: Boolean = false,
     ) = viewModelScope.launch {
-        collectionsRepository.searchUpcomingCollections(address).collect {
+        collectionsRepository
+            .searchUpcomingCollections(address, shouldNotFetch = shouldNotFetch)
+            .collect {
             if (it !is Response.Loading) {
                 analTracker.log(AnalTag.SEARCH_COLLECTIONS) {
                     param(

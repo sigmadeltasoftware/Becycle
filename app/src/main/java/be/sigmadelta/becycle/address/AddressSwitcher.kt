@@ -15,23 +15,25 @@ import be.sigmadelta.becycle.R
 import be.sigmadelta.becycle.common.ui.theme.*
 import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.becycle.common.ui.widgets.BecycleProgressIndicator
-import be.sigmadelta.common.address.Address
+import be.sigmadelta.becycle.common.util.AmbientAddress
+import be.sigmadelta.becycle.common.util.AmbientTabIndex
 import com.github.aakira.napier.Napier
 
 @Composable
 fun AddressSwitcher(
-    selectedTabIx: Int,
-    addresses: ListViewState<Address>,
     onGoToAddressInput: () -> Unit,
     onTabSelected: (Int) -> Unit
 ) {
+
+    val selectedTabIx = AmbientTabIndex.current
+
     TabRow(
         selectedTabIndex = selectedTabIx,
         backgroundColor = primaryBackgroundColor,
         contentColor = primaryAccent,
         divider = { Divider() }
     ) {
-        when (addresses) {
+        when (val addresses = AmbientAddress.current) {
             is ListViewState.Loading -> BecycleProgressIndicator(modifier = Modifier.padding(16.dp))
             is ListViewState.Success -> {
                 addresses.payload.forEachIndexed { ix, it ->
