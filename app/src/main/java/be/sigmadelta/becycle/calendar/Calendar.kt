@@ -1,13 +1,17 @@
 package be.sigmadelta.becycle.calendar
 
 import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Card
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -17,10 +21,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import be.sigmadelta.becycle.address.AddressSwitcher
+import be.sigmadelta.becycle.collections.NoCollectionsSubtitle
+import be.sigmadelta.becycle.collections.UpcomingCollectionItem
 import be.sigmadelta.becycle.common.ui.theme.*
-import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.becycle.common.ui.util.ViewState
-import be.sigmadelta.becycle.common.util.AmbientTabIndex
 import be.sigmadelta.calpose.Calpose
 import be.sigmadelta.calpose.WEIGHT_7DAY_WEEK
 import be.sigmadelta.calpose.model.CalposeActions
@@ -34,28 +38,32 @@ import be.sigmadelta.common.collections.CollectionOverview
 import com.github.aakira.napier.Napier
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toInstant
-import kotlinx.datetime.toLocalDateTime
-import java.time.DayOfWeek
+import kotlinx.datetime.*
 import java.time.YearMonth
 
 @ExperimentalCoroutinesApi
 @Composable
 fun CalendarView(
     collectionOverview: ViewState<CollectionOverview>,
-    addresses: ListViewState<Address>,
     actions: CalendarViewActions
 ) {
 
-    val collectionSet = MutableStateFlow<Set<CalposeDate>>(setOf())
-    val collections = collectionSet.collectAsState().value
-    val selection = MutableStateFlow(CalposeDate(0, DayOfWeek.MONDAY, YearMonth.of(1, 1)))
-    val monthFlow = MutableStateFlow(YearMonth.now())
+    val monthState = remember { mutableStateOf(YearMonth.now()) }
+    val collectionSet = remember { MutableStateFlow<Set<CalposeDate>>(setOf()) }
+    var collections: List<Collection> = mutableListOf()
+    val collectionDates = collectionSet.collectAsState().value
+        .filter { it.month == monthState.value }
+        .toSet()
+    val selection =  remember { mutableStateOf(Clock.System.now().toCalposeDate().copy(month = monthState.value)) }
 
     when (collectionOverview) {
-        is ViewState.Success -> collectionSet.value = collectionOverview.payload.toSelectionSet()
+        is ViewState.Success -> {
+            collections = collectionOverview.payload.allCollections()
+                .filter { it.timestamp.toInstant().toCalposeDate().month == monthState.value }
+            collectionSet.value = collectionOverview.payload.toSelectionSet()
+        }
         is ViewState.Error -> Napier.e("Error during retrieval of collection: ${collectionOverview.error}")
+        else -> Unit
     }
 
     Column {
@@ -64,104 +72,136 @@ fun CalendarView(
             onTabSelected = { ix -> actions.onTabSelected(ix) }
         )
 
-        Calpose(
-            month = monthFlow.collectAsState().value,
-
+        Calendar(
+            month =  monthState,
+            selection = selection,
             actions = CalposeActions(
-                onClickedPreviousMonth = { monthFlow.value = monthFlow.value.minusMonths(1) },
-                onClickedNextMonth = { monthFlow.value = monthFlow.value.plusMonths(1) },
+                onClickedPreviousMonth = { monthState.value = monthState.value.minusMonths(1) },
+                onClickedNextMonth = { monthState.value = monthState.value.plusMonths(1) },
             ),
+            collections = collectionDates
+        ) { selection.value = it }
 
-            widgets = CalposeWidgets(
-                header = { month, todayMonth, actions ->
-                    DefaultHeader(
-                        month,
-                        todayMonth,
-                        actions
-                    )
-                },
-                headerDayRow = { headerDayList ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(1f)
-                            .padding(vertical = 8.dp),
-                    ) {
-                        headerDayList.forEach {
-                            DefaultDay(
-                                text = it.name.first().toString(),
-                                modifier = Modifier.weight(WEIGHT_7DAY_WEEK).alpha(.6f),
-                                style = TextStyle(color = Color.Gray, fontWeight = FontWeight.Bold)
-                            )
-                        }
-                    }
-                },
-                day = { day, today ->
-                    val isSelected = selection.collectAsState().value == day
-                    val hasCollection = collections.contains(day)
-                    val onSelected = {
-                        selection.value = day
-                    }
-                    val weight = if (hasCollection || isSelected) 1f else WEIGHT_7DAY_WEEK
-                    val bgColor = when {
-                        isSelected -> primaryAccent
-                        day == today -> errorSecondaryColor
-                        hasCollection -> secondaryAccent
-                        else -> Color.Transparent
-                    }
-
-                    val widget: @Composable () -> Unit = {
-                        DefaultDay(
-                            text = day.day.toString(),
-                            modifier = Modifier.padding(4.dp).weight(weight).fillMaxWidth(),
-                            style = TextStyle(
-                                color = when {
-                                    isSelected -> Color.White
-                                    else -> Color.Black
-                                },
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-                            )
-                        )
-                    }
-
-                    Column(
-                        modifier = Modifier.weight(WEIGHT_7DAY_WEEK),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-
-                        Crossfade(current = bgColor) {
-                            Box(
-                                modifier = Modifier.preferredSize(28.dp).clip(CircleShape)
-                                    .clickable(onClick = onSelected, indication = null)
-                                    .background(it)
-                            ) {
-                                widget()
-                            }
-                        }
-                    }
-                },
-                priorMonthDay = { day ->
-                    DefaultDay(
-                        text = day.day.toString(),
-                        style = TextStyle(color = unselectedColor),
-                        modifier = Modifier.padding(4.dp).fillMaxWidth().weight(WEIGHT_7DAY_WEEK)
-                    )
-                },
-                headerContainer = {
-                    Card {
-                        it()
-                    }
-                }
-            )
-        )
-
-        EventColumn(collections)
+        EventColumn(collections, selection)
     }
 }
 
 @Composable
-fun EventColumn(collections: Set<CalposeDate>) {
-    collections.forEach {
-        Text(text = "${it.month.month}-${it.day}")
+fun Calendar(
+    month: State<YearMonth>,
+    selection: State<CalposeDate>,
+    actions: CalposeActions,
+    collections: Set<CalposeDate>,
+    onSelectedDate: (CalposeDate) -> Unit
+) {
+
+    Calpose(
+        month = month.value,
+
+        actions = actions,
+
+        widgets = CalposeWidgets(
+            header = { month, todayMonth, actions ->
+                DefaultHeader(
+                    month,
+                    todayMonth,
+                    actions
+                )
+            },
+            headerDayRow = { headerDayList ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(1f)
+                        .padding(vertical = 8.dp),
+                ) {
+                    headerDayList.forEach {
+                        DefaultDay(
+                            text = it.name.first().toString(),
+                            modifier = Modifier.weight(WEIGHT_7DAY_WEEK).alpha(.6f),
+                            style = TextStyle(color = Color.Gray, fontWeight = FontWeight.Bold)
+                        )
+                    }
+                }
+            },
+
+            day = { day, today ->
+                val isSelected = selection.value == day
+                val hasCollection = collections.contains(day)
+                val weight = if (hasCollection || isSelected) 1f else WEIGHT_7DAY_WEEK
+                val bgColor = when {
+                    isSelected -> primaryAccent
+                    hasCollection -> secondaryAccent
+                    else -> Color.Transparent
+                }
+
+                val widget: @Composable () -> Unit = {
+                    DefaultDay(
+                        text = day.day.toString(),
+                        modifier = Modifier.padding(4.dp).weight(weight).fillMaxWidth(),
+                        style = TextStyle(
+                            color = when {
+                                isSelected -> Color.White
+                                else -> Color.Black
+                            },
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                        )
+                    )
+                }
+
+                Column(
+                    modifier = Modifier.weight(WEIGHT_7DAY_WEEK),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+
+                    Crossfade(current = bgColor) {
+                        Box(
+                            modifier = Modifier.preferredSize(28.dp).clip(CircleShape)
+                                .clickable(onClick = { onSelectedDate(day) }, indication = null)
+                                .background(it)
+                                .border(BorderStroke(2.dp, if (day == today) primaryAccent else Color.Transparent), CircleShape)
+                        ) {
+                            widget()
+                        }
+                    }
+                }
+            },
+            priorMonthDay = { day ->
+                DefaultDay(
+                    text = day.day.toString(),
+                    style = TextStyle(color = unselectedColor),
+                    modifier = Modifier.padding(4.dp).fillMaxWidth().weight(WEIGHT_7DAY_WEEK)
+                )
+            },
+            headerContainer = {
+                Card {
+                    it()
+                }
+            }
+        )
+    )
+}
+
+@Composable
+fun EventColumn(collections: List<Collection>, selection: State<CalposeDate>) {
+    Column(Modifier.padding(horizontal = 16.dp)) {
+        Text(
+            "${selection.value.day} ${selection.value.month.month.name} ${selection.value.month.year}",
+            fontWeight = FontWeight.Bold,
+            fontSize = titleFontSize,
+            color = textPrimary,
+            modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+        )
+
+        val currentCollections =
+            collections.filter { it.timestamp.toInstant().toCalposeDate() == selection.value }
+        LazyColumn(Modifier.fillMaxWidth()) {
+            items(currentCollections) {
+                UpcomingCollectionItem(collection = it)
+            }
+        }
+        if (currentCollections.isEmpty()) {
+            NoCollectionsSubtitle()
+        }
     }
 }
 
@@ -171,12 +211,16 @@ data class CalendarViewActions(
     val onTabSelected: (Int) -> Unit
 )
 
+private fun Instant.toCalposeDate(): CalposeDate {
+    val time = toLocalDateTime(TimeZone.currentSystemDefault())
+    return CalposeDate(time.dayOfMonth, time.dayOfWeek, YearMonth.of(time.year, time.month))
+}
+
+private fun CollectionOverview.allCollections() = mutableListOf<Collection>().apply {
+    addAll(today ?: listOf())
+    addAll(tomorrow ?: listOf())
+    addAll(upcoming ?: listOf())
+}
+
 private fun CollectionOverview.toSelectionSet(): Set<CalposeDate> =
-    mutableSetOf<Collection>().apply {
-        addAll(today ?: setOf())
-        addAll(tomorrow ?: setOf())
-        addAll(upcoming ?: setOf())
-    }.map {
-        val time = it.timestamp.toInstant().toLocalDateTime(TimeZone.currentSystemDefault())
-        CalposeDate(time.dayOfMonth, time.dayOfWeek, YearMonth.of(time.year, time.month))
-    }.toSet()
+    allCollections().map { it.timestamp.toInstant().toCalposeDate() }.toSet()

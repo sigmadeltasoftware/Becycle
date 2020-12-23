@@ -4,14 +4,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import be.sigmadelta.becycle.common.analytics.AnalTag
 import be.sigmadelta.becycle.common.analytics.AnalyticsTracker
-import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.becycle.common.ui.util.ViewState
 import be.sigmadelta.becycle.common.ui.util.toViewState
 import be.sigmadelta.common.address.Address
-import be.sigmadelta.common.collections.Collection
 import be.sigmadelta.common.collections.CollectionOverview
 import be.sigmadelta.common.collections.CollectionsRepository
 import be.sigmadelta.common.util.Response
+import be.sigmadelta.common.util.toAnalStateType
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
@@ -34,18 +33,14 @@ class CollectionsViewModel(
             .collect {
             if (it !is Response.Loading) {
                 analTracker.log(AnalTag.SEARCH_COLLECTIONS) {
-                    param(
-                        "state", when (it) {
-                            is Response.Success -> "success"
-                            is Response.Error -> "error"
-                            is Response.Loading -> "loading"
-                        }
-                    )
+                    param("state", it.toAnalStateType())
                     param(
                         "value", when (it) {
                             is Response.Loading -> ""
                             is Response.Success -> {
-                                "Upcoming: ${it.body.upcoming ?: 0}\nToday: ${it.body.today ?: 0}\n Tomorrow: ${it.body.tomorrow ?: 0}"
+                                "Upcoming Size: ${it.body.upcoming?.size ?: 0}" +
+                                "\nToday Size: ${it.body.today?.size ?: 0}" +
+                                "\n Tomorrow Size: ${it.body.tomorrow?.size ?: 0}"
                             }
                             is Response.Error -> it.error?.localizedMessage ?: ""
                         }

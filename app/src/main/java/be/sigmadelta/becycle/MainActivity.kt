@@ -240,7 +240,8 @@ fun Main(
 
         Destination.Calendar -> {
             CalendarView(
-                collectionOverview, AmbientAddress.current, CalendarViewActions(
+                collectionOverview,
+                CalendarViewActions(
                     onGoToAddressInput = {
                         actions.goTo(Destination.SettingsAddressManipulation)
                     },
@@ -357,7 +358,6 @@ fun Main(
                 )
             )
         }
-
 
         Destination.SettingsAddresses -> SettingsAddressOverview(
             AddressOverviewActions(

@@ -52,7 +52,7 @@ class AddressViewModel(
         analTracker.userProp(UserProps.ZIPCODE, address.zipCodeItem.code)
         analTracker.log(AnalTag.SAVE_ADDRESS) {
             param("type", if (addressExists) "updateAddress" else "saveAddress")
-            param("address", address.fullAddress)
+            param("zipcode", address.zipCodeItem.code)
         }
 
         loadSavedAddresses()
