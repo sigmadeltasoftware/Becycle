@@ -1,20 +1,12 @@
 package be.sigmadelta.becycle.address
 
-import android.util.Log
-import androidx.compose.foundation.Icon
-import androidx.compose.foundation.Text
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Divider
-import androidx.compose.material.Tab
-import androidx.compose.material.TabRow
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -23,23 +15,25 @@ import be.sigmadelta.becycle.R
 import be.sigmadelta.becycle.common.ui.theme.*
 import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.becycle.common.ui.widgets.BecycleProgressIndicator
-import be.sigmadelta.common.address.Address
+import be.sigmadelta.becycle.common.util.AmbientAddress
+import be.sigmadelta.becycle.common.util.AmbientTabIndex
 import com.github.aakira.napier.Napier
 
 @Composable
 fun AddressSwitcher(
-    selectedTabIx: Int,
-    addresses: ListViewState<Address>,
     onGoToAddressInput: () -> Unit,
     onTabSelected: (Int) -> Unit
 ) {
+
+    val selectedTabIx = AmbientTabIndex.current
+
     TabRow(
         selectedTabIndex = selectedTabIx,
         backgroundColor = primaryBackgroundColor,
         contentColor = primaryAccent,
         divider = { Divider() }
     ) {
-        when (addresses) {
+        when (val addresses = AmbientAddress.current) {
             is ListViewState.Loading -> BecycleProgressIndicator(modifier = Modifier.padding(16.dp))
             is ListViewState.Success -> {
                 addresses.payload.forEachIndexed { ix, it ->
@@ -80,7 +74,7 @@ fun AddressSwitcher(
                                 color = unselectedColor
                             )
                             Icon(
-                                asset = vectorResource(id = R.drawable.ic_add),
+                                imageVector = vectorResource(id = R.drawable.ic_add),
                                 tint = primaryAccent,
                                 modifier = Modifier.align(Alignment.CenterHorizontally)
                             )

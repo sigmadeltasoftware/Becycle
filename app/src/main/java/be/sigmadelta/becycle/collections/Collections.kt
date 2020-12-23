@@ -2,11 +2,12 @@ package be.sigmadelta.becycle.collections
 
 import android.widget.ImageView
 import androidx.compose.foundation.ScrollableColumn
-import androidx.compose.foundation.Text
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.LazyRowFor
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,9 +29,11 @@ fun Collections(collectionOverview: CollectionOverview) {
             title = "Today",
             date = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         )
-        collectionOverview.today?.let {
-            LazyRowFor(items = it) { collection ->
-                CollectionItem(collection)
+        collectionOverview.today?.let { collections ->
+            LazyRow {
+                items(collections) {
+                    CollectionItem(it)
+                }
             }
         } ?: NoCollectionsSubtitle()
 
@@ -41,9 +44,11 @@ fun Collections(collectionOverview: CollectionOverview) {
                     TimeZone.currentSystemDefault()
                 )
         )
-        collectionOverview.tomorrow?.let {
-            LazyRowFor(items = it) { collection ->
-                CollectionItem(collection = collection, true)
+        collectionOverview.tomorrow?.let { collections ->
+            LazyRow {
+                items(collections) {
+                    CollectionItem(collection = it, true)
+                }
             }
         } ?: NoCollectionsSubtitle()
 
@@ -96,7 +101,7 @@ fun NoCollectionsSubtitle() {
 @Composable
 fun CollectionItem(collection: Collection, isTomorrow: Boolean = false) {
     Card(
-        elevation = 12.dp,
+        elevation = 4.dp,
         modifier = Modifier.width(180.dp).padding(6.dp),
         shape = RoundedCornerShape(8.dp),
         backgroundColor = if (isTomorrow) secondaryAccent else unselectedBackgroundColor
@@ -128,7 +133,7 @@ fun CollectionItem(collection: Collection, isTomorrow: Boolean = false) {
 @Composable
 fun UpcomingCollectionItem(collection: Collection) {
     Card(
-        elevation = 12.dp,
+        elevation = 4.dp,
         modifier = Modifier.fillMaxWidth().padding(6.dp),
         shape = RoundedCornerShape(8.dp)
     ) {
@@ -154,7 +159,7 @@ fun UpcomingCollectionItem(collection: Collection) {
             Spacer(modifier = Modifier.weight(1f))
             collection.timestamp.toInstant().toLocalDateTime(TimeZone.currentSystemDefault()).let {
                 Text(
-                    text = "${it.dayOfMonth}-${it.monthNumber}-${it.year}",
+                    text = "${it.dayOfMonth}/${it.monthNumber}",
                     fontSize = subTextFontSize,
                     color = textSecondary
                 )

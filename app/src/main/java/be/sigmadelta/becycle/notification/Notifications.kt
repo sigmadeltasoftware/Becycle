@@ -2,16 +2,16 @@ package be.sigmadelta.becycle.notification
 
 import android.app.TimePickerDialog
 import androidx.compose.animation.Crossfade
-import androidx.compose.foundation.Icon
-import androidx.compose.foundation.Text
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
+import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.ContextAmbient
+import androidx.compose.ui.platform.AmbientContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -21,24 +21,22 @@ import be.sigmadelta.becycle.R
 import be.sigmadelta.becycle.address.AddressSwitcher
 import be.sigmadelta.becycle.common.ui.theme.*
 import be.sigmadelta.becycle.common.ui.util.ListViewState
-import be.sigmadelta.common.address.Address
+import be.sigmadelta.becycle.common.util.AmbientAddress
+import be.sigmadelta.becycle.common.util.AmbientTabIndex
 import be.sigmadelta.common.date.Time
 import be.sigmadelta.common.notifications.NotificationProps
 import be.sigmadelta.common.notifications.NotificationRepo
 
 @Composable
 fun SettingsNotifications(
-    addresses: ListViewState<Address>,
     notificationProps: ListViewState<NotificationProps>,
-    onGoToAddressInput: () -> Unit,
-    onTomorrowAlarmTimeSelected: (addressId: String, alarmTime: Time) -> Unit,
-    onNotificationsInfoClicked: () -> Unit,
-    onReloadNotificationPropsWhenEmpty: () -> Unit
+    actions: SettingsNotificationsActions
 ) {
-    var selectedTabIx by remember { mutableStateOf(0) }
+    val selectedTabIx = AmbientTabIndex.current
+    val addresses = AmbientAddress.current
 
     Column {
-        AddressSwitcher(selectedTabIx, addresses, onGoToAddressInput) { ix -> selectedTabIx = ix }
+        AddressSwitcher(actions.onGoToAddressInput) { ix -> actions.onTabSelected(ix) }
 
         Row(
             modifier = Modifier.padding(horizontal = 16.dp).padding(top = 16.dp),
@@ -51,8 +49,8 @@ fun SettingsNotifications(
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.weight(1f))
-            IconButton(onClick = { onNotificationsInfoClicked() }) {
-                Icon(asset = vectorResource(id = R.drawable.ic_info), tint = secondaryAccent)
+            IconButton(onClick = { actions.onNotificationsInfoClicked() }) {
+                Icon(imageVector = vectorResource(id = R.drawable.ic_info), tint = secondaryAccent)
             }
         }
 
@@ -62,12 +60,12 @@ fun SettingsNotifications(
                     (notificationProps as? ListViewState.Success)?.payload?.let { props ->
                         props.firstOrNull { it.addressId == addresses[newIx].id }?.let {
                             NotificationSettings(it) { alarmTime ->
-                                onTomorrowAlarmTimeSelected(addresses[newIx].id, alarmTime)
+                                actions.onTomorrowAlarmTimeSelected(addresses[newIx].id, alarmTime)
                             }
                         }
 
                         if (props.isNullOrEmpty()) {
-                            onReloadNotificationPropsWhenEmpty()
+                            actions.onReloadNotificationPropsWhenEmpty()
                         }
                     }
                 }
@@ -75,7 +73,7 @@ fun SettingsNotifications(
         }
 
         if (BuildConfig.DEBUG) {
-            val workInfos = WorkManager.getInstance(ContextAmbient.current)
+            val workInfos = WorkManager.getInstance(AmbientContext.current)
                 .getWorkInfosForUniqueWork(NotificationRepo.WORK_NAME)
                 .get()
             if (workInfos.size == 1) {
@@ -93,7 +91,7 @@ fun NotificationSettings(
 ) {
     var notificationTimeToday by remember { mutableStateOf(notificationProps.genericTodayAlarmTime) }
     var notificationTimeTomorrow by remember { mutableStateOf(notificationProps.genericTomorrowAlarmTime) }
-    val ctx = ContextAmbient.current
+    val ctx = AmbientContext.current
 
     Row(modifier = Modifier.padding(16.dp)) {
         Column(modifier = Modifier.align(alignment = Alignment.CenterVertically)) {
@@ -131,4 +129,12 @@ fun NotificationSettings(
         }
     }
 }
+
+data class SettingsNotificationsActions(
+    val onGoToAddressInput: () -> Unit,
+    val onTomorrowAlarmTimeSelected: (addressId: String, alarmTime: Time) -> Unit,
+    val onNotificationsInfoClicked: () -> Unit,
+    val onReloadNotificationPropsWhenEmpty: () -> Unit,
+    val onTabSelected: (Int) -> Unit
+)
 

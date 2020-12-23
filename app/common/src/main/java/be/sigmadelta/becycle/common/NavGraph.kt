@@ -11,6 +11,8 @@ sealed class Destination: Parcelable {
     @Parcelize
     object Home: Destination()
 
+    @Parcelize
+    object Calendar: Destination()
 
     @Parcelize
     object Settings: Destination()

@@ -3,8 +3,7 @@ package be.sigmadelta.becycle.common
 import android.view.View
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
-import androidx.compose.ui.layout.IntrinsicMeasurable
-import androidx.compose.ui.layout.IntrinsicMeasureScope
+import androidx.compose.ui.layout.*
 import androidx.compose.ui.platform.ViewAmbient
 import androidx.compose.ui.unit.*
 import androidx.core.view.ViewCompat
@@ -240,7 +239,7 @@ private data class InsetsPaddingModifier(
     override fun MeasureScope.measure(
         measurable: Measurable,
         constraints: Constraints
-    ): MeasureScope.MeasureResult {
+    ): MeasureResult {
         val left = if (applyLeft) insets.left else 0
         val top = if (applyTop) insets.top else 0
         val right = if (applyRight) insets.right else 0
@@ -298,7 +297,7 @@ private data class InsetsSizeModifier(
     override fun MeasureScope.measure(
         measurable: Measurable,
         constraints: Constraints
-    ): MeasureScope.MeasureResult {
+    ): MeasureResult {
         val wrappedConstraints = targetConstraints.let { targetConstraints ->
             val resolvedMinWidth = if (widthSide != null) {
                 targetConstraints.minWidth

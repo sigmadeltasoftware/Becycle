@@ -2,6 +2,7 @@ package be.sigmadelta.becycle.accesstoken
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import be.sigmadelta.becycle.common.analytics.AnalTag
 import be.sigmadelta.becycle.common.analytics.AnalyticsTracker
 import be.sigmadelta.becycle.common.ui.util.ViewState
 import be.sigmadelta.becycle.common.ui.util.toViewState
@@ -23,25 +24,26 @@ class AccessTokenViewModel(
 
     fun getAccessToken() = viewModelScope.launch {
         accessTokenRepository.getAccessToken().collect {
-            analTracker.log(
-                ANAL_TAG,
-                "getAccessToken_${when (it) {
-                    is Response.Success -> "success"
-                    is Response.Error -> "error"
-                    is Response.Loading -> "loading"
-                }}",
-                when(it){
-                    is Response.Loading -> null
-                    is Response.Success -> it.body.toString()
-                    is Response.Error -> it.error?.localizedMessage
-                })
+
+            if (it !is Response.Loading) {
+                analTracker.log(AnalTag.GET_ACCESS_TOKEN) {
+                    param("state", when (it) {
+                            is Response.Success -> "success"
+                            is Response.Error -> "error"
+                            is Response.Loading -> ""
+                    })
+
+                    if (it is Response.Error) {
+                        param("response", it.error?.localizedMessage ?: "")
+                    }
+                }
+            }
 
             accessTokenViewState.value = it.toViewState()
         }
     }
 
     companion object {
-        const val TAG = "RecycleViewModel"
         private const val ANAL_TAG = "AccessTokenVM"
     }
 }

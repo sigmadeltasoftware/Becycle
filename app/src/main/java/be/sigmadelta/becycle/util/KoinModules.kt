@@ -2,7 +2,7 @@ package be.sigmadelta.becycle.util
 
 import android.app.PendingIntent
 import android.content.Intent
-import androidx.compose.ui.focus.ExperimentalFocus
+import androidx.compose.material.ExperimentalMaterialApi
 import be.sigmadelta.becycle.SplashScreenActivity
 import be.sigmadelta.becycle.baseheaders.BaseHeadersViewModel
 import be.sigmadelta.becycle.address.AddressViewModel
@@ -55,7 +55,7 @@ private val notificationDb = DB.factory
         root<NotificationLabel>()
     }, org.kodein.db.orm.kotlinx.KotlinxSerializer())
 
-@ExperimentalFocus
+@ExperimentalMaterialApi
 val coreModule = module {
     single { db }
     single { Preferences() }

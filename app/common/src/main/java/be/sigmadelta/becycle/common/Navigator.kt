@@ -73,7 +73,7 @@ fun backHandler(
         backCallback.isEnabled = enabled
     }
 
-    val dispatcher = BackDispatcherAmbient.current
+    val dispatcher = AmbientBackDispatcher.current
     onCommit(backCallback) {
         dispatcher.addCallback(backCallback)
         onDispose {
@@ -86,6 +86,6 @@ fun backHandler(
  * An [androidx.compose.runtime.Ambient] providing the current [OnBackPressedDispatcher]. You must
  * [provide][androidx.compose.runtime.Providers] a value before use.
  */
-val BackDispatcherAmbient = staticAmbientOf<OnBackPressedDispatcher> {
+val AmbientBackDispatcher = staticAmbientOf<OnBackPressedDispatcher> {
     error("No Back Dispatcher provided")
 }

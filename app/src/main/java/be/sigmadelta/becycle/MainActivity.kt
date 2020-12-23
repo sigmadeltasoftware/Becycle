@@ -4,38 +4,39 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.OnBackPressedDispatcher
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.Icon
-import androidx.compose.foundation.Text
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.savedinstancestate.rememberSavedInstanceState
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.focus.ExperimentalFocus
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.ContextAmbient
+import androidx.compose.ui.platform.AmbientContext
 import androidx.compose.ui.platform.setContent
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import be.sigmadelta.becycle.address.*
+import be.sigmadelta.becycle.calendar.CalendarView
+import be.sigmadelta.becycle.calendar.CalendarViewActions
 import be.sigmadelta.becycle.collections.CollectionsViewModel
 import be.sigmadelta.becycle.common.*
 import be.sigmadelta.becycle.common.ui.theme.*
 import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.becycle.common.ui.util.ViewState
 import be.sigmadelta.becycle.common.ui.widgets.BecycleProgressIndicator
+import be.sigmadelta.becycle.common.util.AmbientAddress
+import be.sigmadelta.becycle.common.util.AmbientTabIndex
 import be.sigmadelta.becycle.common.util.PowerUtil
 import be.sigmadelta.becycle.home.Home
+import be.sigmadelta.becycle.home.HomeActions
 import be.sigmadelta.becycle.notification.NotificationViewModel
 import be.sigmadelta.becycle.notification.SettingsNotifications
+import be.sigmadelta.becycle.notification.SettingsNotificationsActions
 import be.sigmadelta.becycle.settings.Settings
 import be.sigmadelta.common.Preferences
-import be.sigmadelta.common.notifications.NotificationRepo
 import be.sigmadelta.common.util.AuthorizationKeyExpiredException
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.bottomsheets.BottomSheet
@@ -47,7 +48,9 @@ import kotlinx.coroutines.flow.collect
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-@ExperimentalFocus
+private var selectedTabIx by mutableStateOf(0)
+
+@ExperimentalMaterialApi
 @ExperimentalCoroutinesApi
 class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
@@ -90,7 +93,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     }
 }
 
-@ExperimentalFocus
+@ExperimentalMaterialApi
 @Composable
 fun MainLayout(
     addressViewModel: AddressViewModel,
@@ -106,12 +109,13 @@ fun MainLayout(
 
     val actions = remember(nav) { Actions(nav) }
 
-    if ((addressViewModel.addressesViewState.value as? ListViewState.Success)?.payload?.isNotEmpty() == true
+    if (
+        (addressViewModel.addressesViewState.value as? ListViewState.Success)?.payload?.isNotEmpty() == true
         && nav.current != Destination.Settings
         && nav.current != Destination.SettingsAddressManipulation
         && preferences.isFirstRun
     ) {
-        MaterialDialog(ContextAmbient.current).show {
+        MaterialDialog(AmbientContext.current).show {
             cornerRadius(16f)
             title(text = "Battery Optimisations")
             message(text = "Due to Android's aggressive battery optimisations, notification reminders might not work on your device.\n\nWould you like disable the battery optimisations for this app to make sure the reminders are allowed to trigger?")
@@ -130,7 +134,12 @@ fun MainLayout(
         }
     }
 
-    Providers(BackDispatcherAmbient provides backPressedDispatcher) {
+    Providers(
+        AmbientBackDispatcher provides backPressedDispatcher,
+        AmbientAddress provides addressViewModel.addressesViewState.value,
+        AmbientTabIndex provides selectedTabIx
+    ) {
+
         ProvideDisplayInsets {
             Scaffold(
                 bodyContent = { _ ->
@@ -144,25 +153,31 @@ fun MainLayout(
                     )
                 },
                 bottomBar = {
-                    val ctx = ContextAmbient.current
+                    val ctx = AmbientContext.current
                     BottomNavigation(
                         backgroundColor = primaryBackgroundColor,
                         elevation = 8.dp,
                     ) {
                         BottomNavigationItem(
-                            icon = { Icon(asset = vectorResource(id = R.drawable.ic_home)) },
+                            icon = { Icon(vectorResource(id = R.drawable.ic_home)) },
                             selectedContentColor = primaryAccent,
                             unselectedContentColor = unselectedColor,
                             selected = nav.current == Destination.Home,
                             onClick = { actions.goTo(Destination.Home) })
                         BottomNavigationItem(
-                            icon = { Icon(asset = vectorResource(id = R.drawable.ic_settings)) },
+                            icon = { Icon(vectorResource(id = R.drawable.ic_calendar)) },
+                            selectedContentColor = primaryAccent,
+                            unselectedContentColor = unselectedColor,
+                            selected = nav.current == Destination.Calendar,
+                            onClick = { actions.goTo(Destination.Calendar) })
+                        BottomNavigationItem(
+                            icon = { Icon(vectorResource(id = R.drawable.ic_settings)) },
                             selectedContentColor = primaryAccent,
                             unselectedContentColor = unselectedColor,
                             selected = nav.current.toString().contains("Settings"), // TODO?
                             onClick = { actions.goTo(Destination.Settings) })
                         BottomNavigationItem(
-                            icon = { Icon(asset = vectorResource(id = R.drawable.ic_web)) },
+                            icon = { Icon(vectorResource(id = R.drawable.ic_web)) },
                             selectedContentColor = primaryAccent,
                             unselectedContentColor = unselectedColor,
                             selected = false,
@@ -187,8 +202,9 @@ fun MainLayout(
     }
 }
 
+@ExperimentalCoroutinesApi
+@ExperimentalMaterialApi
 @SuppressLint("SetJavaScriptEnabled")
-@ExperimentalFocus
 @Composable
 fun Main(
     nav: Navigator<Destination>,
@@ -199,23 +215,49 @@ fun Main(
     notificationViewModel: NotificationViewModel
 ) {
 
-    val addresses by addressViewModel.addressesViewState.collectAsState()
     val collectionOverview by collectionsViewModel.collectionsViewState.collectAsState()
     val zipCodeItemsViewState by addressViewModel.zipCodeItemsViewState.collectAsState()
     val streetsViewState by addressViewModel.streetsViewState.collectAsState()
     val validation by addressViewModel.validationViewState.collectAsState()
     val notificationProps by notificationViewModel.notificationPropsViewState.collectAsState()
 
+    val addresses = (AmbientAddress.current as? ListViewState.Success)?.payload
+
     when (nav.current) {
         Destination.Home -> Home(
-            addresses,
             collectionOverview,
-            { actions.goTo(Destination.SettingsAddressManipulation) },
-            { address -> collectionsViewModel.searchCollections(address) }
+            HomeActions(
+                onGoToAddressInput = { actions.goTo(Destination.SettingsAddressManipulation) },
+                onLoadCollections = { address -> collectionsViewModel.searchCollections(address) },
+                onTabSelected = { ix ->
+                    addresses?.get(ix)?.let {
+                        collectionsViewModel.searchCollections(it, true)
+                    }
+                    selectedTabIx = ix
+                }
+            )
         )
 
+        Destination.Calendar -> {
+            CalendarView(
+                collectionOverview,
+                CalendarViewActions(
+                    onGoToAddressInput = {
+                        actions.goTo(Destination.SettingsAddressManipulation)
+                    },
+                    onSearchCollectionsForAddress = collectionsViewModel::searchCollections,
+                    onTabSelected = { ix ->
+                        addresses?.get(ix)?.let {
+                            collectionsViewModel.searchCollections(it, true)
+                        }
+                        selectedTabIx = ix
+                    }
+                )
+            )
+        }
+
         Destination.Settings -> {
-            val ctx = ContextAmbient.current
+            val ctx = AmbientContext.current
             val autoStarter = AutoStartPermissionHelper.getInstance()
             var notificationSwitchState by remember { mutableStateOf(preferences.notificationsEnabled) }
 
@@ -261,7 +303,11 @@ fun Main(
                     val data =
                         Uri.parse("mailto:?subject=Becycle-Feedback&to=info@sigmadelta.be")
                     mailIntent.data = data
-                    ContextCompat.startActivity(ctx, Intent.createChooser(mailIntent, "Send Feedback"), null)
+                    ContextCompat.startActivity(
+                        ctx,
+                        Intent.createChooser(mailIntent, "Send Feedback"),
+                        null
+                    )
                 }
             ) {
                 preferences.notificationsEnabled = it
@@ -270,21 +316,19 @@ fun Main(
         }
 
         Destination.SettingsNotifications -> {
-            val ctx = ContextAmbient.current
+            val ctx = AmbientContext.current
             SettingsNotifications(
-                addresses,
                 notificationProps,
-                {
-                    actions.goTo(Destination.SettingsAddressManipulation)
-                },
-                notificationViewModel::setTomorrowAlarmTime,
-                {
-                    MaterialDialog(ctx, BottomSheet()).show {
-                        cornerRadius(16f)
-                        title(text = "Notification Info")
-                        message(
-                            text =
-                            """
+                SettingsNotificationsActions(
+                    onGoToAddressInput = { actions.goTo(Destination.SettingsAddressManipulation) },
+                    onTomorrowAlarmTimeSelected = notificationViewModel::setTomorrowAlarmTime,
+                    onNotificationsInfoClicked = {
+                        MaterialDialog(ctx, BottomSheet()).show {
+                            cornerRadius(16f)
+                            title(text = "Notification Info")
+                            message(
+                                text =
+                                """
                             Due to constraints set by the Android operating system for the power-saving 'Doze' mode,
                             we are only able to check whether a notification should be triggered every 15 minutes.
                             This also implies that there is a 15 minute error margin window for the notification time
@@ -293,27 +337,34 @@ fun Main(
                             Should your notification reminder be set to 09:00, the latest you can expect your notification
                             to be triggered is 09:15 (worst case).
                         """.trimIndent()
-                        )
-                        positiveButton(text = "More information") {
-                            actions.goToNotificationsDocumentation(ctx)
+                            )
+                            positiveButton(text = "More information") {
+                                actions.goToNotificationsDocumentation(ctx)
+                            }
+                            negativeButton(text = "OK") {
+                                dismiss()
+                            }
                         }
-                        negativeButton(text = "OK") {
-                            dismiss()
+                    },
+                    onReloadNotificationPropsWhenEmpty = {
+                        notificationViewModel.loadNotificationProps()
+                    },
+                    onTabSelected = { ix ->
+                        addresses?.get(ix)?.let {
+                            collectionsViewModel.searchCollections(it, true)
                         }
+                        selectedTabIx = ix
                     }
-                },
-                onReloadNotificationPropsWhenEmpty = {
-                    notificationViewModel.loadNotificationProps()
-                }
+                )
             )
         }
 
-
         Destination.SettingsAddresses -> SettingsAddressOverview(
-            addresses,
-            { actions.goTo(Destination.SettingsAddressEditRemoval(it.id)) },
-            { actions.goTo(Destination.SettingsAddressManipulation) },
-            { actions.pressOnBack() }
+            AddressOverviewActions(
+                { actions.goTo(Destination.SettingsAddressEditRemoval(it.id)) },
+                { actions.goTo(Destination.SettingsAddressManipulation) },
+                { actions.pressOnBack() }
+            )
         )
 
         Destination.SettingsAddressManipulation -> SettingsAddressManipulation(
@@ -331,23 +382,24 @@ fun Main(
         is Destination.SettingsAddressEditRemoval -> {
             SettingsAddressEditRemoval(
                 (nav.current as Destination.SettingsAddressEditRemoval).addressId,
-                addresses,
                 zipCodeItemsViewState,
                 streetsViewState,
-                addressViewModel::searchZipCode,
-                addressViewModel::searchStreets,
-                {
-                    addressViewModel.validateExistingAddress(it)
-                    collectionsViewModel.removeCollections(it)
-                    collectionsViewModel.searchCollections(it)
-                },
-                {
-                    addressViewModel.removeAddress(it)
-                    collectionsViewModel.removeCollections(it)
-                    collectionsViewModel.searchCollections(it)
-                    actions.pressOnBack()
-                },
-                { actions.pressOnBack() }
+                SettingsAddressEditRemovalActions(
+                    addressViewModel::searchZipCode,
+                    addressViewModel::searchStreets,
+                    {
+                        addressViewModel.validateExistingAddress(it)
+                        collectionsViewModel.removeCollections(it)
+                        collectionsViewModel.searchCollections(it)
+                    },
+                    {
+                        addressViewModel.removeAddress(it)
+                        collectionsViewModel.removeCollections(it)
+                        collectionsViewModel.searchCollections(it)
+                        actions.pressOnBack()
+                    },
+                    { actions.pressOnBack() }
+                )
             )
         }
     }

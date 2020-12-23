@@ -76,10 +76,14 @@ class CollectionsRepository(private val db: DB, private val collectionsApi: Coll
         },
         fetch = {
             val date = referenceDate.toLocalDateTime(TimeZone.currentSystemDefault()).toYyyyMmDd()
-            val untilDate =
-                referenceDate.plus(DateTimePeriod(months = 1), TimeZone.currentSystemDefault())
-                    .toLocalDateTime(TimeZone.currentSystemDefault())
-                    .toYyyyMmDd()
+            val datePlus2Months = referenceDate.plus(DateTimePeriod(months = 2), TimeZone.currentSystemDefault())
+                .toLocalDateTime(TimeZone.currentSystemDefault())
+            val untilDate = LocalDateTime(
+                datePlus2Months.year,
+                datePlus2Months.month,
+                1,
+                1,1,1,1
+            ).toYyyyMmDd()
 
             collectionsApi.getCollections(address, date, untilDate, 100)
         },

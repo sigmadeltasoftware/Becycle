@@ -11,14 +11,14 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.ContextAmbient
+import androidx.compose.ui.platform.AmbientContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import be.sigmadelta.becycle.common.R
 
 @Composable
 fun BecycleProgressIndicator(modifier: Modifier = Modifier.padding(8.dp).height(24.dp)) {
-    val ctx = ContextAmbient.current
+    val ctx = AmbientContext.current
     val d = ctx.getDrawable(R.drawable.rotating_recycle_icon) as AnimatedVectorDrawable
 
     d.registerAnimationCallback(object: Animatable2.AnimationCallback() {

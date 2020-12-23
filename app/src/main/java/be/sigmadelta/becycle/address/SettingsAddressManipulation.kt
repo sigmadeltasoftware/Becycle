@@ -1,20 +1,18 @@
 package be.sigmadelta.becycle.address
 
-import androidx.compose.foundation.Icon
-import androidx.compose.foundation.Text
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.ExperimentalFocus
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.ContextAmbient
+import androidx.compose.ui.platform.AmbientContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -31,7 +29,7 @@ import be.sigmadelta.common.address.ZipCodeItem
 import com.afollestad.materialdialogs.MaterialDialog
 import org.koin.ext.isInt
 
-@ExperimentalFocus
+@ExperimentalMaterialApi
 @Composable
 fun SettingsAddressManipulation(
     zipCodeItemsViewState: ListViewState<ZipCodeItem>,
@@ -54,7 +52,7 @@ fun SettingsAddressManipulation(
                 title = { Text(text = appBarTitle ?: "Create Address") },
                 navigationIcon = {
                     Icon(
-                        asset = vectorResource(id = R.drawable.ic_back),
+                        imageVector = vectorResource(id = R.drawable.ic_back),
                         modifier = Modifier.clickable(onClick = actions.onBackClicked)
                             .padding(start = 8.dp)
                     )
@@ -112,9 +110,9 @@ fun SettingsAddressManipulation(
                     backgroundColor = Color.White,
                     label = { Text("House number") },
                     value = selectedHouseNumber,
-                    keyboardType = KeyboardType.Number,
-                    onValueChange = {
-                        selectedHouseNumber = it
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    onValueChange = { number ->
+                        selectedHouseNumber = number
                     },
                     isErrorValue = !selectedHouseNumber.isInt()
                 )
@@ -137,7 +135,7 @@ fun SettingsAddressManipulation(
                     }
 
                     actions.onAddressRemove?.let {
-                        val ctx = ContextAmbient.current
+                        val ctx = AmbientContext.current
                         Button(
                             modifier = Modifier.align(Alignment.CenterHorizontally).fillMaxWidth(),
                             onClick = {
@@ -153,7 +151,7 @@ fun SettingsAddressManipulation(
                                     negativeButton(text = "Cancel") { it.dismiss() }
                                 }
                             },
-                            backgroundColor = errorColor
+                            colors = ButtonConstants.defaultButtonColors(backgroundColor = errorColor)
                         ) {
                             Text(text = "Remove Address")
                         }

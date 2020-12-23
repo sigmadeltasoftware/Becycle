@@ -2,16 +2,16 @@ package be.sigmadelta.becycle.settings
 
 import android.widget.Toast
 import androidx.annotation.DrawableRes
-import androidx.compose.foundation.*
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
-import androidx.compose.material.Divider
-import androidx.compose.material.Switch
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ContextAmbient
+import androidx.compose.ui.platform.AmbientContext
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -80,7 +80,7 @@ fun SettingsMenuItem(
     switchState: Boolean? = null,
     switchAction: ((Boolean) -> Unit)? = null
 ) {
-    val ctx = ContextAmbient.current
+    val ctx = AmbientContext.current
     Row(
         Modifier.clickable(onClick = {
             if (switchState == null || switchState) {
@@ -93,7 +93,7 @@ fun SettingsMenuItem(
     )
     {
         Icon(
-            asset = vectorResource(id = icon),
+            imageVector = vectorResource(id = icon),
             modifier = Modifier.padding(start = 16.dp).align(Alignment.CenterVertically)
                 .width(32.dp)
         )
@@ -115,7 +115,7 @@ fun SettingsMenuItem(
             Switch(
                 checked = switchState == true,
                 onCheckedChange = switchAction,
-                color = primaryAccent,
+                colors = SwitchDefaults.colors(checkedThumbColor = primaryAccent),
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 32.dp)
                     .align(Alignment.CenterVertically)
             )
@@ -143,7 +143,7 @@ fun NotificationSettingsBatteryOptimisationWarning(
             horizontalArrangement = Arrangement.Center
         ) {
             Icon(
-                asset = vectorResource(id = R.drawable.ic_info),
+                imageVector = vectorResource(id = R.drawable.ic_info),
                 tint = warningColor,
                 modifier = Modifier.clickable(onClick = {
                     onGetDisableBatteryOptimisationInfoClicked()
@@ -151,7 +151,7 @@ fun NotificationSettingsBatteryOptimisationWarning(
             )
             Button(
                 onClick = { onDisableBatteryOptimisationClicked() },
-                backgroundColor = errorColor,
+                colors = ButtonConstants.defaultButtonColors(backgroundColor = errorColor),
                 modifier = Modifier.padding(start = 16.dp)
             ) {
                 Text(text = "DISABLE BATTERY OPTIMISATIONS", color = primaryBackgroundColor)
@@ -174,7 +174,7 @@ fun NotificationSettingsAutoStarterWarning(
             horizontalArrangement = Arrangement.Center
         ) {
             Icon(
-                asset = vectorResource(id = R.drawable.ic_info),
+                imageVector = vectorResource(id = R.drawable.ic_info),
                 tint = warningColor,
                 modifier = Modifier.padding(start = 8.dp).clickable(onClick = {
 
@@ -182,7 +182,7 @@ fun NotificationSettingsAutoStarterWarning(
             )
             Button(
                 onClick = { onAutoStarterClicked() },
-                backgroundColor = errorColor,
+                colors = ButtonDefaults.buttonColors(backgroundColor = errorColor),
                 modifier = Modifier.padding(start = 16.dp)
             ) {
                 Text(text = "GIVE HIGHER PRIORITY", color = primaryBackgroundColor)
@@ -211,8 +211,7 @@ fun SettingsFooter(
             fontWeight = FontWeight.Bold,
             color = textSecondary
         )
-        Image(
-            asset = imageResource(id = R.drawable.ic_sigmadelta_footer),
+        Image(imageResource(id = R.drawable.ic_sigmadelta_footer),
             modifier = Modifier.padding(bottom = 8.dp, start = 128.dp, end = 128.dp)
                 .clickable(onClick = {
                     onSigmaDeltaLogoClicked()
