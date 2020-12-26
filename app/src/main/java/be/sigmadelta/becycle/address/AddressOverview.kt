@@ -19,6 +19,7 @@ import be.sigmadelta.becycle.common.ui.theme.*
 import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.becycle.common.ui.widgets.BecycleProgressIndicator
 import be.sigmadelta.becycle.common.util.AmbientAddress
+import be.sigmadelta.becycle.common.util.str
 import be.sigmadelta.common.address.Address
 
 @Composable
@@ -35,7 +36,7 @@ fun SettingsAddressOverview(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.padding(end = 16.dp)
                     ) {
-                        Text(text = "Address Settings")
+                        Text(R.string.settings__address.str())
                         Spacer(modifier = Modifier.weight(1f))
                         if (addressCount != 0) {
                             Text(
@@ -54,7 +55,8 @@ fun SettingsAddressOverview(
                 navigationIcon = {
                     Icon(
                         imageVector = vectorResource(id = R.drawable.ic_back),
-                        modifier = Modifier.clickable(onClick = actions.onBackClicked).padding(start = 8.dp)
+                        modifier = Modifier.clickable(onClick = actions.onBackClicked)
+                            .padding(start = 8.dp)
                     )
                 }
             )
@@ -124,7 +126,7 @@ fun AddAddressItem(onAddAddressClicked: () -> Unit) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(imageVector = vectorResource(id = R.drawable.ic_add))
             Text(
-                text = "Add Address",
+                text = R.string.add_address.str(),
                 modifier = Modifier.padding(start = 16.dp),
                 fontSize = regularFontSize
             )

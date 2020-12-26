@@ -23,6 +23,7 @@ import be.sigmadelta.becycle.common.ui.theme.regularFontSize
 import be.sigmadelta.becycle.common.ui.theme.subTextFontSize
 import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.becycle.common.ui.widgets.DropDownTextField
+import be.sigmadelta.becycle.common.util.str
 import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.address.Street
 import be.sigmadelta.common.address.ZipCodeItem
@@ -49,7 +50,7 @@ fun SettingsAddressManipulation(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = appBarTitle ?: "Create Address") },
+                title = { Text(text = appBarTitle ?: R.string.create_address.str()) },
                 navigationIcon = {
                     Icon(
                         imageVector = vectorResource(id = R.drawable.ic_back),
@@ -64,7 +65,7 @@ fun SettingsAddressManipulation(
                 DropDownTextField(
                     zipCodeItemsViewState,
                     textValue = selectedZipCode?.code,
-                    label = "Zipcode",
+                    label = R.string.zipcode.str(),
                     textChangeAction = {
                         selectedZipCode = null
                         if (it.isInt()) {
@@ -86,7 +87,7 @@ fun SettingsAddressManipulation(
                 DropDownTextField(
                     streetsViewState,
                     textValue = selectedStreet?.names?.nl,
-                    label = "Street",
+                    label = R.string.street.str(),
                     textChangeAction = {
                         selectedStreet = null
                         selectedZipCode?.let { zip ->
@@ -108,7 +109,7 @@ fun SettingsAddressManipulation(
                         .focusRequester(houseNumberFocusRequester)
                         .padding(horizontal = 32.dp, vertical = 8.dp),
                     backgroundColor = Color.White,
-                    label = { Text("House number") },
+                    label = { Text(R.string.house_number.str()) },
                     value = selectedHouseNumber,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     onValueChange = { number ->
@@ -131,7 +132,7 @@ fun SettingsAddressManipulation(
                             .align(Alignment.CenterHorizontally),
                         enabled = selectedZipCode != null && selectedStreet != null && selectedHouseNumber.isInt()
                     ) {
-                        Text("Save Address")
+                        Text(R.string.save_address.str())
                     }
 
                     actions.onAddressRemove?.let {
@@ -141,19 +142,19 @@ fun SettingsAddressManipulation(
                             onClick = {
                                 MaterialDialog(ctx).show {
                                     cornerRadius(16f)
-                                    title(text = "Remove Address?")
-                                    message(text = "Are you sure you want to remove this address?")
-                                    positiveButton(text = "Remove") {
+                                    title(R.string.remove_address)
+                                    message(R.string.remove_address__text)
+                                    positiveButton(R.string.remove_address_positive) {
                                         existingAddress?.let { address ->
                                             it(address)
                                         }
                                     }
-                                    negativeButton(text = "Cancel") { it.dismiss() }
+                                    negativeButton(android.R.string.cancel) { it.dismiss() }
                                 }
                             },
-                            colors = ButtonConstants.defaultButtonColors(backgroundColor = errorColor)
+                            colors = ButtonDefaults.buttonColors(backgroundColor = errorColor)
                         ) {
-                            Text(text = "Remove Address")
+                            Text(text = R.string.remove_address.str())
                         }
                     }
                 }

@@ -4,7 +4,6 @@ import android.widget.ImageView
 import androidx.compose.foundation.ScrollableColumn
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.LazyRowFor
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.Text
@@ -20,13 +19,15 @@ import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.collections.Collection
 import be.sigmadelta.common.collections.CollectionOverview
 import kotlinx.datetime.*
+import be.sigmadelta.becycle.R
+import be.sigmadelta.becycle.common.util.str
 
 @Composable
 fun Collections(collectionOverview: CollectionOverview) {
 
     ScrollableColumn {
         CollectionTitle(
-            title = "Today",
+            title = R.string.today.str(),
             date = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         )
         collectionOverview.today?.let { collections ->
@@ -38,7 +39,7 @@ fun Collections(collectionOverview: CollectionOverview) {
         } ?: NoCollectionsSubtitle()
 
         CollectionTitle(
-            title = "Tomorrow",
+            title = R.string.tomorrow.str(),
             date = (Clock.System.now()
                 .plus(DateTimePeriod(days = 1), TimeZone.currentSystemDefault())).toLocalDateTime(
                     TimeZone.currentSystemDefault()
@@ -52,7 +53,7 @@ fun Collections(collectionOverview: CollectionOverview) {
             }
         } ?: NoCollectionsSubtitle()
 
-        CollectionTitle(title = "Upcoming Collections")
+        CollectionTitle(title = R.string.collections__upcoming.str())
         collectionOverview.upcoming?.let {
             it.forEach { collection ->
                 UpcomingCollectionItem(collection = collection)
@@ -90,7 +91,7 @@ fun CollectionTitle(
 @Composable
 fun NoCollectionsSubtitle() {
     Text(
-        text = "No scheduled collections",
+        text = R.string.collections__no_scheduled.str(),
         fontSize = regularFontSize,
         color = textSecondary,
         modifier = Modifier.padding(start = 8.dp),
@@ -169,14 +170,15 @@ fun UpcomingCollectionItem(collection: Collection) {
 }
 
 @Composable
-fun EmptyCollections(address: Address) { // TODO
+fun EmptyCollections(address: Address) {
     Card(
         elevation = 12.dp,
         modifier = Modifier.fillMaxWidth().padding(12.dp),
         shape = RoundedCornerShape(8.dp),
     ) {
         Text(
-            "No collections available for ${address.street.names.nl} ${address.houseNumber}.",
+            R.string.collections__no_available_for.str()
+             + "${address.street.names.nl} ${address.houseNumber}.",
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(8.dp)
         )
