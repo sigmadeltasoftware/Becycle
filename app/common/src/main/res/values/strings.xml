@@ -21,12 +21,12 @@
     <string name="recycle_website__more_info">Would you like to visit the Recycle App website for additional information?</string>
 
     <string name="battery_optimisations__title">Battery Optimisations</string>
-    <string name="battery_optimisations__text">Due to Android\'s aggressive battery optimisations, notification reminders might not work on your device.<b/><b/>
+    <string name="battery_optimisations__text">Due to Android\'s aggressive battery optimisations, notification reminders might not work on your device.\n\n
 Would you like disable the battery optimisations for this app to make sure the reminders are allowed to trigger?</string>
     <string name="battery_optimisations__go_to_settings">Go to Settings</string>
     <string name="battery_optimisations__turn_off_reminders">Turn off notification reminders</string>
     <string name="battery_optimisations_disable__title">Disable Battery Optimisations</string>
-    <string name="battery_optimisations_disable__text">Android will try to extend its battery life by letting the system go to sleep. This mode is called \'Doze\' and might prevent the apps from acting when necessary such as in the case of firing a reminder notification.<b/><b/>
+    <string name="battery_optimisations_disable__text">Android will try to extend its battery life by letting the system go to sleep. This mode is called \'Doze\' and might prevent the apps from acting when necessary such as in the case of firing a reminder notification.\n\n
         To disable this, Becycle needs to be whitelisted by disabling battery optimizations. This will allow the app to send reminders even when the system is in Doze mode.</string>
 
     <string name="notifications__schedule">Schedule Notifications</string>
@@ -35,7 +35,7 @@ Would you like disable the battery optimisations for this app to make sure the r
     <string name="notifications_info__text">Due to constraints set by the Android operating system for the power-saving \'Doze\' mode,
                             we are only able to check whether a notification should be triggered every 15 minutes.
                             This also implies that there is a 15 minute error margin window for the notification time
-                            you have selected.<b/><b/>
+                            you have selected.\n\n
 
                             Should your notification reminder be set to 09:00, the latest you can expect your notification
                             to be triggered is 09:15 (worst case).</string>
@@ -47,7 +47,6 @@ Would you like disable the battery optimisations for this app to make sure the r
 
     <string name="retrieve_addresses__error">Failed to retrieve addresses!</string>
     <string name="remove_address__text">Are you sure you want to remove this address?</string>
-    <string name="remove_address_positive">Remove</string>
 
     <string name="collections__upcoming">Upcoming Collections</string>
     <string name="collections__no_scheduled">No scheduled collections</string>

@@ -144,7 +144,7 @@ fun SettingsAddressManipulation(
                                     cornerRadius(16f)
                                     title(R.string.remove_address)
                                     message(R.string.remove_address__text)
-                                    positiveButton(R.string.remove_address_positive) {
+                                    positiveButton(R.string.remove_address) {
                                         existingAddress?.let { address ->
                                             it(address)
                                         }
