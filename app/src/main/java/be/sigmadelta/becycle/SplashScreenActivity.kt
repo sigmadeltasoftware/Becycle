@@ -27,6 +27,7 @@ import be.sigmadelta.becycle.baseheaders.BaseHeadersViewState
 import be.sigmadelta.becycle.common.ui.theme.*
 import be.sigmadelta.becycle.common.ui.util.ViewState
 import be.sigmadelta.becycle.common.ui.widgets.BecycleProgressIndicator
+import be.sigmadelta.becycle.common.util.str
 import be.sigmadelta.common.Preferences
 import be.sigmadelta.common.util.AuthorizationKeyExpiredException
 import be.sigmadelta.common.util.SessionStorage
@@ -116,10 +117,6 @@ class SplashScreenActivity : AppCompatActivity(), CoroutineScope by MainScope() 
         startActivity(Intent(this, SplashScreenActivity::class.java))
         finish()
     }
-
-    companion object {
-        const val TAG = "SplashScreenActivity"
-    }
 }
 
 
@@ -160,12 +157,12 @@ fun ErrorLayout(error: Throwable, actions: ErrorActions) = when (error) {
     is AuthorizationKeyExpiredException -> actions.onAuthKeyExpired()
     is UnknownHostException -> {
         Text(
-            text = "Please check your connection and try launching the app again",
+            text = R.string.splash_screen__error_check_connection.str(),
             modifier = Modifier.padding(16.dp),
             color = errorColor
         )
         Button(onClick = { actions.onNoValidConnection() }) {
-            Text(text = "Retry connecting")
+            Text(text = R.string.retry_connecting.str())
         }
     }
     else -> Text(error.localizedMessage, color = errorColor)

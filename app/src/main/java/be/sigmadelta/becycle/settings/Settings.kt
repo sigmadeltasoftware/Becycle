@@ -20,6 +20,7 @@ import be.sigmadelta.becycle.BuildConfig
 import be.sigmadelta.becycle.R
 import be.sigmadelta.becycle.common.Destination
 import be.sigmadelta.becycle.common.ui.theme.*
+import be.sigmadelta.becycle.common.util.str
 
 @Composable
 fun Settings(
@@ -36,15 +37,15 @@ fun Settings(
 ) {
     Column(modifier = Modifier.padding(bottom = bottomNavigationMargin)) {
         SettingsMenuItem(
-            title = "Address(es)",
-            subtitle = "Manage your address(es) here",
+            title = R.string.settings__addresses.str(),
+            subtitle = R.string.settings__addresses_text.str(),
             R.drawable.ic_home,
             onClickAction = { goTo(Destination.SettingsAddresses) }
         )
         SettingsMenuItemDivider()
         SettingsMenuItem(
-            title = "Notifications",
-            subtitle = "Create and manage your notifications",
+            title = R.string.notifications.str(),
+            subtitle = R.string.settings__notifications_text.str(),
             R.drawable.ic_calender_clock,
             onClickAction = { goTo(Destination.SettingsNotifications) },
             notificationSwitchState,
@@ -59,8 +60,8 @@ fun Settings(
         }
         SettingsMenuItemDivider()
         SettingsMenuItem(
-            title = "Send Feedback",
-            subtitle = "Mail us any feedback such as bugs and/or feature requests",
+            title = R.string.send_feedback.str(),
+            subtitle = R.string.settings__send_feedback_text.str(),
             icon = R.drawable.ic_mail,
             onClickAction = { onSendFeedbackClicked() }
         )
@@ -86,7 +87,11 @@ fun SettingsMenuItem(
             if (switchState == null || switchState) {
                 onClickAction()
             } else {
-                Toast.makeText(ctx, "Enable switch to modify settings", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    ctx,
+                    R.string.settings_switch__modify_settings,
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }, enabled = switchState == null || switchState)
             .background(color = if (switchState == null || switchState) primaryBackgroundColor else unselectedColor)
@@ -151,10 +156,13 @@ fun NotificationSettingsBatteryOptimisationWarning(
             )
             Button(
                 onClick = { onDisableBatteryOptimisationClicked() },
-                colors = ButtonConstants.defaultButtonColors(backgroundColor = errorColor),
+                colors = ButtonDefaults.buttonColors(backgroundColor = errorColor),
                 modifier = Modifier.padding(start = 16.dp)
             ) {
-                Text(text = "DISABLE BATTERY OPTIMISATIONS", color = primaryBackgroundColor)
+                Text(
+                    text = R.string.settings__disable_battery_optimisations.str(),
+                    color = primaryBackgroundColor
+                )
             }
         }
     }
@@ -185,7 +193,10 @@ fun NotificationSettingsAutoStarterWarning(
                 colors = ButtonDefaults.buttonColors(backgroundColor = errorColor),
                 modifier = Modifier.padding(start = 16.dp)
             ) {
-                Text(text = "GIVE HIGHER PRIORITY", color = primaryBackgroundColor)
+                Text(
+                    text = R.string.settings__give_higher_prio.str(),
+                    color = primaryBackgroundColor
+                )
             }
         }
     }
@@ -200,13 +211,13 @@ fun SettingsFooter(
         modifier = Modifier.padding(bottom = 8.dp)
     ) {
         Text(
-            text = "Version: V${BuildConfig.VERSION_NAME}",
+            text = "${R.string.version.str()}: V${BuildConfig.VERSION_NAME}",
             fontSize = minimalFontSize,
             fontWeight = FontWeight.Bold,
             color = textPrimary
         )
         Text(
-            text = "Created by",
+            text = R.string.created_by.str(),
             fontSize = minimalFontSize,
             fontWeight = FontWeight.Bold,
             color = textSecondary

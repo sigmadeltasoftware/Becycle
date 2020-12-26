@@ -9,6 +9,7 @@ import be.sigmadelta.becycle.common.ui.util.toViewState
 import be.sigmadelta.common.accesstoken.AccessTokenRepository
 import be.sigmadelta.common.accesstoken.AccessToken
 import be.sigmadelta.common.util.Response
+import be.sigmadelta.common.util.toAnalStateType
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
@@ -27,11 +28,7 @@ class AccessTokenViewModel(
 
             if (it !is Response.Loading) {
                 analTracker.log(AnalTag.GET_ACCESS_TOKEN) {
-                    param("state", when (it) {
-                            is Response.Success -> "success"
-                            is Response.Error -> "error"
-                            is Response.Loading -> ""
-                    })
+                    param("state", it.toAnalStateType())
 
                     if (it is Response.Error) {
                         param("response", it.error?.localizedMessage ?: "")
@@ -41,9 +38,5 @@ class AccessTokenViewModel(
 
             accessTokenViewState.value = it.toViewState()
         }
-    }
-
-    companion object {
-        private const val ANAL_TAG = "AccessTokenVM"
     }
 }

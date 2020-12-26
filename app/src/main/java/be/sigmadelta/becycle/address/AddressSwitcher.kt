@@ -17,6 +17,7 @@ import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.becycle.common.ui.widgets.BecycleProgressIndicator
 import be.sigmadelta.becycle.common.util.AmbientAddress
 import be.sigmadelta.becycle.common.util.AmbientTabIndex
+import be.sigmadelta.becycle.common.util.str
 import com.github.aakira.napier.Napier
 
 @Composable
@@ -68,7 +69,7 @@ fun AddressSwitcher(
                             modifier = Modifier.padding(16.dp)
                         ) {
                             Text(
-                                text = "Add Address",
+                                text = R.string.add_address.str(),
                                 fontWeight = FontWeight.Bold,
                                 fontSize = regularFontSize,
                                 color = unselectedColor

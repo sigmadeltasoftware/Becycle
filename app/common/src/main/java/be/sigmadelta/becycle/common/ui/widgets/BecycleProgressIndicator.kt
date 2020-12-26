@@ -33,7 +33,6 @@ fun BecycleProgressIndicator(modifier: Modifier = Modifier.padding(8.dp).height(
         d.start()
         img
     }, modifier = modifier)
-    // TODO: Added invisible progressindicator here, otherwise animated doesn't repeat after first start for some reason.
-    // TODO: Likely issue in Compose
+    // TODO: Added invisible progressindicator here, otherwise animated doesn't repeat after first start for some reason. Likely issue in Compose
     CircularProgressIndicator(color = Color(0x00000000), modifier = Modifier.width(0.dp).height(0.dp))
 }

@@ -23,6 +23,7 @@ import be.sigmadelta.becycle.common.ui.theme.*
 import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.becycle.common.util.AmbientAddress
 import be.sigmadelta.becycle.common.util.AmbientTabIndex
+import be.sigmadelta.becycle.common.util.str
 import be.sigmadelta.common.date.Time
 import be.sigmadelta.common.notifications.NotificationProps
 import be.sigmadelta.common.notifications.NotificationRepo
@@ -43,7 +44,7 @@ fun SettingsNotifications(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Schedule notifications",
+                text = R.string.notifications__schedule.str(),
                 fontSize = titleFontSize,
                 color = textPrimary,
                 fontWeight = FontWeight.Bold
@@ -96,13 +97,13 @@ fun NotificationSettings(
     Row(modifier = Modifier.padding(16.dp)) {
         Column(modifier = Modifier.align(alignment = Alignment.CenterVertically)) {
             Text(
-                text = "Tomorrow:",
+                text = "${R.string.tomorrow.str()}:",
                 fontSize = regularFontSize,
                 fontWeight = FontWeight.Bold,
                 color = textPrimary
             )
             Text(
-                text = "Notification for tomorrow's collection",
+                text = R.string.notifications__schedule_tomorrow_text.str(),
                 fontSize = subTextFontSize,
                 color = textSecondary,
                 modifier = Modifier.width(240.dp)

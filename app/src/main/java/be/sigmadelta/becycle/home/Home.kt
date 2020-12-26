@@ -10,10 +10,12 @@ import be.sigmadelta.becycle.address.AddressSwitcher
 import be.sigmadelta.becycle.collections.Collections
 import be.sigmadelta.becycle.collections.EmptyCollections
 import be.sigmadelta.becycle.common.ui.theme.bottomNavigationMargin
+import be.sigmadelta.becycle.common.ui.theme.errorColor
 import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.becycle.common.ui.util.ViewState
 import be.sigmadelta.becycle.common.util.AmbientAddress
 import be.sigmadelta.becycle.common.util.AmbientTabIndex
+import be.sigmadelta.becycle.common.util.str
 import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.collections.CollectionOverview
 
@@ -42,12 +44,15 @@ fun Home(
             }
 
             if (isInitialized.not()) {
-                isInitialized = true
+                isInitialized = true // Disregard linting remark, this is effectively necessary
                 actions.onLoadCollections(addresses.payload[selectedTabIx])
             }
         }
 
-        is ListViewState.Error -> Text("Failed to retrieve addresses!") // TODO: Prettify
+        is ListViewState.Error -> Text(
+            be.sigmadelta.becycle.R.string.retrieve_addresses__error.str(),
+            color = errorColor
+        )
     }
 }
 
@@ -57,7 +62,10 @@ fun HomeLayout(
     address: Address
 ) {
 
-    Column(modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = bottomNavigationMargin + 8.dp)) {
+    Column(
+        modifier = Modifier.padding(horizontal = 16.dp)
+            .padding(bottom = bottomNavigationMargin + 8.dp)
+    ) {
         when (collectionOverview) {
             is ViewState.Empty -> EmptyCollections(address)
             is ViewState.Loading -> Unit // TODO

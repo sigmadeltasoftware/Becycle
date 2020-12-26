@@ -30,6 +30,7 @@ import be.sigmadelta.becycle.common.ui.widgets.BecycleProgressIndicator
 import be.sigmadelta.becycle.common.util.AmbientAddress
 import be.sigmadelta.becycle.common.util.AmbientTabIndex
 import be.sigmadelta.becycle.common.util.PowerUtil
+import be.sigmadelta.becycle.common.util.str
 import be.sigmadelta.becycle.home.Home
 import be.sigmadelta.becycle.home.HomeActions
 import be.sigmadelta.becycle.notification.NotificationViewModel
@@ -40,7 +41,6 @@ import be.sigmadelta.common.Preferences
 import be.sigmadelta.common.util.AuthorizationKeyExpiredException
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.bottomsheets.BottomSheet
-import com.github.aakira.napier.Napier
 import com.judemanutd.autostarter.AutoStartPermissionHelper
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.StateFlow
@@ -117,14 +117,14 @@ fun MainLayout(
     ) {
         MaterialDialog(AmbientContext.current).show {
             cornerRadius(16f)
-            title(text = "Battery Optimisations")
-            message(text = "Due to Android's aggressive battery optimisations, notification reminders might not work on your device.\n\nWould you like disable the battery optimisations for this app to make sure the reminders are allowed to trigger?")
+            title(R.string.battery_optimisations__title)
+            message(R.string.battery_optimisations__text)
             icon(R.drawable.ic_notifications_on)
-            positiveButton(text = "Go to Settings") {
+            positiveButton(R.string.battery_optimisations__go_to_settings) {
                 actions.goTo(Destination.Settings)
                 preferences.isFirstRun = false
             }
-            negativeButton(text = "Turn off notification reminders") {
+            negativeButton(R.string.battery_optimisations__turn_off_reminders) {
                 it.dismiss()
                 preferences.notificationsEnabled = false
                 preferences.isFirstRun = false
@@ -174,7 +174,7 @@ fun MainLayout(
                             icon = { Icon(vectorResource(id = R.drawable.ic_settings)) },
                             selectedContentColor = primaryAccent,
                             unselectedContentColor = unselectedColor,
-                            selected = nav.current.toString().contains("Settings"), // TODO?
+                            selected = nav.current.toString().contains("Settings"),
                             onClick = { actions.goTo(Destination.Settings) })
                         BottomNavigationItem(
                             icon = { Icon(vectorResource(id = R.drawable.ic_web)) },
@@ -184,12 +184,12 @@ fun MainLayout(
                             onClick = {
                                 MaterialDialog(ctx).show {
                                     cornerRadius(16f)
-                                    title(text = ("Go to Recycle App website?"))
-                                    message(text = "Would you like to visit the Recycle App website for additional information?")
-                                    positiveButton(text = "OK") {
+                                    title(R.string.recycle_website__go_to)
+                                    message(R.string.recycle_website__more_info)
+                                    positiveButton(android.R.string.ok) {
                                         actions.goToRecycleWebsite(ctx)
                                     }
-                                    negativeButton(text = "Cancel") {
+                                    negativeButton(android.R.string.cancel) {
                                         it.dismiss()
                                     }
                                 }
@@ -261,7 +261,6 @@ fun Main(
             val autoStarter = AutoStartPermissionHelper.getInstance()
             var notificationSwitchState by remember { mutableStateOf(preferences.notificationsEnabled) }
 
-            Napier.e("triggeredNotifications: ${notificationViewModel.getTriggeredNotificationIds()}")
             Settings(
                 actions.goTo,
                 notificationSwitchState,
@@ -275,17 +274,10 @@ fun Main(
                 onGetDisableBatteryOptimisationInfoClicked = {
                     MaterialDialog(ctx, BottomSheet()).show {
                         cornerRadius(16f)
-                        title(text = "Disable Battery Optimisations")
-                        message(
-                            text =
-                            """
-                            Android will try to extend its battery life by letting the system go to sleep. This mode is called 'Doze' and might prevent the apps from acting when necessary such as in the case of firing a reminder notification. 
-                            
-                            To disable this, Becycle needs to be whitelisted by disabling battery optimizations. This will allow the app to send reminders even when the system is in Doze mode.
-                        """.trimIndent()
-                        )
+                        title(R.string.battery_optimisations_disable__title)
+                        message(R.string.battery_optimisations_disable__text)
                         icon(R.drawable.ic_notifications_on)
-                        positiveButton(text = "Disable Battery Optimisations") {
+                        positiveButton(R.string.battery_optimisations_disable__title) {
                             PowerUtil.checkBattery(ctx)
                             // Can't get proper callback from checkBattery to refresh optimisation warning state,
                             // by going back home, the warning will be refreshed and therefor gone
@@ -305,7 +297,7 @@ fun Main(
                     mailIntent.data = data
                     ContextCompat.startActivity(
                         ctx,
-                        Intent.createChooser(mailIntent, "Send Feedback"),
+                        Intent.createChooser(mailIntent, ctx.getString(R.string.send_feedback)),
                         null
                     )
                 }
@@ -325,23 +317,12 @@ fun Main(
                     onNotificationsInfoClicked = {
                         MaterialDialog(ctx, BottomSheet()).show {
                             cornerRadius(16f)
-                            title(text = "Notification Info")
-                            message(
-                                text =
-                                """
-                            Due to constraints set by the Android operating system for the power-saving 'Doze' mode,
-                            we are only able to check whether a notification should be triggered every 15 minutes.
-                            This also implies that there is a 15 minute error margin window for the notification time
-                            you have selected. 
-                            
-                            Should your notification reminder be set to 09:00, the latest you can expect your notification
-                            to be triggered is 09:15 (worst case).
-                        """.trimIndent()
-                            )
-                            positiveButton(text = "More information") {
+                            title(R.string.notifications_info__title)
+                            message(R.string.notifications_info__text)
+                            positiveButton(R.string.more_information) {
                                 actions.goToNotificationsDocumentation(ctx)
                             }
-                            negativeButton(text = "OK") {
+                            negativeButton(android.R.string.ok) {
                                 dismiss()
                             }
                         }
@@ -425,7 +406,7 @@ fun ValidationSnackbar(
 
         is ValidationViewState.Success -> {
             Snackbar(backgroundColor = primaryAccent) {
-                Text(text = "Address Validated!", color = Color.White)
+                Text(text = R.string.validation__address_validated.str(), color = Color.White)
             }
             MainScope().launch {
                 (validationViewState as? ValidationViewState.Success)?.let { success ->
@@ -438,19 +419,19 @@ fun ValidationSnackbar(
         }
         ValidationViewState.InvalidCombination -> Snackbar(backgroundColor = errorColor) {
             Text(
-                text = "Something went wrong, invalid Address combination. Please reselect your zipcode and street, and try again.",
+                text = R.string.validation__error_invalid_address.str(),
                 color = Color.White
             )
         }
         ValidationViewState.NetworkError -> Snackbar(backgroundColor = errorColor) {
             Text(
-                text = "Something went wrong, bad network response. Please check your connection or try again later.",
+                text = R.string.validation__error_bad_network_response.str(),
                 color = Color.White
             )
         }
         ValidationViewState.InvalidAddressSpecified -> Snackbar(backgroundColor = errorColor) {
             Text(
-                text = "Invalid address specified. Please check your house number and try again",
+                text = R.string.validation__error_invalid_address_specified.str(),
                 color = Color.White
             )
         }

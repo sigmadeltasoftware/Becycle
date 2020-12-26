@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="send_feedback">Send Feedback</string>
+    <string name="more_information">More information</string>
+    <string name="create_address">Create Address</string>
+    <string name="save_address">Save Address</string>
+    <string name="edit_address">Edit Address</string>
+    <string name="remove_address">Remove Address</string>
+    <string name="add_address">Add Address</string>
+    <string name="zipcode">Zipcode</string>
+    <string name="street">Street</string>
+    <string name="house_number">House Number</string>
+    <string name="today">Today</string>
+    <string name="tomorrow">Tomorrow</string>
+    <string name="notifications">Notifications</string>
+    <string name="version">Version</string>
+    <string name="created_by">Created by</string>
+    <string name="retry_connecting">Retry connecting</string>
+
+    <string name="recycle_website__go_to">Go to Recycle App website?</string>
+    <string name="recycle_website__more_info">Would you like to visit the Recycle App website for additional information?</string>
+
+    <string name="battery_optimisations__title">Battery Optimisations</string>
+    <string name="battery_optimisations__text">Due to Android\'s aggressive battery optimisations, notification reminders might not work on your device.\n\n
+Would you like disable the battery optimisations for this app to make sure the reminders are allowed to trigger?</string>
+    <string name="battery_optimisations__go_to_settings">Go to Settings</string>
+    <string name="battery_optimisations__turn_off_reminders">Turn off notification reminders</string>
+    <string name="battery_optimisations_disable__title">Disable Battery Optimisations</string>
+    <string name="battery_optimisations_disable__text">Android will try to extend its battery life by letting the system go to sleep. This mode is called \'Doze\' and might prevent the apps from acting when necessary such as in the case of firing a reminder notification.\n\n
+        To disable this, Becycle needs to be whitelisted by disabling battery optimizations. This will allow the app to send reminders even when the system is in Doze mode.</string>
+
+    <string name="notifications__schedule">Schedule Notifications</string>
+    <string name="notifications__schedule_tomorrow_text">Notification for tomorrow\'s collection</string>
+    <string name="notifications_info__title">Notification Info</string>
+    <string name="notifications_info__text">Due to constraints set by the Android operating system for the power-saving \'Doze\' mode,
+                            we are only able to check whether a notification should be triggered every 15 minutes.
+                            This also implies that there is a 15 minute error margin window for the notification time
+                            you have selected.\n\n
+
+                            Should your notification reminder be set to 09:00, the latest you can expect your notification
+                            to be triggered is 09:15 (worst case).</string>
+
+    <string name="validation__address_validated">Address Validated!</string>
+    <string name="validation__error_invalid_address">Something went wrong, invalid Address combination. Please reselect your zipcode and street, and try again.</string>
+    <string name="validation__error_bad_network_response">Something went wrong, bad network response. Please check your connection or try again later.</string>
+    <string name="validation__error_invalid_address_specified">Invalid address specified. Please check your house number and try again</string>
+
+    <string name="retrieve_addresses__error">Failed to retrieve addresses!</string>
+    <string name="remove_address__text">Are you sure you want to remove this address?</string>
+
+    <string name="collections__upcoming">Upcoming Collections</string>
+    <string name="collections__no_scheduled">No scheduled collections</string>
+    <string name="collections__no_available_for">No collections available for </string>
+    
+    <string name="settings__address">Address Settings</string>
+    <string name="settings__addresses">Address(es)</string>
+    <string name="settings__addresses_text">Manage your address(es) here</string>
+    <string name="settings__disable_battery_optimisations">DISABLE BATTERY OPTIMISATIONS</string>
+    <string name="settings__give_higher_prio">GIVE HIGHER PRIORITY</string>
+    <string name="settings__notifications_text">Create and manage your notifications</string>
+    <string name="settings__send_feedback_text">Mail us any feedback such as bugs and/or feature requests</string>
+    <string name="settings_switch__modify_settings">Enable switch to modify settings</string>
+
+    <string name="splash_screen__error_check_connection">Please check your connection and try launching the app again</string>
+</resources>
