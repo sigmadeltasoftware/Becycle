@@ -1,6 +1,7 @@
 package be.sigmadelta.becycle
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -18,6 +19,7 @@ import androidx.compose.ui.platform.setContent
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.startActivity
 import be.sigmadelta.becycle.address.*
 import be.sigmadelta.becycle.calendar.CalendarView
 import be.sigmadelta.becycle.calendar.CalendarViewActions
@@ -78,7 +80,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
                     collectionsViewModel,
                     notificationViewModel,
                     preferences,
-                    onBackPressedDispatcher
+                    onBackPressedDispatcher,
+                    this
                 )
             }
         }
@@ -100,7 +103,8 @@ fun MainLayout(
     collectionsViewModel: CollectionsViewModel,
     notificationViewModel: NotificationViewModel,
     preferences: Preferences,
-    backPressedDispatcher: OnBackPressedDispatcher
+    backPressedDispatcher: OnBackPressedDispatcher,
+    act: Activity
 ) {
     val nav: Navigator<Destination> =
         rememberSavedInstanceState(saver = Navigator.saver(backPressedDispatcher)) {
@@ -149,7 +153,8 @@ fun MainLayout(
                         preferences,
                         addressViewModel,
                         collectionsViewModel,
-                        notificationViewModel
+                        notificationViewModel,
+                        act
                     )
                 },
                 bottomBar = {
@@ -212,7 +217,8 @@ fun Main(
     preferences: Preferences,
     addressViewModel: AddressViewModel,
     collectionsViewModel: CollectionsViewModel,
-    notificationViewModel: NotificationViewModel
+    notificationViewModel: NotificationViewModel,
+    act: Activity
 ) {
 
     val collectionOverview by collectionsViewModel.collectionsViewState.collectAsState()
@@ -385,14 +391,20 @@ fun Main(
         }
     }
 
-    ValidationSnackbar(validation, addressViewModel, actions)
+    ValidationSnackbar(validation, addressViewModel, actions) {
+        if (preferences.isFirstRun) {
+            act.startActivity(Intent(act, SplashScreenActivity::class.java))
+            act.finish()
+        }
+    }
 }
 
 @Composable
 fun ValidationSnackbar(
     validationViewState: ValidationViewState,
     addressViewModel: AddressViewModel,
-    actions: Actions
+    actions: Actions,
+    onValidationSuccesful: () -> Unit
 ) {
     when (validationViewState) {
         ValidationViewState.Empty -> Unit
@@ -411,8 +423,8 @@ fun ValidationSnackbar(
             MainScope().launch {
                 (validationViewState as? ValidationViewState.Success)?.let { success ->
                     addressViewModel.saveAddress(success.address)
-                    actions.goTo(Destination.Home)
-                    delay(2000)
+                    onValidationSuccesful()
+                    delay(1000)
                     resetViewStates(addressViewModel)
                 }
             }

@@ -1,7 +1,5 @@
 package be.sigmadelta.becycle.address
 
-import android.util.Log
-import androidx.core.os.bundleOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import be.sigmadelta.becycle.common.analytics.AnalTag
