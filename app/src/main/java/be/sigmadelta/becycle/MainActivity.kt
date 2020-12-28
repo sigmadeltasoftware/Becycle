@@ -395,6 +395,9 @@ fun Main(
         if (preferences.isFirstRun) {
             act.startActivity(Intent(act, SplashScreenActivity::class.java))
             act.finish()
+        } else {
+            actions.goTo(Destination.Home)
+            resetViewStates(addressViewModel)
         }
     }
 }
