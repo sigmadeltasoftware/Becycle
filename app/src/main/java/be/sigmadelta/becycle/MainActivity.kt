@@ -9,10 +9,12 @@ import androidx.activity.OnBackPressedDispatcher
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.savedinstancestate.rememberSavedInstanceState
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.AmbientContext
 import androidx.compose.ui.platform.setContent
@@ -360,6 +362,7 @@ fun Main(
             SettingsAddressManipulationActions(
                 onSearchZipCode = addressViewModel::searchZipCode,
                 onSearchStreet = addressViewModel::searchStreets,
+                onHouseNumberValueChanged = addressViewModel::resetValidation,
                 onValidateAddress = addressViewModel::validateAddress,
                 onAddressRemove = null,
                 onBackClicked = { actions.pressOnBack() }
@@ -372,26 +375,27 @@ fun Main(
                 zipCodeItemsViewState,
                 streetsViewState,
                 SettingsAddressEditRemovalActions(
-                    addressViewModel::searchZipCode,
-                    addressViewModel::searchStreets,
-                    {
+                    onSearchZipCode = addressViewModel::searchZipCode,
+                    onSearchStreet = addressViewModel::searchStreets,
+                    onAddressChanged = {
                         addressViewModel.validateExistingAddress(it)
                         collectionsViewModel.removeCollections(it)
                         collectionsViewModel.searchCollections(it)
                     },
-                    {
+                    onAddressRemove = {
                         addressViewModel.removeAddress(it)
                         collectionsViewModel.removeCollections(it)
                         collectionsViewModel.searchCollections(it)
                         actions.pressOnBack()
                     },
-                    { actions.pressOnBack() }
+                    onHouseNumberValueChanged = addressViewModel::resetValidation,
+                    onBackClicked = { actions.pressOnBack() }
                 )
             )
         }
     }
 
-    ValidationSnackbar(validation, addressViewModel, actions) {
+    ValidationSnackbar(validation, addressViewModel) {
         if (preferences.isFirstRun) {
             act.startActivity(Intent(act, SplashScreenActivity::class.java))
             act.finish()
@@ -406,7 +410,6 @@ fun Main(
 fun ValidationSnackbar(
     validationViewState: ValidationViewState,
     addressViewModel: AddressViewModel,
-    actions: Actions,
     onValidationSuccesful: () -> Unit
 ) {
     when (validationViewState) {
@@ -432,29 +435,42 @@ fun ValidationSnackbar(
                 }
             }
         }
-        ValidationViewState.InvalidCombination -> Snackbar(backgroundColor = errorColor) {
-            Text(
-                text = R.string.validation__error_invalid_address.str(),
-                color = Color.White
-            )
+        ValidationViewState.InvalidCombination -> ErrorSnackbar(
+            R.string.validation__error_invalid_address.str()) {
+            addressViewModel.resetValidation()
         }
-        ValidationViewState.NetworkError -> Snackbar(backgroundColor = errorColor) {
-            Text(
-                text = R.string.validation__error_bad_network_response.str(),
-                color = Color.White
-            )
+        ValidationViewState.NetworkError -> ErrorSnackbar(
+            R.string.validation__error_bad_network_response.str()) {
+            addressViewModel.resetValidation()
         }
-        ValidationViewState.InvalidAddressSpecified -> Snackbar(backgroundColor = errorColor) {
-            Text(
-                text = R.string.validation__error_invalid_address_specified.str(),
-                color = Color.White
-            )
+        ValidationViewState.InvalidAddressSpecified -> ErrorSnackbar(
+            R.string.validation__error_invalid_address_specified.str()) {
+            addressViewModel.resetValidation()
+        }
+        ValidationViewState.DuplicateAddressEntry -> ErrorSnackbar(
+            R.string.validation__error_duplicate_address_entry.str()) {
+            addressViewModel.resetValidation()
         }
     }
+}
 
-    MainScope().launch {
-        delay(4000)
-        addressViewModel.resetValidation()
+@Composable
+fun ErrorSnackbar(
+    text: String,
+    onClose: () -> Unit
+) {
+    Snackbar(backgroundColor = errorColor) {
+        Row {
+            Text(
+                text = text,
+                color = Color.White,
+                modifier = Modifier.weight(0.9f)
+            )
+            IconButton(
+                onClick = { onClose() },
+                modifier = Modifier.weight(0.1f)
+            ) { Icon(imageVector = vectorResource(id = R.drawable.ic_close)) }
+        }
     }
 }
 
