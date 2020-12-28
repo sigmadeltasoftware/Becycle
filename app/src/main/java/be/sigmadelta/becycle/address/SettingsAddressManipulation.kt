@@ -17,6 +17,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import be.sigmadelta.becycle.BuildConfig
 import be.sigmadelta.becycle.R
 import be.sigmadelta.becycle.common.ui.theme.errorColor
 import be.sigmadelta.becycle.common.ui.theme.regularFontSize
@@ -180,7 +181,9 @@ fun ZipCodeItemLayout(zipCodeItem: ZipCodeItem) {
 @Composable
 fun StreetLayout(street: Street) {
     Text(street.names.nl, fontWeight = FontWeight.Bold, fontSize = regularFontSize)
-    Text(street.id, fontSize = subTextFontSize)
+    if (BuildConfig.DEBUG) {
+        Text(street.id, fontSize = subTextFontSize)
+    }
     Divider(modifier = Modifier.fillMaxWidth())
 }
 
