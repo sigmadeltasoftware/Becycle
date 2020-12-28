@@ -2,30 +2,47 @@ package be.sigmadelta.becycle.collections
 
 import android.widget.ImageView
 import androidx.compose.foundation.ScrollableColumn
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import be.sigmadelta.becycle.R
 import be.sigmadelta.becycle.common.ui.theme.*
 import be.sigmadelta.becycle.common.ui.util.iconRef
+import be.sigmadelta.becycle.common.util.str
 import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.collections.Collection
 import be.sigmadelta.common.collections.CollectionOverview
 import kotlinx.datetime.*
-import be.sigmadelta.becycle.R
-import be.sigmadelta.becycle.common.util.str
+
+@ExperimentalMaterialApi
+@Composable
+fun Collections(
+    collectionOverview: CollectionOverview,
+    actions: CollectionActions
+) {
+//    val dismissState = rememberDismissState(DismissValue.Default)
+
+//    SwipeToRefresh(state = dismissState, background = {Text(text = "DWAAWD", fontSize = 40.sp)}) {
+//
+//    }
+
+    CollectionView(collectionOverview)
+}
 
 @Composable
-fun Collections(collectionOverview: CollectionOverview) {
-
-    ScrollableColumn {
+fun CollectionView(collectionOverview: CollectionOverview) {
+    ScrollableColumn(modifier = Modifier.background(Color.White)) {
         CollectionTitle(
             title = R.string.today.str(),
             date = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
@@ -184,3 +201,7 @@ fun EmptyCollections(address: Address) {
         )
     }
 }
+
+data class CollectionActions(
+    val onSwipeToRefresh: () -> Unit
+)

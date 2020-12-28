@@ -7,6 +7,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import be.sigmadelta.becycle.address.AddressSwitcher
+import be.sigmadelta.becycle.collections.CollectionActions
 import be.sigmadelta.becycle.collections.Collections
 import be.sigmadelta.becycle.collections.EmptyCollections
 import be.sigmadelta.becycle.common.ui.theme.bottomNavigationMargin
@@ -39,7 +40,8 @@ fun Home(
                 )
                 HomeLayout(
                     collectionOverview,
-                    addresses.payload[selectedTabIx]
+                    addresses.payload[selectedTabIx],
+                    actions
                 )
             }
 
@@ -59,7 +61,8 @@ fun Home(
 @Composable
 fun HomeLayout(
     collectionOverview: ViewState<CollectionOverview>,
-    address: Address
+    address: Address,
+    actions: HomeActions
 ) {
 
     Column(
@@ -69,7 +72,14 @@ fun HomeLayout(
         when (collectionOverview) {
             is ViewState.Empty -> EmptyCollections(address)
             is ViewState.Loading -> Unit // TODO
-            is ViewState.Success -> Collections(collectionOverview = collectionOverview.payload)
+            is ViewState.Success -> Collections(
+                collectionOverview = collectionOverview.payload,
+                actions = CollectionActions(
+                    onSwipeToRefresh = {
+                        actions.onLoadCollections(address)
+                    }
+                )
+            )
             is ViewState.Error -> Unit // TODO
         }
     }

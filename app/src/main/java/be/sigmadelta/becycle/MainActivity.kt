@@ -161,47 +161,49 @@ fun MainLayout(
                 },
                 bottomBar = {
                     val ctx = AmbientContext.current
-                    BottomNavigation(
-                        backgroundColor = primaryBackgroundColor,
-                        elevation = 8.dp,
-                    ) {
-                        BottomNavigationItem(
-                            icon = { Icon(vectorResource(id = R.drawable.ic_home)) },
-                            selectedContentColor = primaryAccent,
-                            unselectedContentColor = unselectedColor,
-                            selected = nav.current == Destination.Home,
-                            onClick = { actions.goTo(Destination.Home) })
-                        BottomNavigationItem(
-                            icon = { Icon(vectorResource(id = R.drawable.ic_calendar)) },
-                            selectedContentColor = primaryAccent,
-                            unselectedContentColor = unselectedColor,
-                            selected = nav.current == Destination.Calendar,
-                            onClick = { actions.goTo(Destination.Calendar) })
-                        BottomNavigationItem(
-                            icon = { Icon(vectorResource(id = R.drawable.ic_settings)) },
-                            selectedContentColor = primaryAccent,
-                            unselectedContentColor = unselectedColor,
-                            selected = nav.current.toString().contains("Settings"),
-                            onClick = { actions.goTo(Destination.Settings) })
-                        BottomNavigationItem(
-                            icon = { Icon(vectorResource(id = R.drawable.ic_web)) },
-                            selectedContentColor = primaryAccent,
-                            unselectedContentColor = unselectedColor,
-                            selected = false,
-                            onClick = {
-                                MaterialDialog(ctx).show {
-                                    cornerRadius(16f)
-                                    title(R.string.recycle_website__go_to)
-                                    message(R.string.recycle_website__more_info)
-                                    positiveButton(android.R.string.ok) {
-                                        actions.goToRecycleWebsite(ctx)
-                                    }
-                                    negativeButton(android.R.string.cancel) {
-                                        it.dismiss()
+                    if ((AmbientAddress.current as ListViewState.Success).payload.isNotEmpty()) {
+                        BottomNavigation(
+                            backgroundColor = primaryBackgroundColor,
+                            elevation = 8.dp,
+                        ) {
+                            BottomNavigationItem(
+                                icon = { Icon(vectorResource(id = R.drawable.ic_home)) },
+                                selectedContentColor = primaryAccent,
+                                unselectedContentColor = unselectedColor,
+                                selected = nav.current == Destination.Home,
+                                onClick = { actions.goTo(Destination.Home) })
+                            BottomNavigationItem(
+                                icon = { Icon(vectorResource(id = R.drawable.ic_calendar)) },
+                                selectedContentColor = primaryAccent,
+                                unselectedContentColor = unselectedColor,
+                                selected = nav.current == Destination.Calendar,
+                                onClick = { actions.goTo(Destination.Calendar) })
+                            BottomNavigationItem(
+                                icon = { Icon(vectorResource(id = R.drawable.ic_settings)) },
+                                selectedContentColor = primaryAccent,
+                                unselectedContentColor = unselectedColor,
+                                selected = nav.current.toString().contains("Settings"),
+                                onClick = { actions.goTo(Destination.Settings) })
+                            BottomNavigationItem(
+                                icon = { Icon(vectorResource(id = R.drawable.ic_web)) },
+                                selectedContentColor = primaryAccent,
+                                unselectedContentColor = unselectedColor,
+                                selected = false,
+                                onClick = {
+                                    MaterialDialog(ctx).show {
+                                        cornerRadius(16f)
+                                        title(R.string.recycle_website__go_to)
+                                        message(R.string.recycle_website__more_info)
+                                        positiveButton(android.R.string.ok) {
+                                            actions.goToRecycleWebsite(ctx)
+                                        }
+                                        negativeButton(android.R.string.cancel) {
+                                            it.dismiss()
+                                        }
                                     }
                                 }
-                            }
-                        )
+                            )
+                        }
                     }
                 }
             )
@@ -436,19 +438,23 @@ fun ValidationSnackbar(
             }
         }
         ValidationViewState.InvalidCombination -> ErrorSnackbar(
-            R.string.validation__error_invalid_address.str()) {
+            R.string.validation__error_invalid_address.str()
+        ) {
             addressViewModel.resetValidation()
         }
         ValidationViewState.NetworkError -> ErrorSnackbar(
-            R.string.validation__error_bad_network_response.str()) {
+            R.string.validation__error_bad_network_response.str()
+        ) {
             addressViewModel.resetValidation()
         }
         ValidationViewState.InvalidAddressSpecified -> ErrorSnackbar(
-            R.string.validation__error_invalid_address_specified.str()) {
+            R.string.validation__error_invalid_address_specified.str()
+        ) {
             addressViewModel.resetValidation()
         }
         ValidationViewState.DuplicateAddressEntry -> ErrorSnackbar(
-            R.string.validation__error_duplicate_address_entry.str()) {
+            R.string.validation__error_duplicate_address_entry.str()
+        ) {
             addressViewModel.resetValidation()
         }
     }

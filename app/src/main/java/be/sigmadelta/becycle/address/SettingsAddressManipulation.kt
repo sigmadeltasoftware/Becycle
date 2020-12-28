@@ -181,10 +181,11 @@ fun ZipCodeItemLayout(zipCodeItem: ZipCodeItem) {
 
 @Composable
 fun StreetLayout(street: Street) {
-    Text(street.names.nl, fontWeight = FontWeight.Bold, fontSize = regularFontSize)
-    if (BuildConfig.DEBUG) {
-        Text(street.id, fontSize = subTextFontSize)
-    }
+    Text(
+        street.names.nl,
+        modifier = Modifier.padding(vertical = 4.dp),
+        fontWeight = FontWeight.Bold,
+        fontSize = regularFontSize)
     Divider(modifier = Modifier.fillMaxWidth())
 }
 
