@@ -44,6 +44,7 @@ Would you like disable the battery optimisations for this app to make sure the r
     <string name="validation__error_invalid_address">Something went wrong, invalid Address combination. Please reselect your zipcode and street, and try again.</string>
     <string name="validation__error_bad_network_response">Something went wrong, bad network response. Please check your connection or try again later.</string>
     <string name="validation__error_invalid_address_specified">Invalid address specified. Please check your house number and try again</string>
+    <string name="validation__error_duplicate_address_entry">Duplicate address Entry. Please enter a unique address and try again</string>
 
     <string name="retrieve_addresses__error">Failed to retrieve addresses!</string>
     <string name="remove_address__text">Are you sure you want to remove this address?</string>

@@ -42,6 +42,7 @@ Wil je de batterij-optimalisaties voor Becycle uitschakelen, om er voor te zorge
     <string name="validation__error_invalid_address">Er ging iets mis, ongeldige adres combinatie. Gelieve uw postcode en straat te selecteren en opnieuw te proberen.</string>
     <string name="validation__error_bad_network_response">Er ging iets mis, ongeldig antwoord van de server. Kijk uw verbinding na of probeer laten opnieuw.</string>
     <string name="validation__error_invalid_address_specified">Ongeldig adres gespecifieerd. Kijk uw huisnummer na en probeer opnieuw.</string>
+    <string name="validation__error_duplicate_address_entry">Geen uniek adres. Voer aub een uniek adres in en probeer opnieuw.</string>
 
     <string name="retrieve_addresses__error">Probleem bij het ophalen van de addressen!</string>
     <string name="remove_address__text">Ben je zeker dat je dit adres wilt verwijderen?</string>

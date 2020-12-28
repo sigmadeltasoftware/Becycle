@@ -99,6 +99,11 @@ class AddressViewModel(
     }
 
     fun validateAddress(zipCodeItem: ZipCodeItem, street: Street, houseNumber: Int) = viewModelScope.launch {
+        if (addressRepository.getAddresses().map { it.fullAddress }.contains(Address(zipCodeItem, street, houseNumber).fullAddress)){
+            validationViewState.value = ValidationViewState.DuplicateAddressEntry
+            return@launch
+        }
+
         addressRepository.validateAddress(zipCodeItem, street, houseNumber).collect {
             validationViewState.value = when (it) {
                 is Response.Loading -> ValidationViewState.Loading
@@ -173,4 +178,5 @@ sealed class ValidationViewState {
     object InvalidCombination: ValidationViewState()
     object InvalidAddressSpecified: ValidationViewState()
     object NetworkError: ValidationViewState()
+    object DuplicateAddressEntry: ValidationViewState()
 }

@@ -115,6 +115,7 @@ fun SettingsAddressManipulation(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     onValueChange = { number ->
                         selectedHouseNumber = number
+                        actions.onHouseNumberValueChanged()
                     },
                     isErrorValue = !selectedHouseNumber.isInt()
                 )
@@ -196,6 +197,7 @@ data class AddressCreationPrefill(
 data class SettingsAddressManipulationActions(
     val onSearchZipCode: (String) -> Unit,
     val onSearchStreet: (String, ZipCodeItem) -> Unit,
+    val onHouseNumberValueChanged: () -> Unit,
     val onValidateAddress: (ZipCodeItem, Street, Int) -> Unit,
     val onAddressRemove: ((Address) -> Unit)?,
     val onBackClicked: () -> Unit

@@ -1,14 +1,14 @@
 object BecProperties {
     const val applicationId = "be.sigmadelta.becycle"
-    const val versionCode = 7
-    const val versionName = "1.0.2"
+    const val versionCode = 8
+    const val versionName = "1.0.3"
 }
 
 object Versions {
     const val gradleTools = "4.2.0-alpha16"
     const val compileSdk = 30
     const val targetSdk = compileSdk
-    const val minSdk = 24
+    const val minSdk = 21
     const val buildTools = "$compileSdk.0.2"
     const val google_gms = "4.3.4"
     const val firebase_crashlytics_gradle = "2.3.0"

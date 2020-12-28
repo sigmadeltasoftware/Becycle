@@ -34,6 +34,7 @@ fun SettingsAddressEditRemoval(
                         SettingsAddressManipulationActions(
                             onSearchZipCode = actions.onSearchZipCode,
                             onSearchStreet = actions.onSearchStreet,
+                            onHouseNumberValueChanged = actions.onHouseNumberValueChanged,
                             onValidateAddress = { zipCodeItem, street, houseNumber ->
                                 actions.onAddressChanged(
                                     it.copy(
@@ -60,5 +61,6 @@ data class SettingsAddressEditRemovalActions (
     val onSearchStreet: (String, ZipCodeItem) -> Unit,
     val onAddressChanged: (Address) -> Unit,
     val onAddressRemove: (Address) -> Unit,
+    val onHouseNumberValueChanged: () -> Unit,
     val onBackClicked: () -> Unit
 )
