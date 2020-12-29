@@ -2,6 +2,7 @@ package be.sigmadelta.becycle.home
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -20,6 +21,7 @@ import be.sigmadelta.becycle.common.util.str
 import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.collections.CollectionOverview
 
+@ExperimentalMaterialApi
 @Composable
 fun Home(
     collectionOverview: ViewState<CollectionOverview>,
@@ -58,6 +60,7 @@ fun Home(
     }
 }
 
+@ExperimentalMaterialApi
 @Composable
 fun HomeLayout(
     collectionOverview: ViewState<CollectionOverview>,

@@ -386,6 +386,7 @@ fun Main(
                     },
                     onAddressRemove = {
                         addressViewModel.removeAddress(it)
+                        selectedTabIx = 0
                         collectionsViewModel.removeCollections(it)
                         collectionsViewModel.searchCollections(it)
                         actions.pressOnBack()
