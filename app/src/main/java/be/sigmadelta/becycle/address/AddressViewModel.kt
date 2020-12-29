@@ -8,9 +8,11 @@ import be.sigmadelta.becycle.common.analytics.UserProps
 import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.becycle.common.ui.util.toViewState
 import be.sigmadelta.common.address.Address
+import be.sigmadelta.common.address.AddressDao
+import be.sigmadelta.common.address.RecAppAddressDao
 import be.sigmadelta.common.address.AddressRepository
-import be.sigmadelta.common.address.Street
-import be.sigmadelta.common.address.ZipCodeItem
+import be.sigmadelta.common.address.recapp.RecAppStreetDao
+import be.sigmadelta.common.address.recapp.RecAppZipCodeItemDao
 import be.sigmadelta.common.notifications.NotificationRepo
 import be.sigmadelta.common.util.InvalidAddressException
 import be.sigmadelta.common.util.Response
@@ -29,15 +31,15 @@ class AddressViewModel(
 ) : ViewModel() {
 
     val addressesViewState = MutableStateFlow<ListViewState<Address>>(ListViewState.Empty())
-    val zipCodeItemsViewState = MutableStateFlow<ListViewState<ZipCodeItem>>(ListViewState.Empty())
-    val streetsViewState = MutableStateFlow<ListViewState<Street>>(ListViewState.Empty())
+    val zipCodeItemsViewState = MutableStateFlow<ListViewState<RecAppZipCodeItemDao>>(ListViewState.Empty())
+    val streetsViewState = MutableStateFlow<ListViewState<RecAppStreetDao>>(ListViewState.Empty())
     val validationViewState = MutableStateFlow<ValidationViewState>(ValidationViewState.Empty)
 
     init {
         loadSavedAddresses()
     }
 
-    fun saveAddress(address: Address) = viewModelScope.launch {
+    fun saveAddress(address: RecAppAddressDao) = viewModelScope.launch {
         val addressExists = addressRepository.getAddresses().map { it.id }.contains(address.id)
 
         if (addressExists) {
@@ -73,14 +75,12 @@ class AddressViewModel(
 
     fun removeAddress(address: Address) = viewModelScope.launch {
         addressRepository.removeAddress(address)
-        analTracker.log(AnalTag.REMOVE_ADDRESS) {
-            param("address", address.fullAddress)
-        }
+        analTracker.log(AnalTag.REMOVE_ADDRESS)
         loadSavedAddresses()
     }
 
     fun searchZipCode(searchQuery: String) = viewModelScope.launch {
-        addressRepository.searchZipCodes(searchQuery).collect {
+        addressRepository.searchRecAppZipCodes(searchQuery).collect {
             zipCodeItemsViewState.value = it.toViewState()
             analTracker.log(AnalTag.SEARCH_ZIP_CODE) {
                 param("query", searchQuery)
@@ -88,8 +88,8 @@ class AddressViewModel(
         }
     }
 
-    fun searchStreets(searchQuery: String, zipCodeItem: ZipCodeItem) = viewModelScope.launch {
-        addressRepository.searchStreets(searchQuery, zipCodeItem).collect {
+    fun searchStreets(searchQuery: String, zipCodeItem: RecAppZipCodeItemDao) = viewModelScope.launch {
+        addressRepository.searchRecAppStreets(searchQuery, zipCodeItem).collect {
             analTracker.log(AnalTag.SEARCH_STREETS) {
                 param("query", searchQuery)
                 param("zipcode", zipCodeItem.code)
@@ -98,13 +98,13 @@ class AddressViewModel(
         }
     }
 
-    fun validateAddress(zipCodeItem: ZipCodeItem, street: Street, houseNumber: Int) = viewModelScope.launch {
-        if (addressRepository.getAddresses().map { it.fullAddress }.contains(Address(zipCodeItem, street, houseNumber).fullAddress)){
+    fun validateAddress(zipCodeItem: RecAppZipCodeItemDao, street: RecAppStreetDao, houseNumber: Int) = viewModelScope.launch {
+        if (addressRepository.getAddresses().map { it.fullAddress }.contains(RecAppAddressDao(zipCodeItem, street, houseNumber).asGeneric().fullAddress)){
             validationViewState.value = ValidationViewState.DuplicateAddressEntry
             return@launch
         }
 
-        addressRepository.validateAddress(zipCodeItem, street, houseNumber).collect {
+        addressRepository.validateRecAppAddress(zipCodeItem, street, houseNumber).collect {
             validationViewState.value = when (it) {
                 is Response.Loading -> ValidationViewState.Loading
                 is Response.Success -> {
@@ -129,13 +129,13 @@ class AddressViewModel(
         }
     }
 
-    fun validateExistingAddress(address: Address) = viewModelScope.launch {
-        addressRepository.validateExistingAddress(address).collect {
+    fun validateExistingRecAppAddress(address: RecAppAddressDao) = viewModelScope.launch {
+        addressRepository.validateExistingRecAppAddress(address).collect {
             validationViewState.value = when (it) {
                 is Response.Loading -> ValidationViewState.Loading
                 is Response.Success -> {
                     analTracker.log(AnalTag.VALIDATE_EXISTING_ADDRESS) {
-                        param("address", address.fullAddress)
+                        param("address", address.asGeneric().fullAddress)
                     }
                     ValidationViewState.Success(it.body)
                 }
@@ -165,7 +165,7 @@ class AddressViewModel(
         analTracker.log(AnalTag.RESET_VALIDATION)
     }
 
-    private fun createDefaultNotificationSettings(address: Address) {
+    private fun createDefaultNotificationSettings(address: RecAppAddressDao) {
         notificationRepo.insertDefaultNotificationProps(address)
         analTracker.log(AnalTag.CREATE_DEFAULT_NOTIFICATION_SETTINGS)
     }
@@ -174,7 +174,7 @@ class AddressViewModel(
 sealed class ValidationViewState {
     object Empty: ValidationViewState()
     object Loading: ValidationViewState()
-    data class Success(val address: Address): ValidationViewState()
+    data class Success(val address: RecAppAddressDao): ValidationViewState()
     object InvalidCombination: ValidationViewState()
     object InvalidAddressSpecified: ValidationViewState()
     object NetworkError: ValidationViewState()

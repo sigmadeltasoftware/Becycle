@@ -1,6 +1,6 @@
-package be.sigmadelta.common.collections
+package be.sigmadelta.common.collections.recapp
 
-import be.sigmadelta.common.address.Address
+import be.sigmadelta.common.address.RecAppAddressDao
 import be.sigmadelta.common.util.ApiResponse
 import be.sigmadelta.common.util.SearchQueryResult
 import be.sigmadelta.common.util.SessionStorage
@@ -9,18 +9,18 @@ import io.ktor.client.*
 import io.ktor.client.request.*
 import kotlinx.serialization.Serializable
 
-class CollectionsApi(
+class RecAppCollectionsApi(
     private val baseUrl: String,
     private val client: HttpClient,
     private val sessionStorage: SessionStorage
 ) {
 
     suspend fun getCollections(
-        address: Address,
+        address: RecAppAddressDao,
         fromDateYyyyMmDd: String,
         untilDateYyyyMmDd: String,
         size: Int
-    ): ApiResponse<SearchQueryResult<Collection>> = try {
+    ): ApiResponse<SearchQueryResult<RecAppCollectionDao>> = try {
         val response = client.get<SearchQueryResult<CollectionResponse>> {
             url("$baseUrl/$COLLECTIONS_API")
             sessionStorage.attachHeaders(this)
@@ -54,9 +54,9 @@ class CollectionsApi(
 data class CollectionResponse (
     val timestamp: String,
     val type: String,
-    val fraction: CollectionFraction,
+    val fraction: RecAppCollectionFractionDao,
 ) {
-    fun toCollection(address: Address) = Collection(
+    fun toCollection(address: RecAppAddressDao) = RecAppCollectionDao(
         timestamp = this.timestamp,
         fraction = this.fraction,
         type = this.type,

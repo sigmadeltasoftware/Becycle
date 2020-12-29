@@ -1,10 +1,9 @@
-package be.sigmadelta.becycle.address
+package be.sigmadelta.becycle.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyColumnForIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
@@ -96,13 +95,13 @@ fun SettingsAddressOverviewItem(
         )
         {
             Text(
-                text = "${address.street.names.nl} ${address.houseNumber}",
+                text = address.streetWithHouseNr,
                 color = textPrimary,
                 fontWeight = FontWeight.Bold,
                 fontSize = regularFontSize
             )
             Text(
-                text = "${address.zipCodeItem.code} ${address.zipCodeItem.names.firstOrNull()?.nl}",
+                text = "${address.zipCode} ${address.municipality}",
                 color = textPrimary,
                 fontSize = subTextFontSize
             )

@@ -75,8 +75,7 @@ class SplashScreenActivity : AppCompatActivity(), CoroutineScope by MainScope() 
         launch {
             baseHeadersViewModel.baseHeadersViewState.collect { viewState ->
                 when (viewState) {
-                    is BaseHeadersViewState.Empty -> {
-                    }
+                    is BaseHeadersViewState.Empty -> Unit
                     is BaseHeadersViewState.Error -> error = viewState.error
                     is BaseHeadersViewState.Headers -> {
                         sessionStorage.baseHeaders = viewState.headers
@@ -93,7 +92,7 @@ class SplashScreenActivity : AppCompatActivity(), CoroutineScope by MainScope() 
                         Napier.d("Received Access token: ${result.payload}")
                         sessionStorage.accessToken = result.payload.accessToken
                         launch(Dispatchers.IO) {
-                            delay(1400)
+                            delay(700)
                             startActivity(
                                 Intent(
                                     this@SplashScreenActivity,

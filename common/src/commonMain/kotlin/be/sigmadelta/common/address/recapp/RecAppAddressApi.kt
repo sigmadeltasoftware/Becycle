@@ -1,46 +1,45 @@
-package be.sigmadelta.common.address
+package be.sigmadelta.common.address.recapp
 
+import be.sigmadelta.common.address.RecAppAddressDao
 import be.sigmadelta.common.util.ApiResponse
 import be.sigmadelta.common.util.SearchQueryResult
 import be.sigmadelta.common.util.SessionStorage
 import be.sigmadelta.common.util.getApi
 import io.ktor.client.*
-import io.ktor.client.features.*
 import io.ktor.client.request.*
-import org.kodein.memory.util.UUID
 
-class AddressApi(
+class RecAppAddressApi(
     private val baseUrl: String,
     private val client: HttpClient,
     private val sessionStorage: SessionStorage
 ) {
 
-    suspend fun getZipCodes(searchQuery: String) = client.getApi<SearchQueryResult<ZipCodeItem>> {
+    suspend fun getZipCodes(searchQuery: String) = client.getApi<SearchQueryResult<RecAppZipCodeItemDao>> {
         url("$baseUrl/$ZIPCODES_API")
         parameter("q", searchQuery)
         sessionStorage.attachHeaders(this)
     }
 
-    suspend fun getStreets(searchQuery: String, zipCodeItem: ZipCodeItem) = client.getApi<SearchQueryResult<Street>> {
+    suspend fun getStreets(searchQuery: String, zipCodeItem: RecAppZipCodeItemDao) = client.getApi<SearchQueryResult<RecAppStreetDao>> {
         url("$baseUrl/$STREETS_API")
         parameter("q", searchQuery)
         parameter("zipcodes", zipCodeItem.id)
         sessionStorage.attachHeaders(this)
     }
 
-    suspend fun validateAddress(zipCodeItem: ZipCodeItem, street: Street, houseNumber: Int): ApiResponse<Address> = try {
+    suspend fun validateAddress(zipCodeItem: RecAppZipCodeItemDao, street: RecAppStreetDao, houseNumber: Int): ApiResponse<RecAppAddressDao> = try {
         client.head<Unit> {
             url("$baseUrl/$STREETS_API")
             parameter("zipcodeId", zipCodeItem.id)
             parameter("streetId", street.id)
             sessionStorage.attachHeaders(this)
         }
-        ApiResponse.Success(Address(zipCodeItem, street, houseNumber))
+        ApiResponse.Success(RecAppAddressDao(zipCodeItem, street, houseNumber))
     } catch (e: Throwable) {
         ApiResponse.Error(e)
     }
 
-    suspend fun validateExistingAddress(address: Address): ApiResponse<Address> = try {
+    suspend fun validateExistingAddress(address: RecAppAddressDao): ApiResponse<RecAppAddressDao> = try {
         client.head<Unit> {
             url("$baseUrl/$STREETS_API")
             parameter("zipcodeId", address.zipCodeItem.id)

@@ -17,7 +17,6 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import be.sigmadelta.becycle.BuildConfig
 import be.sigmadelta.becycle.R
 import be.sigmadelta.becycle.common.ui.theme.errorColor
 import be.sigmadelta.becycle.common.ui.theme.regularFontSize
@@ -26,23 +25,23 @@ import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.becycle.common.ui.widgets.DropDownTextField
 import be.sigmadelta.becycle.common.util.str
 import be.sigmadelta.common.address.Address
-import be.sigmadelta.common.address.Street
-import be.sigmadelta.common.address.ZipCodeItem
+import be.sigmadelta.common.address.recapp.RecAppStreetDao
+import be.sigmadelta.common.address.recapp.RecAppZipCodeItemDao
 import com.afollestad.materialdialogs.MaterialDialog
 import org.koin.ext.isInt
 
 @ExperimentalMaterialApi
 @Composable
 fun SettingsAddressManipulation(
-    zipCodeItemsViewState: ListViewState<ZipCodeItem>,
-    streetsViewState: ListViewState<Street>,
+    zipCodeItemsViewState: ListViewState<RecAppZipCodeItemDao>,
+    streetsViewState: ListViewState<RecAppStreetDao>,
     actions: SettingsAddressManipulationActions,
     appBarTitle: String? = null,
     existingAddress: Address? = null,
 ) {
-    var selectedZipCode by remember { mutableStateOf<ZipCodeItem?>(null) }
+    var selectedZipCode by remember { mutableStateOf<RecAppZipCodeItemDao?>(null) }
     var isInvalidZipCodeInput by remember { mutableStateOf(false) }
-    var selectedStreet by remember { mutableStateOf<Street?>(null) }
+    var selectedStreet by remember { mutableStateOf<RecAppStreetDao?>(null) }
     var selectedHouseNumber by remember { mutableStateOf("") }
 
     val streetFocusRequester = FocusRequester()
@@ -80,7 +79,7 @@ fun SettingsAddressManipulation(
                         selectedZipCode = zipCode
                         streetFocusRequester.requestFocus()
                     },
-                    itemLayout = { item: ZipCodeItem -> ZipCodeItemLayout(zipCodeItem = item) },
+                    itemLayout = { item: RecAppZipCodeItemDao -> ZipCodeItemLayout(zipCodeItem = item) },
                     keyboardType = KeyboardType.Number,
                     isError = isInvalidZipCodeInput
                 )
@@ -99,7 +98,7 @@ fun SettingsAddressManipulation(
                         selectedStreet = street
                         houseNumberFocusRequester.requestFocus()
                     },
-                    itemLayout = { item: Street -> StreetLayout(street = item) },
+                    itemLayout = { item: RecAppStreetDao -> StreetLayout(street = item) },
                     focusRequester = streetFocusRequester,
                     isError = selectedZipCode == null
                 )
@@ -166,7 +165,7 @@ fun SettingsAddressManipulation(
 }
 
 @Composable
-fun ZipCodeItemLayout(zipCodeItem: ZipCodeItem) {
+fun ZipCodeItemLayout(zipCodeItem: RecAppZipCodeItemDao) {
     Text(
         zipCodeItem.code,
         fontWeight = FontWeight.Bold,
@@ -180,7 +179,7 @@ fun ZipCodeItemLayout(zipCodeItem: ZipCodeItem) {
 }
 
 @Composable
-fun StreetLayout(street: Street) {
+fun StreetLayout(street: RecAppStreetDao) {
     Text(
         street.names.nl,
         modifier = Modifier.padding(vertical = 4.dp),
@@ -197,9 +196,9 @@ data class AddressCreationPrefill(
 
 data class SettingsAddressManipulationActions(
     val onSearchZipCode: (String) -> Unit,
-    val onSearchStreet: (String, ZipCodeItem) -> Unit,
+    val onSearchStreet: (String, RecAppZipCodeItemDao) -> Unit,
     val onHouseNumberValueChanged: () -> Unit,
-    val onValidateAddress: (ZipCodeItem, Street, Int) -> Unit,
+    val onValidateAddress: (RecAppZipCodeItemDao, RecAppStreetDao, Int) -> Unit,
     val onAddressRemove: ((Address) -> Unit)?,
     val onBackClicked: () -> Unit
 )

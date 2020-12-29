@@ -52,6 +52,7 @@ Wil je de batterij-optimalisaties voor Becycle uitschakelen, om er voor te zorge
     <string name="collections__no_available_for">Geen ophalingen beschikbaar voor </string>
 
     <string name="settings__address">Adres-instellingen</string>
+    <string name="settings__notifications">Notificatie-instellingen</string>
     <string name="settings__addresses">Adressen</string>
     <string name="settings__addresses_text">Beheer uw adressen hier</string>
     <string name="settings__disable_battery_optimisations">BATTERIJ-OPTIMALISATIES UITSCHAKELEN</string>
@@ -61,4 +62,26 @@ Wil je de batterij-optimalisaties voor Becycle uitschakelen, om er voor te zorge
     <string name="settings_switch__modify_settings">Schakelaar aanzetten om instellingen te wijzigen</string>
 
     <string name="splash_screen__error_check_connection">Kijk uw verbinding na en start de app opnieuw op</string>
+
+    <string name="collectiontype__GFT">GFT</string>
+    <string name="collectiontype__GFT_DIFTAR">GFT DIFTAR</string>
+    <string name="collectiontype__RESIDUAL_HOUSEHOLD_WASTE">Huisvuil</string>
+    <string name="collectiontype__RESIDUAL_HOUSEHOLD_WASTE_DIFTAR">Huisvuil DIFTAR</string>
+    <string name="collectiontype__GROF_HUISVUIL">Grof Huisvuil</string>
+    <string name="collectiontype__GROF_HUISVUIL_APPOINTMENT">Grof Huisvuil (Afspraak)</string>
+    <string name="collectiontype__PAPER_CARTON">Papier &amp; Karton</string>
+    <string name="collectiontype__PMD">PMD</string>
+    <string name="collectiontype__TEXTILE">Textiel</string>
+    <string name="collectiontype__LARGE_HOUSEHOLD_WASTE_APPOINTMENT">Groot Huisvuil (Afspraak)</string>
+    <string name="collectiontype__SOFT_PLASTICS">Zacht Plastic</string>
+    <string name="collectiontype__BATTERIES">Batterijen</string>
+    <string name="collectiontype__GLASS">Glas</string>
+    <string name="collectiontype__SNOEIHOUT">Snoeihout</string>
+    <string name="collectiontype__SNOEIHOUT_APPOINTMENT">Snoeihout (Afspraak)</string>
+    <string name="collectiontype__OLD_METALS">Oud Metaal</string>
+    <string name="collectiontype__RE_USE_CENTER">Recycleercentrum</string>
+    <string name="collectiontype__IJZER">Ijzer</string>
+    <string name="collectiontype__CHRISTMAS_TREES">Kerstbomen</string>
+    <string name="collectiontype__HOUSEHOLD_HAZARDEOUS_WASTE_KGA">KGA</string>
+    <string name="collectiontype__UNKNOWN">Onbekend</string>
 </resources>

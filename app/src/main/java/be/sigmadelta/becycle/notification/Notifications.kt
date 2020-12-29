@@ -2,11 +2,9 @@ package be.sigmadelta.becycle.notification
 
 import android.app.TimePickerDialog
 import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,6 +25,30 @@ import be.sigmadelta.becycle.common.util.str
 import be.sigmadelta.common.date.Time
 import be.sigmadelta.common.notifications.NotificationProps
 import be.sigmadelta.common.notifications.NotificationRepo
+
+@Composable
+fun SettingsNotificationsOverview(
+    notificationProps: ListViewState<NotificationProps>,
+    actions: SettingsNotificationsActions
+) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(R.string.settings__notifications.str()) },
+                navigationIcon = {
+                    Icon(
+                        imageVector = vectorResource(id = R.drawable.ic_back),
+                        modifier = Modifier.clickable(onClick = actions.onBackClicked)
+                            .padding(start = 8.dp)
+                    )
+                }
+            )
+        },
+        bodyContent = {
+            SettingsNotifications(notificationProps, actions)
+        }
+    )
+}
 
 @Composable
 fun SettingsNotifications(
@@ -136,6 +158,7 @@ data class SettingsNotificationsActions(
     val onTomorrowAlarmTimeSelected: (addressId: String, alarmTime: Time) -> Unit,
     val onNotificationsInfoClicked: () -> Unit,
     val onReloadNotificationPropsWhenEmpty: () -> Unit,
-    val onTabSelected: (Int) -> Unit
+    val onTabSelected: (Int) -> Unit,
+    val onBackClicked: () -> Unit
 )
 

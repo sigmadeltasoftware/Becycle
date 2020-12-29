@@ -25,7 +25,6 @@ fun AddressSwitcher(
     onGoToAddressInput: () -> Unit,
     onTabSelected: (Int) -> Unit
 ) {
-
     val selectedTabIx = AmbientTabIndex.current
 
     TabRow(
@@ -48,13 +47,13 @@ fun AddressSwitcher(
                         unselectedContentColor = primaryBackgroundColor,
                     ) {
                         Text(
-                            it.zipCodeItem.code,
+                            it.zipCode,
                             fontWeight = FontWeight.Bold,
                             fontSize = titleFontSize,
                             color = if (selectedTabIx == ix) primaryAccent else unselectedColor
                         )
                         Text(
-                            "${it.street.names.nl} ${it.houseNumber}",
+                            it.streetWithHouseNr,
                             fontSize = subTextFontSize,
                             color = if (selectedTabIx == ix) primaryAccent else unselectedColor,
                             maxLines = 1,

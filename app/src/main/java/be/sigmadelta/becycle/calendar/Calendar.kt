@@ -34,6 +34,7 @@ import be.sigmadelta.calpose.widgets.DefaultDay
 import be.sigmadelta.calpose.widgets.DefaultHeader
 import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.collections.Collection
+import be.sigmadelta.common.collections.recapp.RecAppCollectionDao
 import be.sigmadelta.common.collections.CollectionOverview
 import com.github.aakira.napier.Napier
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -59,7 +60,7 @@ fun CalendarView(
     when (collectionOverview) {
         is ViewState.Success -> {
             collections = collectionOverview.payload.allCollections()
-                .filter { it.timestamp.toInstant().toCalposeDate().month == monthState.value }
+                .filter { it.date.toCalposeDate().month == monthState.value }
             collectionSet.value = collectionOverview.payload.toSelectionSet()
         }
         is ViewState.Error -> Napier.e("Error during retrieval of collection: ${collectionOverview.error}")
@@ -193,7 +194,7 @@ fun EventColumn(collections: List<Collection>, selection: State<CalposeDate>) {
         )
 
         val currentCollections =
-            collections.filter { it.timestamp.toInstant().toCalposeDate() == selection.value }
+            collections.filter { it.date.toCalposeDate() == selection.value }
         LazyColumn(Modifier.fillMaxWidth()) {
             items(currentCollections) {
                 UpcomingCollectionItem(collection = it)
@@ -211,10 +212,11 @@ data class CalendarViewActions(
     val onTabSelected: (Int) -> Unit
 )
 
-private fun Instant.toCalposeDate(): CalposeDate {
-    val time = toLocalDateTime(TimeZone.currentSystemDefault())
-    return CalposeDate(time.dayOfMonth, time.dayOfWeek, YearMonth.of(time.year, time.month))
+private fun LocalDateTime.toCalposeDate(): CalposeDate {
+    return CalposeDate(date.dayOfMonth, date.dayOfWeek, YearMonth.of(date.year, date.month))
 }
+
+private fun Instant.toCalposeDate(): CalposeDate = toLocalDateTime(TimeZone.currentSystemDefault()).toCalposeDate()
 
 private fun CollectionOverview.allCollections() = mutableListOf<Collection>().apply {
     addAll(today ?: listOf())
@@ -223,4 +225,4 @@ private fun CollectionOverview.allCollections() = mutableListOf<Collection>().ap
 }
 
 private fun CollectionOverview.toSelectionSet(): Set<CalposeDate> =
-    allCollections().map { it.timestamp.toInstant().toCalposeDate() }.toSet()
+    allCollections().map { it.date.toCalposeDate() }.toSet()

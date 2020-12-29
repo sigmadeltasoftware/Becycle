@@ -54,6 +54,7 @@ Would you like disable the battery optimisations for this app to make sure the r
     <string name="collections__no_available_for">No collections available for </string>
     
     <string name="settings__address">Address Settings</string>
+    <string name="settings__notifications">Notification Settings</string>
     <string name="settings__addresses">Address(es)</string>
     <string name="settings__addresses_text">Manage your address(es) here</string>
     <string name="settings__disable_battery_optimisations">DISABLE BATTERY OPTIMISATIONS</string>
@@ -63,4 +64,26 @@ Would you like disable the battery optimisations for this app to make sure the r
     <string name="settings_switch__modify_settings">Enable switch to modify settings</string>
 
     <string name="splash_screen__error_check_connection">Please check your connection and try launching the app again</string>
+
+    <string name="collectiontype__GFT">GFT</string>
+    <string name="collectiontype__GFT_DIFTAR">GFT DIFTAR</string>
+    <string name="collectiontype__RESIDUAL_HOUSEHOLD_WASTE">Household Waste</string>
+    <string name="collectiontype__RESIDUAL_HOUSEHOLD_WASTE_DIFTAR">Household Waste DIFTAR</string>
+    <string name="collectiontype__GROF_HUISVUIL">Bulky Household Waste</string>
+    <string name="collectiontype__GROF_HUISVUIL_APPOINTMENT">Bulky Household Waste (Appointment)</string>
+    <string name="collectiontype__PAPER_CARTON">Paper, Cardboard,…</string>
+    <string name="collectiontype__PMD">Plastic/Carton Bottles</string>
+    <string name="collectiontype__TEXTILE">Textile</string>
+    <string name="collectiontype__LARGE_HOUSEHOLD_WASTE_APPOINTMENT">Large Household Waste (Appointment)</string>
+    <string name="collectiontype__SOFT_PLASTICS">Soft Plastics</string>
+    <string name="collectiontype__BATTERIES">Batteries</string>
+    <string name="collectiontype__GLASS">Glass</string>
+    <string name="collectiontype__SNOEIHOUT">Prunings</string>
+    <string name="collectiontype__SNOEIHOUT_APPOINTMENT">Prunings (Appointment)</string>
+    <string name="collectiontype__OLD_METALS">Old Metals</string>
+    <string name="collectiontype__RE_USE_CENTER">Reuse-Center Collection</string>
+    <string name="collectiontype__IJZER">Iron</string>
+    <string name="collectiontype__CHRISTMAS_TREES">Christmas Trees</string>
+    <string name="collectiontype__HOUSEHOLD_HAZARDEOUS_WASTE_KGA">Household Hazardeous Waste</string>
+    <string name="collectiontype__UNKNOWN">Unknown</string>
 </resources>

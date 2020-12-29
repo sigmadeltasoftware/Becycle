@@ -24,6 +24,9 @@ class Preferences {
         get() = settings[IS_FIRST_RUN] ?: true
         set(value) = settings.putBoolean(IS_FIRST_RUN, value)
 
+    var dbVersion: Int
+        get() = settings[]
+
     // - Make notification persistent
     // - Snooze notification from within drawer itself (5min - 1h)
     // - Same day/day before

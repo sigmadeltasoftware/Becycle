@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 
 
-class BaseHeadersRepository(private val baseHeadersApi: BaseHeadersApi) {
+class BaseHeadersRepository(private val baseHeadersApi: RecAppBaseHeadersApi) {
 
     fun observeBaseHeaders() : Flow<Response<BaseHeadersResponse>> = flow {
         emit(Response.Loading())

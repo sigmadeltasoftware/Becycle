@@ -5,7 +5,7 @@ import io.ktor.client.*
 import io.ktor.client.request.*
 import kotlinx.serialization.Serializable
 
-class BaseHeadersApi(private val client: HttpClient) {
+class RecAppBaseHeadersApi(private val client: HttpClient) {
 
     suspend fun getBaseHeaders() = client.getApi<BaseHeadersResponse> {
         url("$HEADERS_BASE_URL/$BASE_HEADER_API")

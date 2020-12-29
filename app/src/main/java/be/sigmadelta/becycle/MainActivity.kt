@@ -21,7 +21,6 @@ import androidx.compose.ui.platform.setContent
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.startActivity
 import be.sigmadelta.becycle.address.*
 import be.sigmadelta.becycle.calendar.CalendarView
 import be.sigmadelta.becycle.calendar.CalendarViewActions
@@ -38,10 +37,13 @@ import be.sigmadelta.becycle.common.util.str
 import be.sigmadelta.becycle.home.Home
 import be.sigmadelta.becycle.home.HomeActions
 import be.sigmadelta.becycle.notification.NotificationViewModel
-import be.sigmadelta.becycle.notification.SettingsNotifications
 import be.sigmadelta.becycle.notification.SettingsNotificationsActions
+import be.sigmadelta.becycle.notification.SettingsNotificationsOverview
+import be.sigmadelta.becycle.settings.AddressOverviewActions
 import be.sigmadelta.becycle.settings.Settings
+import be.sigmadelta.becycle.settings.SettingsAddressOverview
 import be.sigmadelta.common.Preferences
+import be.sigmadelta.common.Faction
 import be.sigmadelta.common.util.AuthorizationKeyExpiredException
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.bottomsheets.BottomSheet
@@ -319,7 +321,7 @@ fun Main(
 
         Destination.SettingsNotifications -> {
             val ctx = AmbientContext.current
-            SettingsNotifications(
+            SettingsNotificationsOverview(
                 notificationProps,
                 SettingsNotificationsActions(
                     onGoToAddressInput = { actions.goTo(Destination.SettingsAddressManipulation) },
@@ -345,7 +347,8 @@ fun Main(
                             collectionsViewModel.searchCollections(it, true)
                         }
                         selectedTabIx = ix
-                    }
+                    },
+                    onBackClicked = actions.pressOnBack
                 )
             )
         }
@@ -372,29 +375,39 @@ fun Main(
         )
 
         is Destination.SettingsAddressEditRemoval -> {
-            SettingsAddressEditRemoval(
-                (nav.current as Destination.SettingsAddressEditRemoval).addressId,
-                zipCodeItemsViewState,
-                streetsViewState,
-                SettingsAddressEditRemovalActions(
-                    onSearchZipCode = addressViewModel::searchZipCode,
-                    onSearchStreet = addressViewModel::searchStreets,
-                    onAddressChanged = {
-                        addressViewModel.validateExistingAddress(it)
-                        collectionsViewModel.removeCollections(it)
-                        collectionsViewModel.searchCollections(it)
-                    },
-                    onAddressRemove = {
-                        addressViewModel.removeAddress(it)
-                        selectedTabIx = 0
-                        collectionsViewModel.removeCollections(it)
-                        collectionsViewModel.searchCollections(it)
-                        actions.pressOnBack()
-                    },
-                    onHouseNumberValueChanged = addressViewModel::resetValidation,
-                    onBackClicked = { actions.pressOnBack() }
-                )
-            )
+            val addr = addresses?.firstOrNull { it.id == (nav.current as Destination.SettingsAddressEditRemoval).addressId }
+
+            when (addr?.faction) {
+                Faction.RECAPP -> {
+                    SettingsRecAppAddressEditRemoval(
+                        addr.id,
+                        zipCodeItemsViewState,
+                        streetsViewState,
+                        SettingsAddressEditRemovalActions(
+                            onSearchZipCode = addressViewModel::searchZipCode,
+                            onSearchStreet = addressViewModel::searchStreets,
+                            onAddressChanged = {
+                                val generic = it.asGeneric()
+                                addressViewModel.validateExistingRecAppAddress(it)
+                                collectionsViewModel.removeCollections(generic)
+                                collectionsViewModel.searchCollections(generic)
+                            },
+                            onAddressRemove = {
+                                addressViewModel.removeAddress(it)
+                                selectedTabIx = 0
+                                collectionsViewModel.removeCollections(it)
+                                collectionsViewModel.searchCollections(it)
+                                actions.pressOnBack()
+                            },
+                            onHouseNumberValueChanged = addressViewModel::resetValidation,
+                            onBackClicked = { actions.pressOnBack() }
+                        )
+                    )
+                }
+                Faction.LIMNET -> Unit // TODO
+                null -> Unit
+            }
+
         }
     }
 

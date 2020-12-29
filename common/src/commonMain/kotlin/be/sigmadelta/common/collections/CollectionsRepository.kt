@@ -1,6 +1,10 @@
 package be.sigmadelta.common.collections
 
 import be.sigmadelta.common.address.Address
+import be.sigmadelta.common.Faction
+import be.sigmadelta.common.address.RecAppAddressDao
+import be.sigmadelta.common.collections.recapp.RecAppCollectionDao
+import be.sigmadelta.common.collections.recapp.RecAppCollectionsApi
 import be.sigmadelta.common.util.*
 import com.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
@@ -10,7 +14,7 @@ import org.kodein.db.deleteAll
 import org.kodein.db.find
 import org.kodein.db.useModels
 
-class CollectionsRepository(private val db: DB, private val collectionsApi: CollectionsApi) {
+class CollectionsRepository(private val recAppDb: DB, private val collectionsApi: RecAppCollectionsApi) {
 
     suspend fun searchUpcomingCollections(
         address: Address,
@@ -19,7 +23,7 @@ class CollectionsRepository(private val db: DB, private val collectionsApi: Coll
     ): Flow<Response<CollectionOverview>> = networkBoundResource(
         shouldFetch = { overview ->
             val upcomingSize = overview.upcoming?.filter {
-                it.timestamp.toInstant().toEpochMilliseconds() > referenceDate.toEpochMilliseconds()
+                it.date.toInstant(TimeZone.currentSystemDefault()) > referenceDate
             }?.size ?: 0
 
             val todaySize = overview.today?.size ?: 0
@@ -36,43 +40,44 @@ class CollectionsRepository(private val db: DB, private val collectionsApi: Coll
             } && shouldNotFetch.not()
         },
         query = {
-            val list = db.find<Collection>().all()
-                .useModels { it.toList() }
-                .apply {
-                    Napier.d("nonfiltered query = ${this.map { it.timestamp }}")
-                }
-                .filter { it.timestamp.toInstant() >= referenceDate }
-                .filter { it.addressId == address.id }.apply {
-                    Napier.d("query = ${this.map { "${it.collectionType}_${it.timestamp}" }}")
-                }
-                .sortedBy { it.timestamp.toInstant() }
-                .apply {
-                    if (size > TOTAL_ITEMS_RETURN) {
-                        subList(0, TOTAL_ITEMS_RETURN)
-                    } else this
-                }
-            val today = list.filter {
-                it.timestamp.toInstant().toLocalDateTime(TimeZone.currentSystemDefault()).isToday()
-            }
-            val tomorrow = list.filter {
-                it.timestamp.toInstant().toLocalDateTime(TimeZone.currentSystemDefault())
-                    .isTomorrow()
-            }
-            val todayTomorrow = today.toMutableList().apply { addAll(tomorrow) }
-            val upcoming = list.toMutableList().apply { removeAll(todayTomorrow) }
-            val upcomingSubListSize = if (upcoming.size > 5) 5 else upcoming.size
-            Napier.d(
-                """
+            when (address.faction) {
+                Faction.LIMNET,
+                Faction.RECAPP -> {
+                    val list = recAppDb.find<RecAppCollectionDao>().all()
+                        .useModels { it.toList() }
+                        .apply {
+                            Napier.d("nonfiltered query = ${this.map { it.timestamp }}")
+                        }
+                        .filter { it.timestamp.toInstant() >= referenceDate }
+                        .filter { it.addressId == address.id }.apply {
+                            Napier.d("query = ${this.map { "${it.collectionType}_${it.timestamp}" }}")
+                        }
+                        .sortedBy { it.timestamp.toInstant() }
+                        .apply {
+                            if (size > TOTAL_ITEMS_RETURN) {
+                                subList(0, TOTAL_ITEMS_RETURN)
+                            } else this
+                        }.map { it.asGeneric() }
+
+                    val today = list.filter { it.date.isToday() }
+                    val tomorrow = list.filter { it.date.isTomorrow() }
+                    val todayTomorrow = today.toMutableList().apply { addAll(tomorrow) }
+                    val upcoming = list.toMutableList().apply { removeAll(todayTomorrow) }
+                    val upcomingSubListSize = if (upcoming.size > 5) 5 else upcoming.size
+                    Napier.d(
+                        """
                 today: size = ${today.size} || $today
                 tomorrow: size = ${tomorrow.size} || $tomorrow
                 upcoming: size = ${upcoming.size} || $upcoming
             """.trimIndent()
-            )
-            CollectionOverview(
-                today.nullOnEmpty(),
-                tomorrow.nullOnEmpty(),
-                upcoming.subList(0, upcomingSubListSize).nullOnEmpty()
-            )
+                    )
+                    CollectionOverview(
+                        today.nullOnEmpty(),
+                        tomorrow.nullOnEmpty(),
+                        upcoming.subList(0, upcomingSubListSize).nullOnEmpty()
+                    )
+                }
+            }
         },
         fetch = {
             val date = referenceDate.toLocalDateTime(TimeZone.currentSystemDefault()).toYyyyMmDd()
@@ -85,23 +90,32 @@ class CollectionsRepository(private val db: DB, private val collectionsApi: Coll
                 1,1,1,1
             ).toYyyyMmDd()
 
-            collectionsApi.getCollections(address, date, untilDate, 100)
+            when (address.faction) {
+                Faction.LIMNET, // TODO
+                Faction.RECAPP -> {
+                    recAppDb.find<RecAppAddressDao>().all()
+                        .useModels { it.toList() }
+                        .firstOrNull { it.id == address.id }?.let {
+                            collectionsApi.getCollections(it, date, untilDate, 40)
+                        }
+                }
+            }
         },
         saveFetchResult = { result ->
             when (result) {
                 is ApiResponse.Success -> storeCollections(result.body.items, address.id)
-                is ApiResponse.Error -> Response.Error<List<Collection>>(result.error)
+                is ApiResponse.Error -> Response.Error<List<RecAppCollectionDao>>(result.error)
             }
         }
     )
 
     suspend fun removeCollections(address: Address) {
-        db.deleteAll(db.find<Collection>().byIndex("addressId", address.id))
+        recAppDb.deleteAll(recAppDb.find<RecAppCollectionDao>().byIndex("addressId", address.id))
     }
 
-    private fun storeCollections(collection: List<Collection>, addressId: String) {
-        db.deleteAll(db.find<Collection>().byIndex("addressId", addressId))
-        collection.forEach { db.put(it) }
+    private fun storeCollections(collection: List<RecAppCollectionDao>, addressId: String) {
+        recAppDb.deleteAll(recAppDb.find<RecAppCollectionDao>().byIndex("addressId", addressId))
+        collection.forEach { recAppDb.put(it) }
     }
 
     private fun <T> List<T>.nullOnEmpty() = if (isEmpty()) null else this

@@ -54,8 +54,6 @@ class CollectionsViewModel(
 
     fun removeCollections(address: Address) = viewModelScope.launch {
         collectionsRepository.removeCollections(address)
-        analTracker.log(AnalTag.REMOVE_COLLECTIONS) {
-            param("address", address.fullAddress)
-        }
+        analTracker.log(AnalTag.REMOVE_COLLECTIONS)
     }
 }

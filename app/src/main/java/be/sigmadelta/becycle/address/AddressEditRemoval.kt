@@ -10,15 +10,16 @@ import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.becycle.common.util.AmbientAddress
 import be.sigmadelta.becycle.common.util.str
 import be.sigmadelta.common.address.Address
-import be.sigmadelta.common.address.Street
-import be.sigmadelta.common.address.ZipCodeItem
+import be.sigmadelta.common.address.RecAppAddressDao
+import be.sigmadelta.common.address.recapp.RecAppStreetDao
+import be.sigmadelta.common.address.recapp.RecAppZipCodeItemDao
 
 @ExperimentalMaterialApi
 @Composable
-fun SettingsAddressEditRemoval(
+fun SettingsRecAppAddressEditRemoval(
     addressId: String,
-    zipCodeItemViewState: ListViewState<ZipCodeItem>,
-    streetsViewState: ListViewState<Street>,
+    zipCodeItemViewState: ListViewState<RecAppZipCodeItemDao>,
+    streetsViewState: ListViewState<RecAppStreetDao>,
     actions: SettingsAddressEditRemovalActions
 ) {
 
@@ -37,7 +38,8 @@ fun SettingsAddressEditRemoval(
                             onHouseNumberValueChanged = actions.onHouseNumberValueChanged,
                             onValidateAddress = { zipCodeItem, street, houseNumber ->
                                 actions.onAddressChanged(
-                                    it.copy(
+                                    RecAppAddressDao(
+                                        id = it.id,
                                         zipCodeItem = zipCodeItem,
                                         street = street,
                                         houseNumber = houseNumber
@@ -58,8 +60,8 @@ fun SettingsAddressEditRemoval(
 
 data class SettingsAddressEditRemovalActions (
     val onSearchZipCode: (String) -> Unit,
-    val onSearchStreet: (String, ZipCodeItem) -> Unit,
-    val onAddressChanged: (Address) -> Unit,
+    val onSearchStreet: (String, RecAppZipCodeItemDao) -> Unit,
+    val onAddressChanged: (RecAppAddressDao) -> Unit,
     val onAddressRemove: (Address) -> Unit,
     val onHouseNumberValueChanged: () -> Unit,
     val onBackClicked: () -> Unit

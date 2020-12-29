@@ -1,16 +1,15 @@
 package be.sigmadelta.common.address
 
-import kotlinx.serialization.Serializable
-import org.kodein.db.model.orm.Metadata
-import org.kodein.memory.util.UUID
+import be.sigmadelta.common.Faction
 
-@Serializable
 data class Address(
-    val zipCodeItem: ZipCodeItem,
-    val street: Street,
-    val houseNumber: Int,
-    override val id: String = UUID.randomUUID().toString()
-) : Metadata {
-    val streetWithHouseNr = "${street.names.nl} $houseNumber"
-    val fullAddress = "$streetWithHouseNr | ${zipCodeItem.code} ${zipCodeItem.names.firstOrNull()?.nl}"
+    val zipCode: String,
+    val municipality: String,
+    val street: String,
+    val houseNumber: String,
+    val faction: Faction,
+    val id: String
+) {
+    val streetWithHouseNr = "$street $houseNumber"
+    val fullAddress = "$streetWithHouseNr | $zipCode $municipality"
 }

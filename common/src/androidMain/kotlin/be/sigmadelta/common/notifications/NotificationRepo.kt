@@ -6,14 +6,15 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.os.Build
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.*
 import be.sigmadelta.common.Preferences
 import be.sigmadelta.common.address.Address
+import be.sigmadelta.common.address.RecAppAddressDao
 import be.sigmadelta.common.address.AddressRepository
 import be.sigmadelta.common.collections.Collection
+import be.sigmadelta.common.collections.recapp.RecAppCollectionDao
 import be.sigmadelta.common.collections.CollectionType
 import be.sigmadelta.common.collections.CollectionsRepository
 import be.sigmadelta.common.date.Time
@@ -32,7 +33,6 @@ import org.koin.core.KoinComponent
 import org.koin.core.inject
 import java.util.concurrent.TimeUnit
 
-private const val TAG = "NotificationRepo"
 
 actual class NotificationRepo(
     private val context: Context,
@@ -57,7 +57,7 @@ actual class NotificationRepo(
         workManager.enqueueUniquePeriodicWork(WORK_NAME, ExistingPeriodicWorkPolicy.KEEP, workBuilder)
     }
 
-    fun insertDefaultNotificationProps(address: Address) {
+    fun insertDefaultNotificationProps(address: RecAppAddressDao) {
         val notificationProps = NotificationProps(
             UUID.randomUUID().toString(),
             address.id,
@@ -143,7 +143,7 @@ actual class NotificationRepo(
                                 Napier.d("searchUpcomingCollections(): ${response.body}")
 
                                 val tomorrowNotifications = response.body.tomorrow
-                                Napier.d("tomorrow = ${tomorrowNotifications?.map { it.collectionType }}")
+                                Napier.d("tomorrow = ${tomorrowNotifications?.map { it.type }}")
 
                                 tomorrowNotifications?.let {
                                     createTomorrowNotifications(
@@ -174,7 +174,8 @@ actual class NotificationRepo(
 
             val (text, hasCollectionTomorrow) =  when (collections.size) {
                 0 -> "" to false // Do nothing when empty
-                1 -> "You have a ${collections.first().fraction.name.nl} collection tomorrow" to true
+                // TODO: Look into better way to extract names (maybe through strings?)
+                1 -> "You have a ${collections.first().type.name} collection tomorrow" to true
                 else -> "You have multiple collections tomorrow" to true
             }
 
@@ -232,7 +233,7 @@ actual class NotificationRepo(
     }
 }
 
-private fun List<Collection>.filterByEnabledNotifications(props: NotificationProps) =
+private fun List<RecAppCollectionDao>.filterByEnabledNotifications(props: NotificationProps) =
     filter { collection -> // Are notifications enabled for this collection type
         props.collectionSettings
             .firstOrNull { it.type == collection.collectionType }

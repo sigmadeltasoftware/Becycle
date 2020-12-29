@@ -13,15 +13,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.AmbientContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import be.sigmadelta.becycle.R
 import be.sigmadelta.becycle.common.ui.theme.*
 import be.sigmadelta.becycle.common.ui.util.iconRef
+import be.sigmadelta.becycle.common.util.name
 import be.sigmadelta.becycle.common.util.str
 import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.collections.Collection
+import be.sigmadelta.common.collections.recapp.RecAppCollectionDao
 import be.sigmadelta.common.collections.CollectionOverview
 import kotlinx.datetime.*
 
@@ -129,7 +132,7 @@ fun CollectionItem(collection: Collection, isTomorrow: Boolean = false) {
             modifier = Modifier.padding(16.dp)
         ) {
             Text(
-                collection.fraction.name.nl.capitalize(),
+                collection.type.name(AmbientContext.current),
                 fontWeight = FontWeight.Bold,
                 fontSize = regularFontSize,
                 color = if (isTomorrow) primaryAccent else textPrimary,
@@ -138,11 +141,11 @@ fun CollectionItem(collection: Collection, isTomorrow: Boolean = false) {
 
             AndroidView(viewBlock = {
                 ImageView(it).apply {
-                    setImageDrawable(it.getDrawable(collection.collectionType.iconRef()))
+                    setImageDrawable(it.getDrawable(collection.type.iconRef()))
                 }
             }, modifier = Modifier.width(48.dp),
                 update = {
-                    it.setImageDrawable(it.context.getDrawable(collection.collectionType.iconRef()))
+                    it.setImageDrawable(it.context.getDrawable(collection.type.iconRef()))
                 })
         }
     }
@@ -161,27 +164,25 @@ fun UpcomingCollectionItem(collection: Collection) {
         ) {
             AndroidView(viewBlock = {
                 ImageView(it).apply {
-                    setImageDrawable(it.getDrawable(collection.collectionType.iconRef()))
+                    setImageDrawable(it.getDrawable(collection.type.iconRef()))
                 }
             }, modifier = Modifier.width(36.dp),
                 update = {
-                    it.setImageDrawable(it.context.getDrawable(collection.collectionType.iconRef()))
+                    it.setImageDrawable(it.context.getDrawable(collection.type.iconRef()))
                 }
             )
             Text(
-                collection.fraction.name.nl.capitalize(),
+                collection.type.name(AmbientContext.current),
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.padding(start = 16.dp),
                 fontSize = regularFontSize
             )
             Spacer(modifier = Modifier.weight(1f))
-            collection.timestamp.toInstant().toLocalDateTime(TimeZone.currentSystemDefault()).let {
-                Text(
-                    text = "${it.dayOfMonth}/${it.monthNumber}",
-                    fontSize = subTextFontSize,
-                    color = textSecondary
-                )
-            }
+            Text(
+                text = "${collection.date.dayOfMonth}/${collection.date.monthNumber}",
+                fontSize = subTextFontSize,
+                color = textSecondary
+            )
         }
     }
 }
@@ -195,7 +196,7 @@ fun EmptyCollections(address: Address) {
     ) {
         Text(
             R.string.collections__no_available_for.str()
-             + "${address.street.names.nl} ${address.houseNumber}.",
+             + "${address.street} ${address.houseNumber}.",
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(8.dp)
         )
