@@ -19,6 +19,7 @@ import be.sigmadelta.becycle.common.util.AmbientAddress
 import be.sigmadelta.becycle.common.util.AmbientTabIndex
 import be.sigmadelta.becycle.common.util.str
 import be.sigmadelta.common.address.Address
+import be.sigmadelta.common.collections.CollectionException
 import be.sigmadelta.common.collections.CollectionOverview
 
 @ExperimentalMaterialApi
@@ -78,9 +79,8 @@ fun HomeLayout(
             is ViewState.Success -> Collections(
                 collectionOverview = collectionOverview.payload,
                 actions = CollectionActions(
-                    onSwipeToRefresh = {
-                        actions.onLoadCollections(address)
-                    }
+                    onSwipeToRefresh = { actions.onLoadCollections(address) },
+                    onExceptionInfoClicked = { actions.onExceptionInfoClicked(it) }
                 )
             )
             is ViewState.Error -> Unit // TODO
@@ -91,5 +91,6 @@ fun HomeLayout(
 data class HomeActions(
     val onGoToAddressInput: () -> Unit,
     val onLoadCollections: (Address) -> Unit,
-    val onTabSelected: (Int) -> Unit
+    val onTabSelected: (Int) -> Unit,
+    val onExceptionInfoClicked: (CollectionException) -> Unit
 )

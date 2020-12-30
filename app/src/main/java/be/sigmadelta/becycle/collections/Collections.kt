@@ -6,6 +6,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.material.Card
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Text
@@ -24,6 +27,7 @@ import be.sigmadelta.becycle.common.util.name
 import be.sigmadelta.becycle.common.util.str
 import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.collections.Collection
+import be.sigmadelta.common.collections.CollectionException
 import be.sigmadelta.common.collections.recapp.RecAppCollectionDao
 import be.sigmadelta.common.collections.CollectionOverview
 import kotlinx.datetime.*
@@ -39,11 +43,14 @@ fun Collections(
 //
 //    }
 
-    CollectionView(collectionOverview)
+    CollectionView(collectionOverview, actions)
 }
 
 @Composable
-fun CollectionView(collectionOverview: CollectionOverview) {
+fun CollectionView(
+    collectionOverview: CollectionOverview,
+    actions: CollectionActions
+) {
     ScrollableColumn(modifier = Modifier.background(Color.White)) {
         CollectionTitle(
             title = R.string.today.str(),
@@ -52,7 +59,9 @@ fun CollectionView(collectionOverview: CollectionOverview) {
         collectionOverview.today?.let { collections ->
             LazyRow {
                 items(collections) {
-                    CollectionItem(it)
+                    CollectionItem(it) {
+                        actions.onExceptionInfoClicked(it)
+                    }
                 }
             }
         } ?: NoCollectionsSubtitle()
@@ -67,7 +76,9 @@ fun CollectionView(collectionOverview: CollectionOverview) {
         collectionOverview.tomorrow?.let { collections ->
             LazyRow {
                 items(collections) {
-                    CollectionItem(collection = it, true)
+                    CollectionItem(collection = it, true) {
+                        actions.onExceptionInfoClicked(it)
+                    }
                 }
             }
         } ?: NoCollectionsSubtitle()
@@ -75,7 +86,9 @@ fun CollectionView(collectionOverview: CollectionOverview) {
         CollectionTitle(title = R.string.collections__upcoming.str())
         collectionOverview.upcoming?.let {
             it.forEach { collection ->
-                UpcomingCollectionItem(collection = collection)
+                UpcomingCollectionItem(collection = collection) {
+                    actions.onExceptionInfoClicked(it)
+                }
             }
         } ?: NoCollectionsSubtitle()
     }
@@ -119,44 +132,54 @@ fun NoCollectionsSubtitle() {
 }
 
 @Composable
-fun CollectionItem(collection: Collection, isTomorrow: Boolean = false) {
+fun CollectionItem(
+    collection: Collection,
+    isTomorrow: Boolean = false,
+    onExceptionInfoClicked: (CollectionException) -> Unit
+) {
     Card(
         elevation = 4.dp,
         modifier = Modifier.width(180.dp).padding(6.dp),
         shape = RoundedCornerShape(8.dp),
         backgroundColor = if (isTomorrow) secondaryAccent else unselectedBackgroundColor
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text(
-                collection.type.name(AmbientContext.current),
-                fontWeight = FontWeight.Bold,
-                fontSize = regularFontSize,
-                color = if (isTomorrow) primaryAccent else textPrimary,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
+        Box {
+            collection.exception?.let {
+                CollectionExceptionInfoButton(
+                    modifier = Modifier.align(Alignment.TopEnd)
+                ) { onExceptionInfoClicked(it) }
+            }
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(16.dp).align(Alignment.Center)
+            ) {
+                Text(
+                    collection.type.name(AmbientContext.current),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = regularFontSize,
+                    color = if (isTomorrow) primaryAccent else textPrimary,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
 
-            AndroidView(viewBlock = {
-                ImageView(it).apply {
-                    setImageDrawable(it.getDrawable(collection.type.iconRef()))
-                }
-            }, modifier = Modifier.width(48.dp),
-                update = {
-                    it.setImageDrawable(it.context.getDrawable(collection.type.iconRef()))
-                }
-            )
-
-            collection?.exception?.let {
-                Text("${it.title} - ${it.replacementDate.toString()}")
+                AndroidView(viewBlock = {
+                    ImageView(it).apply {
+                        setImageDrawable(it.getDrawable(collection.type.iconRef()))
+                    }
+                }, modifier = Modifier.width(48.dp),
+                    update = {
+                        it.setImageDrawable(it.context.getDrawable(collection.type.iconRef()))
+                    }
+                )
             }
         }
     }
 }
 
 @Composable
-fun UpcomingCollectionItem(collection: Collection) {
+fun UpcomingCollectionItem(
+    collection: Collection,
+    onExceptionInfoClicked: (CollectionException) -> Unit
+) {
     Card(
         elevation = 4.dp,
         modifier = Modifier.fillMaxWidth().padding(6.dp),
@@ -164,6 +187,7 @@ fun UpcomingCollectionItem(collection: Collection) {
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
             modifier = Modifier.padding(8.dp)
         ) {
             AndroidView(viewBlock = {
@@ -181,8 +205,8 @@ fun UpcomingCollectionItem(collection: Collection) {
                 modifier = Modifier.padding(start = 16.dp),
                 fontSize = regularFontSize
             )
-            collection?.exception?.let {
-                Text("${it.title} - ${it.replacementDate.toString()}")
+            collection.exception?.let {
+                CollectionExceptionInfoButton { onExceptionInfoClicked(it) }
             }
             Spacer(modifier = Modifier.weight(1f))
             Text(
@@ -210,6 +234,20 @@ fun EmptyCollections(address: Address) {
     }
 }
 
+@Composable
+fun CollectionExceptionInfoButton(
+    modifier: Modifier = Modifier,
+    onExceptionInfoClicked: () -> Unit
+) {
+    IconButton(onClick = { onExceptionInfoClicked() }, modifier = modifier) {
+        Icon(imageVector = vectorResource(id = R.drawable.ic_info),
+            tint = primaryAccent,
+            modifier = Modifier.padding(start = 2.dp)
+        )
+    }
+}
+
 data class CollectionActions(
-    val onSwipeToRefresh: () -> Unit
+    val onSwipeToRefresh: () -> Unit,
+    val onExceptionInfoClicked: (CollectionException) -> Unit
 )

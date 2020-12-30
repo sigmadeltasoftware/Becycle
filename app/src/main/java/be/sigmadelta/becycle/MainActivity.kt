@@ -2,6 +2,7 @@ package be.sigmadelta.becycle
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -42,6 +43,7 @@ import be.sigmadelta.becycle.notification.SettingsNotificationsOverview
 import be.sigmadelta.becycle.settings.*
 import be.sigmadelta.common.Preferences
 import be.sigmadelta.common.Faction
+import be.sigmadelta.common.collections.CollectionException
 import be.sigmadelta.common.util.AuthorizationKeyExpiredException
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.bottomsheets.BottomSheet
@@ -244,7 +246,8 @@ fun Main(
                         collectionsViewModel.searchCollections(it, true)
                     }
                     selectedTabIx = ix
-                }
+                },
+                onExceptionInfoClicked = { showCollectionExceptionDialog(act, it) }
             )
         )
 
@@ -261,7 +264,8 @@ fun Main(
                             collectionsViewModel.searchCollections(it, true)
                         }
                         selectedTabIx = ix
-                    }
+                    },
+                    onExceptionInfoClicked = { showCollectionExceptionDialog(act, it) }
                 )
             )
         }
@@ -417,6 +421,22 @@ fun Main(
             actions.goTo(Destination.Home)
             resetViewStates(addressViewModel)
         }
+    }
+}
+
+private fun showCollectionExceptionDialog(ctx: Context, ex: CollectionException) {
+    MaterialDialog(ctx).show {
+        cornerRadius(16f)
+        title(text = ex.title)
+        message(text = ctx.getString(R.string.collectionexception__text,
+            "${ex.replacementDate.dayOfMonth}-${ex.replacementDate.monthNumber}-${ex.replacementDate.year}"
+        ))
+        icon(R.drawable.ic_info)
+        positiveButton(android.R.string.ok) {
+            it.dismiss()
+        }
+        cancelable(true)
+        cancelOnTouchOutside(true)
     }
 }
 

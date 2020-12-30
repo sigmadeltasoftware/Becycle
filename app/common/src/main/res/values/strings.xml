@@ -86,4 +86,6 @@ Would you like disable the battery optimisations for this app to make sure the r
     <string name="collectiontype__CHRISTMAS_TREES">Christmas Trees</string>
     <string name="collectiontype__HOUSEHOLD_HAZARDEOUS_WASTE_KGA">Household Hazardeous Waste</string>
     <string name="collectiontype__UNKNOWN">Unknown</string>
+
+    <string name="collectionexception__text">Collection is offered exceptionally in lieu of the one which normally took place on %1$s.</string>
 </resources>

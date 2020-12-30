@@ -84,4 +84,6 @@ Wil je de batterij-optimalisaties voor Becycle uitschakelen, om er voor te zorge
     <string name="collectiontype__CHRISTMAS_TREES">Kerstbomen</string>
     <string name="collectiontype__HOUSEHOLD_HAZARDEOUS_WASTE_KGA">KGA</string>
     <string name="collectiontype__UNKNOWN">Onbekend</string>
+
+    <string name="collectionexception__text">Deze ophaling wordt uitzonderlijk aangeboden ter compensatie van degene die normaal gezien op %1$s plaatsvond.</string>
 </resources>

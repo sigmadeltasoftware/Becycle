@@ -34,6 +34,7 @@ import be.sigmadelta.calpose.widgets.DefaultDay
 import be.sigmadelta.calpose.widgets.DefaultHeader
 import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.collections.Collection
+import be.sigmadelta.common.collections.CollectionException
 import be.sigmadelta.common.collections.recapp.RecAppCollectionDao
 import be.sigmadelta.common.collections.CollectionOverview
 import com.github.aakira.napier.Napier
@@ -83,7 +84,9 @@ fun CalendarView(
             collections = collectionDates
         ) { selection.value = it }
 
-        EventColumn(collections, selection)
+        EventColumn(collections, selection) {
+            actions.onExceptionInfoClicked(it)
+        }
     }
 }
 
@@ -183,7 +186,11 @@ fun Calendar(
 }
 
 @Composable
-fun EventColumn(collections: List<Collection>, selection: State<CalposeDate>) {
+fun EventColumn(
+    collections: List<Collection>,
+    selection: State<CalposeDate>,
+    onExceptionInfoClicked: (CollectionException) -> Unit
+) {
     Column(Modifier.padding(horizontal = 16.dp)) {
         Text(
             "${selection.value.day} ${selection.value.month.month.name} ${selection.value.month.year}",
@@ -197,7 +204,9 @@ fun EventColumn(collections: List<Collection>, selection: State<CalposeDate>) {
             collections.filter { it.date.toCalposeDate() == selection.value }
         LazyColumn(Modifier.fillMaxWidth()) {
             items(currentCollections) {
-                UpcomingCollectionItem(collection = it)
+                UpcomingCollectionItem(collection = it) {
+                    onExceptionInfoClicked(it)
+                }
             }
         }
         if (currentCollections.isEmpty()) {
@@ -209,7 +218,8 @@ fun EventColumn(collections: List<Collection>, selection: State<CalposeDate>) {
 data class CalendarViewActions(
     val onGoToAddressInput: () -> Unit,
     val onSearchCollectionsForAddress: (Address) -> Unit,
-    val onTabSelected: (Int) -> Unit
+    val onTabSelected: (Int) -> Unit,
+    val onExceptionInfoClicked: (CollectionException) -> Unit
 )
 
 private fun LocalDateTime.toCalposeDate(): CalposeDate {

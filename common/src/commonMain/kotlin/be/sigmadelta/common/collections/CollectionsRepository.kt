@@ -65,12 +65,12 @@ class CollectionsRepository(
                 upcoming: size = ${upcoming.size} || $upcoming
             """.trimIndent()
             )
+
             CollectionOverview(
                 today.nullOnEmpty(),
                 tomorrow.nullOnEmpty(),
                 upcoming.subList(0, upcomingSubListSize).nullOnEmpty()
             )
-
         },
         fetch = {
             val date = referenceDate.toLocalDateTime(TimeZone.currentSystemDefault()).toYyyyMmDd()
