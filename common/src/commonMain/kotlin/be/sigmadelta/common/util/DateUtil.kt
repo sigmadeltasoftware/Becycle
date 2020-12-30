@@ -1,7 +1,6 @@
 package be.sigmadelta.common.util
 
 import be.sigmadelta.common.date.Time
-import com.github.aakira.napier.Napier
 import kotlinx.datetime.*
 
 fun addLeadingZeroBelow10(value: Int) = if (value < 10) "0$value" else value
@@ -11,9 +10,7 @@ fun LocalDateTime.toYyyyMmDd() =
 
 fun LocalDateTime.isToday(): Boolean {
     val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-    Napier.d("this.dayOfYear = ${this.dayOfYear} == now.dayOfYear = ${now.dayOfYear}")
-    val isToday = (now.dayOfYear == dayOfYear && now.year == year)
-    return isToday
+    return (now.dayOfYear == dayOfYear && now.year == year)
 }
 
 fun LocalDateTime.isTomorrow(): Boolean {

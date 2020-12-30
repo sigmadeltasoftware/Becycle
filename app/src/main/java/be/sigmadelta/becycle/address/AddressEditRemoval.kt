@@ -9,6 +9,8 @@ import be.sigmadelta.becycle.common.ui.theme.errorColor
 import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.becycle.common.util.AmbientAddress
 import be.sigmadelta.becycle.common.util.str
+import be.sigmadelta.becycle.settings.SettingsAddressManipulation
+import be.sigmadelta.becycle.settings.SettingsAddressManipulationActions
 import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.address.RecAppAddressDao
 import be.sigmadelta.common.address.recapp.RecAppStreetDao

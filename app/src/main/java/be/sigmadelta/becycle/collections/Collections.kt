@@ -35,7 +35,6 @@ fun Collections(
     actions: CollectionActions
 ) {
 //    val dismissState = rememberDismissState(DismissValue.Default)
-
 //    SwipeToRefresh(state = dismissState, background = {Text(text = "DWAAWD", fontSize = 40.sp)}) {
 //
 //    }
@@ -146,7 +145,12 @@ fun CollectionItem(collection: Collection, isTomorrow: Boolean = false) {
             }, modifier = Modifier.width(48.dp),
                 update = {
                     it.setImageDrawable(it.context.getDrawable(collection.type.iconRef()))
-                })
+                }
+            )
+
+            collection?.exception?.let {
+                Text("${it.title} - ${it.replacementDate.toString()}")
+            }
         }
     }
 }
@@ -177,6 +181,9 @@ fun UpcomingCollectionItem(collection: Collection) {
                 modifier = Modifier.padding(start = 16.dp),
                 fontSize = regularFontSize
             )
+            collection?.exception?.let {
+                Text("${it.title} - ${it.replacementDate.toString()}")
+            }
             Spacer(modifier = Modifier.weight(1f))
             Text(
                 text = "${collection.date.dayOfMonth}/${collection.date.monthNumber}",

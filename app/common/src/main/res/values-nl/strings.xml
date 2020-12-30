@@ -26,8 +26,8 @@ Wil je de batterij-optimalisaties voor Becycle uitschakelen, om er voor te zorge
     <string name="battery_optimisations__go_to_settings">Ga naar de Instellingen</string>
     <string name="battery_optimisations__turn_off_reminders">Notificaties uitschakelen</string>
     <string name="battery_optimisations_disable__title">Batterij-optimalisaties Uitschakelen</string>
-    <string name="battery_optimisations_disable__text">Android zal het batterij-leven proberen verbeteren door in slaapstand te gaan. Deze slaapstand wordt \'Doze\' genoemd en kan het versturen van notificaties verhinderen.\n\n
-       Om er voor te zorgen dat notificaties nog kunnen doorkomen voor Becycle, moet de app ge-whitelist worden. Dit zal de app toestaan om ook herinneringen te versturen wanneer je toestel zich in \'Doze\' toestand bevindt.</string>
+    <string name="battery_optimisations_disable__text">Android zal het batterij-leven proberen verbeteren door in slaapstand te gaan. Deze slaapstand wordt \'Doze\' genoemd en kan het versturen van notificaties verhinderen.
+        \n\nOm er voor te zorgen dat notificaties nog kunnen doorkomen voor Becycle, moet de app ge-whitelist worden. Dit zal de app toestaan om ook herinneringen te versturen wanneer je toestel zich in \'Doze\' toestand bevindt.</string>
 
     <string name="notifications__schedule">Notificaties Inplannen</string>
     <string name="notifications__schedule_tomorrow_text">Notificaties voor de ophaling van morgen</string>
@@ -79,7 +79,7 @@ Wil je de batterij-optimalisaties voor Becycle uitschakelen, om er voor te zorge
     <string name="collectiontype__SNOEIHOUT">Snoeihout</string>
     <string name="collectiontype__SNOEIHOUT_APPOINTMENT">Snoeihout (Afspraak)</string>
     <string name="collectiontype__OLD_METALS">Oud Metaal</string>
-    <string name="collectiontype__RE_USE_CENTER">Recycleercentrum</string>
+    <string name="collectiontype__RE_USE_CENTER">Kringloopwinkel</string>
     <string name="collectiontype__IJZER">Ijzer</string>
     <string name="collectiontype__CHRISTMAS_TREES">Kerstbomen</string>
     <string name="collectiontype__HOUSEHOLD_HAZARDEOUS_WASTE_KGA">KGA</string>

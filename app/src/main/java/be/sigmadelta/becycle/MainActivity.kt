@@ -39,9 +39,7 @@ import be.sigmadelta.becycle.home.HomeActions
 import be.sigmadelta.becycle.notification.NotificationViewModel
 import be.sigmadelta.becycle.notification.SettingsNotificationsActions
 import be.sigmadelta.becycle.notification.SettingsNotificationsOverview
-import be.sigmadelta.becycle.settings.AddressOverviewActions
-import be.sigmadelta.becycle.settings.Settings
-import be.sigmadelta.becycle.settings.SettingsAddressOverview
+import be.sigmadelta.becycle.settings.*
 import be.sigmadelta.common.Preferences
 import be.sigmadelta.common.Faction
 import be.sigmadelta.common.util.AuthorizationKeyExpiredException

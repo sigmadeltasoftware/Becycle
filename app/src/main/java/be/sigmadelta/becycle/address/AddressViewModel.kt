@@ -43,10 +43,11 @@ class AddressViewModel(
         val addressExists = addressRepository.getAddresses().map { it.id }.contains(address.id)
 
         if (addressExists) {
-            addressRepository.updateAddress(address.id, address)
+            // TODO: Check if address update still works properly after removing the separate addressId
+            addressRepository.updateAddress(address)
         } else {
             addressRepository.insertAddress(address)
-            createDefaultNotificationSettings(address)
+            createDefaultNotificationSettings(address.asGeneric())
         }
 
         analTracker.userProp(UserProps.ZIPCODE, address.zipCodeItem.code)
@@ -68,7 +69,7 @@ class AddressViewModel(
     }
 
     fun clearAllAddresses() = viewModelScope.launch {
-        addressRepository.removeAddresses()
+//        addressRepository.removeAddresses()
         analTracker.log(AnalTag.CLEAR_ALL_ADDRESSES)
         loadSavedAddresses()
     }
@@ -165,7 +166,7 @@ class AddressViewModel(
         analTracker.log(AnalTag.RESET_VALIDATION)
     }
 
-    private fun createDefaultNotificationSettings(address: RecAppAddressDao) {
+    private fun createDefaultNotificationSettings(address: Address) {
         notificationRepo.insertDefaultNotificationProps(address)
         analTracker.log(AnalTag.CREATE_DEFAULT_NOTIFICATION_SETTINGS)
     }

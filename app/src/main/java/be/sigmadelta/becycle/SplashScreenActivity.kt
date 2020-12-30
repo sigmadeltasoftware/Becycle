@@ -31,6 +31,7 @@ import be.sigmadelta.becycle.common.ui.widgets.BecycleProgressIndicator
 import be.sigmadelta.becycle.common.util.str
 import be.sigmadelta.common.Preferences
 import be.sigmadelta.common.util.AuthorizationKeyExpiredException
+import be.sigmadelta.common.util.DBManager
 import be.sigmadelta.common.util.SessionStorage
 import com.github.aakira.napier.Napier
 import kotlinx.coroutines.*
@@ -47,6 +48,7 @@ class SplashScreenActivity : AppCompatActivity(), CoroutineScope by MainScope() 
     private val accessTokenViewModel: AccessTokenViewModel by viewModel()
     private val sessionStorage: SessionStorage by inject()
     private val prefs: Preferences by inject()
+    private val dbMan: DBManager by inject()
 
     private var error by mutableStateOf<Throwable?>(null)
     private var showSplashScreen by mutableStateOf(false)
@@ -107,11 +109,19 @@ class SplashScreenActivity : AppCompatActivity(), CoroutineScope by MainScope() 
             }
         }
 
-        baseHeadersViewModel.getBaseHeaders()
 
         if (prefs.androidNotificationIconRef == 0) {
             prefs.androidNotificationIconRef = R.drawable.ic_becycle
         }
+
+        Napier.e("hasMigrated = ${prefs.hasMigrated}")
+        if (prefs.hasMigrated.not()) {
+            dbMan.migrate()
+            prefs.hasMigrated = true
+            Napier.e("Migrated successfully!")
+        }
+
+        baseHeadersViewModel.getBaseHeaders()
     }
 
     private fun restart() {

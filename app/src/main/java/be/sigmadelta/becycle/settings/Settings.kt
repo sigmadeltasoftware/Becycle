@@ -143,7 +143,7 @@ fun NotificationSettingsBatteryOptimisationWarning(
             modifier = Modifier.background(
                 color = errorSecondaryColor,
                 shape = RoundedCornerShape(12.dp)
-            ).fillMaxWidth().padding(vertical = 16.dp),
+            ).fillMaxWidth().padding(vertical = 16.dp, horizontal = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {

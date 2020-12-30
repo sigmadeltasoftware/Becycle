@@ -2,6 +2,7 @@ package be.sigmadelta.common.collections.recapp
 
 import be.sigmadelta.common.Faction
 import be.sigmadelta.common.collections.Collection
+import be.sigmadelta.common.collections.CollectionException
 import be.sigmadelta.common.collections.CollectionType
 import be.sigmadelta.common.util.TranslationContainer
 import kotlinx.datetime.TimeZone
@@ -18,17 +19,19 @@ data class RecAppCollectionDao (
     val timestamp: String,
     val type: String,
     val fraction: RecAppCollectionFractionDao,
-    val addressId: String
+    val addressId: String,
+    val exception: RecAppCollectionExceptionDao? = null
 ): Metadata {
 
-    val collectionType = fraction.logo.toCollectionType()
+    fun collectionType() = fraction.logo.toCollectionType()
     override fun indexes() = indexSet("addressId" to addressId)
 
     fun asGeneric() = Collection(
         id = id,
-        type = collectionType,
+        type = collectionType(),
         date = timestamp.toInstant().toLocalDateTime(TimeZone.currentSystemDefault()),
-        faction = Faction.RECAPP
+        faction = Faction.RECAPP,
+        exception = exception?.toCollectionException()
     )
 }
 

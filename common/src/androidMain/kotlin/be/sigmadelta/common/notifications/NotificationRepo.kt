@@ -9,9 +9,9 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.*
+import be.sigmadelta.common.Faction
 import be.sigmadelta.common.Preferences
 import be.sigmadelta.common.address.Address
-import be.sigmadelta.common.address.RecAppAddressDao
 import be.sigmadelta.common.address.AddressRepository
 import be.sigmadelta.common.collections.Collection
 import be.sigmadelta.common.collections.recapp.RecAppCollectionDao
@@ -19,15 +19,13 @@ import be.sigmadelta.common.collections.CollectionType
 import be.sigmadelta.common.collections.CollectionsRepository
 import be.sigmadelta.common.date.Time
 import be.sigmadelta.common.db.appCtx
+import be.sigmadelta.common.util.DBManager
 import be.sigmadelta.common.util.Response
+import be.sigmadelta.common.util.TranslationContainer
 import be.sigmadelta.common.util.toTime
 import com.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.collect
 import kotlinx.datetime.*
-import org.kodein.db.DB
-import org.kodein.db.deleteAll
-import org.kodein.db.find
-import org.kodein.db.useModels
 import org.kodein.memory.util.UUID
 import org.koin.core.KoinComponent
 import org.koin.core.inject
@@ -36,8 +34,7 @@ import java.util.concurrent.TimeUnit
 
 actual class NotificationRepo(
     private val context: Context,
-    private val db: DB,
-    private val notificationDb: DB
+    private val dbMan: DBManager
 ) {
 
     init {
@@ -57,12 +54,12 @@ actual class NotificationRepo(
         workManager.enqueueUniquePeriodicWork(WORK_NAME, ExistingPeriodicWorkPolicy.KEEP, workBuilder)
     }
 
-    fun insertDefaultNotificationProps(address: RecAppAddressDao) {
+    fun insertDefaultNotificationProps(address: Address) {
         val notificationProps = NotificationProps(
             UUID.randomUUID().toString(),
             address.id,
-            address.zipCodeItem.code,
-            address.street.names,
+            address.zipCode,
+            address.street,
             CollectionType.values().map {
                 CollectionNotificationProps(
                     it,
@@ -75,35 +72,30 @@ actual class NotificationRepo(
             Time.parseHhMm(DEFAULT_TOMORROW_TIME)!!
         )
 
-        val findPrevious = db.find<NotificationProps>().byIndex("addressId", address.id)
-        db.deleteAll(findPrevious)
-        db.put(notificationProps)
+        dbMan.saveNotificationProps(notificationProps, address)
         Napier.d("notificationProps: $notificationProps")
     }
 
-    fun getNotificationProps(address: Address) = db.find<NotificationProps>()
-        .all().useModels { it.toList() }
-        .firstOrNull { it.addressId == address.id }
+    fun getNotificationProps(address: Address) = dbMan.findNotificationPropsByAddress(address)
 
-    fun getAllNotificationProps() = db.find<NotificationProps>()
-        .all().useModels { it.toList() }
-
-    fun putTriggeredNotificationId(label: NotificationLabel) {
-        notificationDb.put(label)
+    fun getAllNotificationProps(): List<NotificationProps> {
+        val propList = mutableListOf<NotificationProps>()
+        Faction.values().forEach {
+            propList.addAll(dbMan.findAll<NotificationProps>(it))
+        }
+        return propList
     }
 
-    fun getTriggeredNotificationIds() = notificationDb.find<NotificationLabel>().all().useModels { it.toList() }
+    fun putTriggeredNotificationId(label: NotificationLabel) {
+        dbMan.markNotificationTriggered(label)
+    }
 
-    fun updateTomorrowAlarmTime(addressId: String, alarmTime: Time) {
-        val cursor = db.find<NotificationProps>().byIndex("addressId", addressId)
-        if (cursor.isValid()) {
-            Napier.d("Cursor is valid, updating time to $alarmTime")
-            val updatedModel = cursor.model().copy(genericTomorrowAlarmTime = alarmTime)
-            db.deleteAll(cursor)
-            db.put(updatedModel)
-        } else {
-            Napier.e("Cursor is invalid!")
-        }
+    fun getTriggeredNotificationIds() = dbMan.getTriggeredNotificationLabels()
+
+    fun updateTomorrowAlarmTime(address: Address, alarmTime: Time) {
+        val props = dbMan.findNotificationPropsByAddress(address)
+        Napier.d("Updating time to $alarmTime")
+        dbMan.saveNotificationProps(props.copy(genericTomorrowAlarmTime = alarmTime), address)
     }
 
     @SuppressLint("ServiceCast")
@@ -236,7 +228,7 @@ actual class NotificationRepo(
 private fun List<RecAppCollectionDao>.filterByEnabledNotifications(props: NotificationProps) =
     filter { collection -> // Are notifications enabled for this collection type
         props.collectionSettings
-            .firstOrNull { it.type == collection.collectionType }
+            .firstOrNull { it.type == collection.collectionType() }
             ?.enabled == true
     }.apply {
         Napier.d("filterByEnabledNotifications(): $this")

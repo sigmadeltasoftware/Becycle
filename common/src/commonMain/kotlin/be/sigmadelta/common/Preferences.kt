@@ -9,6 +9,7 @@ class Preferences {
         const val NOTIFS_ENABLED = "NOTIFS_ENABLED"
         const val IS_FIRST_RUN = "IS_FIRST_RUN"
         const val NOTIFS_ICON_REF = "NOTIFS_ICON_REF"
+        const val HAS_MIGRATED = "HAS_MIGRATED"
         val settings = Settings.Companion.invoke()
     }
 
@@ -24,8 +25,9 @@ class Preferences {
         get() = settings[IS_FIRST_RUN] ?: true
         set(value) = settings.putBoolean(IS_FIRST_RUN, value)
 
-    var dbVersion: Int
-        get() = settings[]
+    var hasMigrated: Boolean
+        get() = settings[HAS_MIGRATED] ?: false
+        set(value) = settings.putBoolean(HAS_MIGRATED, value)
 
     // - Make notification persistent
     // - Snooze notification from within drawer itself (5min - 1h)

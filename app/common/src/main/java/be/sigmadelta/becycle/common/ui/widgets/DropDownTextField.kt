@@ -33,7 +33,8 @@ fun <T> DropDownTextField(
     itemLayout: @Composable (LazyItemScope.(T) -> Unit),
     keyboardType: KeyboardType = KeyboardType.Text,
     focusRequester: FocusRequester = FocusRequester(),
-    isError: Boolean = false
+    isError: Boolean = false,
+    onActiveCallback: (CommitScope.() -> Unit)? = null,
 ) {
 
     var textField by remember { mutableStateOf("") }
@@ -99,6 +100,7 @@ fun <T> DropDownTextField(
                 else -> Unit
             }
         }
+        onActive(callback = onActiveCallback ?: {})
     }
 }
 

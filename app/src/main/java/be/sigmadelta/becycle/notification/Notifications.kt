@@ -22,6 +22,7 @@ import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.becycle.common.util.AmbientAddress
 import be.sigmadelta.becycle.common.util.AmbientTabIndex
 import be.sigmadelta.becycle.common.util.str
+import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.date.Time
 import be.sigmadelta.common.notifications.NotificationProps
 import be.sigmadelta.common.notifications.NotificationRepo
@@ -83,7 +84,7 @@ fun SettingsNotifications(
                     (notificationProps as? ListViewState.Success)?.payload?.let { props ->
                         props.firstOrNull { it.addressId == addresses[newIx].id }?.let {
                             NotificationSettings(it) { alarmTime ->
-                                actions.onTomorrowAlarmTimeSelected(addresses[newIx].id, alarmTime)
+                                actions.onTomorrowAlarmTimeSelected(addresses[newIx], alarmTime)
                             }
                         }
 
@@ -155,7 +156,7 @@ fun NotificationSettings(
 
 data class SettingsNotificationsActions(
     val onGoToAddressInput: () -> Unit,
-    val onTomorrowAlarmTimeSelected: (addressId: String, alarmTime: Time) -> Unit,
+    val onTomorrowAlarmTimeSelected: (address: Address, alarmTime: Time) -> Unit,
     val onNotificationsInfoClicked: () -> Unit,
     val onReloadNotificationPropsWhenEmpty: () -> Unit,
     val onTabSelected: (Int) -> Unit,

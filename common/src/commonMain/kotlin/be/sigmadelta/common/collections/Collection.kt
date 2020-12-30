@@ -8,4 +8,10 @@ data class Collection(
     val type: CollectionType,
     val date: LocalDateTime,
     val faction: Faction,
+    val exception: CollectionException? = null
+)
+
+data class CollectionException(
+    val title: String,
+    val replacementDate: LocalDateTime
 )

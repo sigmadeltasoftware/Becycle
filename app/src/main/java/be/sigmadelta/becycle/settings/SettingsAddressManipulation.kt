@@ -1,4 +1,4 @@
-package be.sigmadelta.becycle.address
+package be.sigmadelta.becycle.settings
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -44,6 +44,7 @@ fun SettingsAddressManipulation(
     var selectedStreet by remember { mutableStateOf<RecAppStreetDao?>(null) }
     var selectedHouseNumber by remember { mutableStateOf("") }
 
+    val zipCodeFocusRequester = FocusRequester()
     val streetFocusRequester = FocusRequester()
     val houseNumberFocusRequester = FocusRequester()
 
@@ -80,8 +81,12 @@ fun SettingsAddressManipulation(
                         streetFocusRequester.requestFocus()
                     },
                     itemLayout = { item: RecAppZipCodeItemDao -> ZipCodeItemLayout(zipCodeItem = item) },
+                    focusRequester = zipCodeFocusRequester,
                     keyboardType = KeyboardType.Number,
-                    isError = isInvalidZipCodeInput
+                    isError = isInvalidZipCodeInput,
+                    onActiveCallback = {
+                        zipCodeFocusRequester.requestFocus()
+                    }
                 )
 
                 DropDownTextField(

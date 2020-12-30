@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import be.sigmadelta.becycle.common.analytics.AnalTag
 import be.sigmadelta.becycle.common.analytics.AnalyticsTracker
 import be.sigmadelta.becycle.common.ui.util.ListViewState
+import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.date.Time
 import be.sigmadelta.common.notifications.NotificationProps
 import be.sigmadelta.common.notifications.NotificationRepo
@@ -27,12 +28,12 @@ class NotificationViewModel(
         notificationPropsViewState.value = ListViewState.Success(notificationProps)
     }
 
-    fun setTomorrowAlarmTime(addressId: String, alarmTime: Time) {
-        Napier.d("addressId: $addressId - alarmTime: $alarmTime")
+    fun setTomorrowAlarmTime(address: Address, alarmTime: Time) {
+        Napier.d("addressId: ${address.id} - alarmTime: $alarmTime")
         analTracker.log(AnalTag.SET_TOMORROW_ALARM_TIME) {
             param("time", alarmTime.hhmm)
         }
-        notificationRepo.updateTomorrowAlarmTime(addressId, alarmTime)
+        notificationRepo.updateTomorrowAlarmTime(address, alarmTime)
         loadNotificationProps()
     }
 
