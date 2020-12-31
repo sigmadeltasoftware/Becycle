@@ -18,6 +18,7 @@ import be.sigmadelta.common.address.recapp.RecAppAddressApi
 import be.sigmadelta.common.address.AddressRepository
 import be.sigmadelta.common.baseheader.BaseHeadersRepository
 import be.sigmadelta.common.accesstoken.AccessTokenRepository
+import be.sigmadelta.common.address.limnet.LimNetAddressApi
 import be.sigmadelta.common.collections.recapp.RecAppCollectionsApi
 import be.sigmadelta.common.collections.CollectionsRepository
 import be.sigmadelta.common.notifications.NotificationRepo
@@ -36,6 +37,7 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 private const val RECYCLE_BASE_URL = "https://recycleapp.be/api/app/v1"
+private const val LIMNET_BASE_URL = "https://limburg.net/api-proxy/public"
 
 @ExperimentalMaterialApi
 val coreModule = module {
@@ -61,8 +63,9 @@ val baseHeadersModule = module {
 val recycleModule = module {
     single { AccessTokenApi(RECYCLE_BASE_URL, get(), get()) }
     single { RecAppAddressApi(RECYCLE_BASE_URL, get(), get()) }
+    single { LimNetAddressApi(LIMNET_BASE_URL, get()) }
     single { AccessTokenRepository(get()) }
-    single { AddressRepository(get(), get(), get()) }
+    single { AddressRepository(get(), get(), get(), get()) }
     viewModel { AddressViewModel(get(), get(), get()) }
     viewModel { AccessTokenViewModel(get(), get()) }
 }

@@ -1,4 +1,4 @@
-package be.sigmadelta.becycle.settings
+package be.sigmadelta.becycle.settings.recapp
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -32,10 +32,10 @@ import org.koin.ext.isInt
 
 @ExperimentalMaterialApi
 @Composable
-fun SettingsAddressManipulation(
+fun SettingsRecAppAddressManipulation(
     zipCodeItemsViewState: ListViewState<RecAppZipCodeItemDao>,
     streetsViewState: ListViewState<RecAppStreetDao>,
-    actions: SettingsAddressManipulationActions,
+    actions: SettingsRecAppAddressManipulationActions,
     appBarTitle: String? = null,
     existingAddress: Address? = null,
 ) {
@@ -47,6 +47,10 @@ fun SettingsAddressManipulation(
     val zipCodeFocusRequester = FocusRequester()
     val streetFocusRequester = FocusRequester()
     val houseNumberFocusRequester = FocusRequester()
+
+    onDispose(callback = {
+        actions.onExit()
+    })
 
     Scaffold(
         topBar = {
@@ -69,9 +73,14 @@ fun SettingsAddressManipulation(
                     label = R.string.zipcode.str(),
                     textChangeAction = {
                         selectedZipCode = null
+
                         if (it.isInt()) {
                             isInvalidZipCodeInput = false
-                            actions.onSearchZipCode(it)
+                            if (it.toInt() in 35..39) {
+                                actions.onLimNetZipCodeEntered()
+                            } else {
+                                actions.onSearchRecAppZipCode(it)
+                            }
                         } else {
                             isInvalidZipCodeInput = true
                         }
@@ -96,7 +105,7 @@ fun SettingsAddressManipulation(
                     textChangeAction = {
                         selectedStreet = null
                         selectedZipCode?.let { zip ->
-                            actions.onSearchStreet(it, zip)
+                            actions.onSearchRecAppStreet(it, zip)
                         }
                     },
                     itemSelectedAction = { street ->
@@ -127,7 +136,7 @@ fun SettingsAddressManipulation(
                 Column(Modifier.padding(horizontal = 24.dp)) {
                     Button(
                         onClick = {
-                            actions.onValidateAddress(
+                            actions.onValidateRecAppAddress(
                                 selectedZipCode!!,
                                 selectedStreet!!,
                                 selectedHouseNumber.toInt()
@@ -187,23 +196,19 @@ fun ZipCodeItemLayout(zipCodeItem: RecAppZipCodeItemDao) {
 fun StreetLayout(street: RecAppStreetDao) {
     Text(
         street.names.nl,
-        modifier = Modifier.padding(vertical = 4.dp),
+        modifier = Modifier.padding(vertical = 8.dp),
         fontWeight = FontWeight.Bold,
         fontSize = regularFontSize)
     Divider(modifier = Modifier.fillMaxWidth())
 }
 
-data class AddressCreationPrefill(
-    val zipCodeNumber: String,
-    val streetName: String,
-    val houseNumber: String
-)
-
-data class SettingsAddressManipulationActions(
-    val onSearchZipCode: (String) -> Unit,
-    val onSearchStreet: (String, RecAppZipCodeItemDao) -> Unit,
+data class SettingsRecAppAddressManipulationActions(
+    val onSearchRecAppZipCode: (String) -> Unit,
+    val onSearchRecAppStreet: (String, RecAppZipCodeItemDao) -> Unit,
+    val onValidateRecAppAddress: (RecAppZipCodeItemDao, RecAppStreetDao, Int) -> Unit,
     val onHouseNumberValueChanged: () -> Unit,
-    val onValidateAddress: (RecAppZipCodeItemDao, RecAppStreetDao, Int) -> Unit,
     val onAddressRemove: ((Address) -> Unit)?,
-    val onBackClicked: () -> Unit
+    val onLimNetZipCodeEntered: () -> Unit,
+    val onBackClicked: () -> Unit,
+    val onExit: () -> Unit
 )

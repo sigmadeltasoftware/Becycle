@@ -3,6 +3,7 @@ package be.sigmadelta.common.util
 import be.sigmadelta.common.Faction
 import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.address.AddressDao
+import be.sigmadelta.common.address.LimNetAddressDao
 import be.sigmadelta.common.address.RecAppAddressDao
 import be.sigmadelta.common.address.recapp.legacy.LegacyRecappAddress
 import be.sigmadelta.common.collections.Collection
@@ -30,30 +31,37 @@ class DBManager {
     }
 
     fun storeAddress(address: AddressDao) = when (address) {
-        is RecAppAddressDao -> recAppDb.put(address)
-    }
+        is RecAppAddressDao -> recAppDb
+        is LimNetAddressDao -> limNetDb
+    }.put(address)
 
     fun removeAddress(address: Address) {
-        val db = getDb(address.faction)
         when (address.faction) {
-            Faction.LIMNET, // TODO
-            Faction.RECAPP -> {
-                db.find<RecAppAddressDao>().byId(address.id).use {
-                    if (it.isValid()) {
-                        db.delete(it.key())
-                    }
-                }
+            Faction.RECAPP -> innerRemoveAddress<RecAppAddressDao>(address.faction, address.id)
+            Faction.LIMNET -> innerRemoveAddress<LimNetAddressDao>(address.faction, address.id)
+        }
+    }
+
+    private inline fun <reified T : Any> innerRemoveAddress(faction: Faction, addressId: String) {
+        val db = getDb(faction)
+        db.find<T>().byId(addressId).use {
+            if (it.isValid()) {
+                db.delete(it.key())
             }
         }
     }
 
     fun updateAddress(address: AddressDao) = when (address) {
-        is RecAppAddressDao -> {
-            recAppDb.find<RecAppAddressDao>().byId(address.id).use {
-                if (it.isValid()) {
-                    recAppDb.deleteAll(it)
-                    recAppDb.put(address)
-                }
+        is RecAppAddressDao -> innerUpdateAddress<RecAppAddressDao>(address.asGeneric())
+        is LimNetAddressDao -> innerUpdateAddress<LimNetAddressDao>(address.asGeneric())
+    }
+
+    private inline fun <reified T: Any> innerUpdateAddress(address: Address) {
+        val db = getDb(address.faction)
+        db.find<T>().byId(address.id).use {
+            if (it.isValid()) {
+                db.deleteAll(it)
+                db.put(address)
             }
         }
     }
@@ -62,7 +70,7 @@ class DBManager {
         val addresses = mutableListOf<Address>()
         Faction.values().forEach {
             when (it) {
-                Faction.LIMNET, // TODO
+                Faction.LIMNET -> addresses.addAll(findAll<LimNetAddressDao>(it).map { it.asGeneric() })
                 Faction.RECAPP -> addresses.addAll(findAll<RecAppAddressDao>(it).map { it.asGeneric() })
             }
         }
@@ -77,6 +85,19 @@ class DBManager {
                 it.useModels { it.toList().map { it.asGeneric() } }
             }
         }
+    }
+
+    private inline fun <reified T: Any> innerFindAllCollectionsByAddress(address: Address) {
+        val db = getDb(address.faction)
+        when (address.faction) {
+            Faction.RECAPP -> db.find<RecAppCollectionDao>().byIndex("addressId", address.id).use {
+                it.useModels { it.toList().map { it.asGeneric() } }
+            }
+            Faction.LIMNET -> db.find<LimNetColllectionDao>().byIndex("addressId", address.id).use {
+                it.useModels { it.toList().map { it.asGeneric() } }
+            }
+        }
+
     }
 
     fun findNotificationPropsByAddress(address: Address) = getDb(address.faction)
@@ -113,7 +134,9 @@ class DBManager {
         val db = getDb(address.faction)
 
         when (address.faction) {
-            Faction.LIMNET, // TODO
+            Faction.LIMNET -> db.find<LimNetCollectionDao>()
+                .byIndex("addressId", address.id)
+                .use { db.deleteAll(it) }
             Faction.RECAPP -> db.find<RecAppCollectionDao>()
                 .byIndex("addressId", address.id)
                 .use { db.deleteAll(it) }

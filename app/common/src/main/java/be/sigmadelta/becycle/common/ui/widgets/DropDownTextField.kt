@@ -35,6 +35,7 @@ fun <T> DropDownTextField(
     focusRequester: FocusRequester = FocusRequester(),
     isError: Boolean = false,
     onActiveCallback: (CommitScope.() -> Unit)? = null,
+    minimumChars: Int = 2,
 ) {
 
     var textField by remember { mutableStateOf("") }
@@ -56,7 +57,7 @@ fun <T> DropDownTextField(
             value = textValue ?: textField,
             onValueChange = {
                 textField = it
-                if (isDebouncing.not() && it.isNotBlank() && it.length > 1) {
+                if (isDebouncing.not() && it.isNotBlank() && it.length > minimumChars-1) {
                     isDebouncing = true
                     textChangeAction(it)
                 }

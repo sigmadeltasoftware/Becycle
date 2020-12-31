@@ -27,7 +27,7 @@ class AccessTokenViewModel(
         accessTokenRepository.getAccessToken().collect {
 
             if (it !is Response.Loading) {
-                analTracker.log(AnalTag.GET_ACCESS_TOKEN) {
+                analTracker.log(AnalTag.GET_ACCESS_TOKEN.s()) {
                     param("state", it.toAnalStateType())
 
                     if (it is Response.Error) {

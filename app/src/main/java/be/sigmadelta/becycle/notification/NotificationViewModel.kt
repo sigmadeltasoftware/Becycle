@@ -22,7 +22,7 @@ class NotificationViewModel(
     fun loadNotificationProps() = viewModelScope.launch {
         val notificationProps = notificationRepo.getAllNotificationProps()
         Napier.d("notificationProps = $notificationProps")
-        analTracker.log(AnalTag.LOAD_NOTIFICATION_PROPS){
+        analTracker.log(AnalTag.LOAD_NOTIFICATION_PROPS.s()){
             param("prop_count", notificationProps.size.toString())
         }
         notificationPropsViewState.value = ListViewState.Success(notificationProps)
@@ -30,7 +30,7 @@ class NotificationViewModel(
 
     fun setTomorrowAlarmTime(address: Address, alarmTime: Time) {
         Napier.d("addressId: ${address.id} - alarmTime: $alarmTime")
-        analTracker.log(AnalTag.SET_TOMORROW_ALARM_TIME) {
+        analTracker.log(AnalTag.SET_TOMORROW_ALARM_TIME.s()) {
             param("time", alarmTime.hhmm)
         }
         notificationRepo.updateTomorrowAlarmTime(address, alarmTime)
@@ -41,6 +41,6 @@ class NotificationViewModel(
 
     fun scheduleWorker() = viewModelScope.launch {
         notificationRepo.scheduleWorker()
-        analTracker.log(AnalTag.SCHEDULE_WORKER)
+        analTracker.log(AnalTag.SCHEDULE_WORKER.s())
     }
 }

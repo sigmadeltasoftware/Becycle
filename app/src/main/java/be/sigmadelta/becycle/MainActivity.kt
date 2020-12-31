@@ -41,8 +41,17 @@ import be.sigmadelta.becycle.notification.NotificationViewModel
 import be.sigmadelta.becycle.notification.SettingsNotificationsActions
 import be.sigmadelta.becycle.notification.SettingsNotificationsOverview
 import be.sigmadelta.becycle.settings.*
+import be.sigmadelta.becycle.settings.limnet.SettingsLimNetAddressEditRemoval
+import be.sigmadelta.becycle.settings.limnet.SettingsLimNetAddressEditRemovalActions
+import be.sigmadelta.becycle.settings.limnet.SettingsLimNetAddressManipulation
+import be.sigmadelta.becycle.settings.limnet.SettingsLimNetAddressManipulationActions
+import be.sigmadelta.becycle.settings.recapp.SettingsRecAppAddressEditRemoval
+import be.sigmadelta.becycle.settings.recapp.SettingsRecAppAddressEditRemovalActions
+import be.sigmadelta.becycle.settings.recapp.SettingsRecAppAddressManipulation
+import be.sigmadelta.becycle.settings.recapp.SettingsRecAppAddressManipulationActions
 import be.sigmadelta.common.Preferences
 import be.sigmadelta.common.Faction
+import be.sigmadelta.common.address.LimNetAddressDao
 import be.sigmadelta.common.collections.CollectionException
 import be.sigmadelta.common.util.AuthorizationKeyExpiredException
 import com.afollestad.materialdialogs.MaterialDialog
@@ -71,8 +80,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         // Add observers for access token expiration
         launch {
             // TODO: Handle this better through a separate viewState in AddressViewModel
-            addressViewModel.zipCodeItemsViewState.observeForAutKeyErrors { restartAppForTokenRefresh() }
-            addressViewModel.streetsViewState.observeForAutKeyErrors { restartAppForTokenRefresh() }
+            addressViewModel.recAppZipCodeItemsViewState.observeForAutKeyErrors { restartAppForTokenRefresh() }
+            addressViewModel.recAppStreetsViewState.observeForAutKeyErrors { restartAppForTokenRefresh() }
             addressViewModel.addressesViewState.observeForAutKeyErrors { restartAppForTokenRefresh() }
             collectionsViewModel.collectionsViewState.observeForAuthKeyErrors { restartAppForTokenRefresh() }
         }
@@ -120,7 +129,7 @@ fun MainLayout(
     if (
         (addressViewModel.addressesViewState.value as? ListViewState.Success)?.payload?.isNotEmpty() == true
         && nav.current != Destination.Settings
-        && nav.current != Destination.SettingsAddressManipulation
+        && nav.current != Destination.SettingsAddressManipulation()
         && preferences.isFirstRun
     ) {
         MaterialDialog(AmbientContext.current).show {
@@ -228,9 +237,12 @@ fun Main(
 ) {
 
     val collectionOverview by collectionsViewModel.collectionsViewState.collectAsState()
-    val zipCodeItemsViewState by addressViewModel.zipCodeItemsViewState.collectAsState()
-    val streetsViewState by addressViewModel.streetsViewState.collectAsState()
-    val validation by addressViewModel.validationViewState.collectAsState()
+    val recAppZipCodeItemsViewState by addressViewModel.recAppZipCodeItemsViewState.collectAsState()
+    val recAppStreetsViewState by addressViewModel.recAppStreetsViewState.collectAsState()
+    val recAppValidation by addressViewModel.recAppValidationViewState.collectAsState()
+    val limNetMunicipalityViewState by addressViewModel.limNetMunicipalityViewState.collectAsState()
+    val limNetStreetViewState by addressViewModel.limNetStreetViewState.collectAsState()
+    val limNetHouseNumberViewState by addressViewModel.limNetHouseNumberViewState.collectAsState()
     val notificationProps by notificationViewModel.notificationPropsViewState.collectAsState()
 
     val addresses = (AmbientAddress.current as? ListViewState.Success)?.payload
@@ -239,7 +251,7 @@ fun Main(
         Destination.Home -> Home(
             collectionOverview,
             HomeActions(
-                onGoToAddressInput = { actions.goTo(Destination.SettingsAddressManipulation) },
+                onGoToAddressInput = { actions.goTo(Destination.SettingsAddressManipulation()) },
                 onLoadCollections = { address -> collectionsViewModel.searchCollections(address) },
                 onTabSelected = { ix ->
                     addresses?.get(ix)?.let {
@@ -256,7 +268,7 @@ fun Main(
                 collectionOverview,
                 CalendarViewActions(
                     onGoToAddressInput = {
-                        actions.goTo(Destination.SettingsAddressManipulation)
+                        actions.goTo(Destination.SettingsAddressManipulation())
                     },
                     onSearchCollectionsForAddress = collectionsViewModel::searchCollections,
                     onTabSelected = { ix ->
@@ -326,7 +338,7 @@ fun Main(
             SettingsNotificationsOverview(
                 notificationProps,
                 SettingsNotificationsActions(
-                    onGoToAddressInput = { actions.goTo(Destination.SettingsAddressManipulation) },
+                    onGoToAddressInput = { actions.goTo(Destination.SettingsAddressManipulation()) },
                     onTomorrowAlarmTimeSelected = notificationViewModel::setTomorrowAlarmTime,
                     onNotificationsInfoClicked = {
                         MaterialDialog(ctx, BottomSheet()).show {
@@ -357,24 +369,47 @@ fun Main(
 
         Destination.SettingsAddresses -> SettingsAddressOverview(
             AddressOverviewActions(
-                { actions.goTo(Destination.SettingsAddressEditRemoval(it.id)) },
-                { actions.goTo(Destination.SettingsAddressManipulation) },
+                { actions.goTo(Destination.SettingsAddressEditRemoval(it.id, it.faction)) },
+                { actions.goTo(Destination.SettingsAddressManipulation()) },
                 { actions.pressOnBack() }
             )
         )
 
-        Destination.SettingsAddressManipulation -> SettingsAddressManipulation(
-            zipCodeItemsViewState,
-            streetsViewState,
-            SettingsAddressManipulationActions(
-                onSearchZipCode = addressViewModel::searchZipCode,
-                onSearchStreet = addressViewModel::searchStreets,
-                onHouseNumberValueChanged = addressViewModel::resetValidation,
-                onValidateAddress = addressViewModel::validateAddress,
-                onAddressRemove = null,
-                onBackClicked = { actions.pressOnBack() }
+        is Destination.SettingsAddressManipulation -> when ((nav.current as Destination.SettingsAddressManipulation).faction) {
+            Faction.LIMNET -> SettingsLimNetAddressManipulation(
+                municipalityItemsViewState = limNetMunicipalityViewState,
+                streetsViewState = limNetStreetViewState,
+                houseNumbersViewState = limNetHouseNumberViewState,
+                actions = SettingsLimNetAddressManipulationActions(
+                    onSearchLimNetMunicipality = addressViewModel::searchMunicipality,
+                    onSearchLimNetStreet = addressViewModel::searchStreets,
+                    onSearchLimNetHouseNumbers = addressViewModel::searchHouseNumbers,
+                    onAddressRemove = null,
+                    onExit = addressViewModel::resetAll,
+                    onBackClicked = { actions.pressOnBack() },
+                    onSaveLimNetAddress = { municipality, street, houseNumber ->
+                        addressViewModel.saveAddress(LimNetAddressDao(municipality, street, houseNumber))
+                    },
+                )
             )
-        )
+
+            Faction.RECAPP -> SettingsRecAppAddressManipulation(
+                recAppZipCodeItemsViewState,
+                recAppStreetsViewState,
+                SettingsRecAppAddressManipulationActions(
+                    onSearchRecAppZipCode = addressViewModel::searchZipCode,
+                    onSearchRecAppStreet = addressViewModel::searchStreets,
+                    onHouseNumberValueChanged = addressViewModel::resetValidation,
+                    onValidateRecAppAddress = addressViewModel::validateAddress,
+                    onLimNetZipCodeEntered = {
+                        actions.goTo(Destination.SettingsAddressManipulation(Faction.LIMNET))
+                    },
+                    onExit = addressViewModel::resetAll,
+                    onAddressRemove = null,
+                    onBackClicked = { actions.pressOnBack() },
+                )
+            )
+        }
 
         is Destination.SettingsAddressEditRemoval -> {
             val addr = addresses?.firstOrNull { it.id == (nav.current as Destination.SettingsAddressEditRemoval).addressId }
@@ -383,9 +418,9 @@ fun Main(
                 Faction.RECAPP -> {
                     SettingsRecAppAddressEditRemoval(
                         addr.id,
-                        zipCodeItemsViewState,
-                        streetsViewState,
-                        SettingsAddressEditRemovalActions(
+                        recAppZipCodeItemsViewState,
+                        recAppStreetsViewState,
+                        SettingsRecAppAddressEditRemovalActions(
                             onSearchZipCode = addressViewModel::searchZipCode,
                             onSearchStreet = addressViewModel::searchStreets,
                             onAddressChanged = {
@@ -402,18 +437,44 @@ fun Main(
                                 actions.pressOnBack()
                             },
                             onHouseNumberValueChanged = addressViewModel::resetValidation,
-                            onBackClicked = { actions.pressOnBack() }
+                            onExit = addressViewModel::resetAll,
+                            onBackClicked = actions.pressOnBack,
+                            onLimNetZipCodeEntered = { actions.goTo(Destination.SettingsAddressEditRemoval(addr.id, Faction.LIMNET))}
                         )
                     )
                 }
-                Faction.LIMNET -> Unit // TODO
+
+                Faction.LIMNET -> SettingsLimNetAddressEditRemoval(
+                    addr.id,
+                    limNetMunicipalityViewState,
+                    limNetStreetViewState,
+                    limNetHouseNumberViewState,
+                    actions = SettingsLimNetAddressEditRemovalActions(
+                        onAddressRemove = {
+                            addressViewModel.removeAddress(it)
+                            selectedTabIx = 0
+                            collectionsViewModel.removeCollections(it)
+                            collectionsViewModel.searchCollections(it)
+                            actions.pressOnBack()
+                        },
+                        onBackClicked = actions.pressOnBack,
+                        onSearchLimNetMunicipality = addressViewModel::searchMunicipality,
+                        onSearchLimNetStreet = addressViewModel::searchStreets,
+                        onSearchLimNetHouseNumbers = addressViewModel::searchHouseNumbers,
+                        onSaveLimNetAddress = { _, _, _, ->
+                            // TODO
+                        },
+                        onExit = addressViewModel::resetAll
+                    )
+                )
+
                 null -> Unit
             }
 
         }
     }
 
-    ValidationSnackbar(validation, addressViewModel) {
+    ValidationSnackbar(recAppValidation, addressViewModel) {
         if (preferences.isFirstRun) {
             act.startActivity(Intent(act, SplashScreenActivity::class.java))
             act.finish()
@@ -428,9 +489,12 @@ private fun showCollectionExceptionDialog(ctx: Context, ex: CollectionException)
     MaterialDialog(ctx).show {
         cornerRadius(16f)
         title(text = ex.title)
-        message(text = ctx.getString(R.string.collectionexception__text,
-            "${ex.replacementDate.dayOfMonth}-${ex.replacementDate.monthNumber}-${ex.replacementDate.year}"
-        ))
+        message(
+            text = ctx.getString(
+                R.string.collectionexception__text,
+                "${ex.replacementDate.dayOfMonth}-${ex.replacementDate.monthNumber}-${ex.replacementDate.year}"
+            )
+        )
         icon(R.drawable.ic_info)
         positiveButton(android.R.string.ok) {
             it.dismiss()
@@ -471,24 +535,19 @@ fun ValidationSnackbar(
         }
         ValidationViewState.InvalidCombination -> ErrorSnackbar(
             R.string.validation__error_invalid_address.str()
-        ) {
-            addressViewModel.resetValidation()
-        }
+        ) { addressViewModel.resetValidation() }
+
         ValidationViewState.NetworkError -> ErrorSnackbar(
             R.string.validation__error_bad_network_response.str()
-        ) {
-            addressViewModel.resetValidation()
-        }
+        ) { addressViewModel.resetValidation() }
+
         ValidationViewState.InvalidAddressSpecified -> ErrorSnackbar(
             R.string.validation__error_invalid_address_specified.str()
-        ) {
-            addressViewModel.resetValidation()
-        }
+        ) { addressViewModel.resetValidation() }
+
         ValidationViewState.DuplicateAddressEntry -> ErrorSnackbar(
             R.string.validation__error_duplicate_address_entry.str()
-        ) {
-            addressViewModel.resetValidation()
-        }
+        ) { addressViewModel.resetValidation() }
     }
 }
 

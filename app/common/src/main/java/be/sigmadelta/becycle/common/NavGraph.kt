@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Parcelable
+import be.sigmadelta.common.Faction
 import kotlinx.android.parcel.Parcelize
 
 sealed class Destination: Parcelable {
@@ -24,10 +25,10 @@ sealed class Destination: Parcelable {
     object SettingsAddresses: Destination()
 
     @Parcelize
-    object SettingsAddressManipulation: Destination()
+    data class SettingsAddressManipulation(val faction: Faction = Faction.RECAPP): Destination()
 
     @Parcelize
-    data class SettingsAddressEditRemoval(val addressId: String): Destination()
+    data class SettingsAddressEditRemoval(val addressId: String, val faction: Faction): Destination()
 }
 
 class Actions(private val nav: Navigator<Destination>) {

@@ -8,6 +8,7 @@
     <string name="remove_address">Adres verwijderen</string>
     <string name="add_address">Adres Toevoegen</string>
     <string name="zipcode">Postcode</string>
+    <string name="municipality">Gemeente</string>
     <string name="street">Straat</string>
     <string name="house_number">Huisnummer</string>
     <string name="today">Vandaag</string>

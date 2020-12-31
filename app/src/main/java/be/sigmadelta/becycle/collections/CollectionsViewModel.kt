@@ -32,7 +32,7 @@ class CollectionsViewModel(
             .searchUpcomingCollections(address, shouldNotFetch = shouldNotFetch)
             .collect {
             if (it !is Response.Loading) {
-                analTracker.log(AnalTag.SEARCH_COLLECTIONS) {
+                analTracker.log(AnalTag.SEARCH_COLLECTIONS.s()) {
                     param("state", it.toAnalStateType())
                     param(
                         "value", when (it) {
@@ -54,6 +54,6 @@ class CollectionsViewModel(
 
     fun removeCollections(address: Address) = viewModelScope.launch {
         collectionsRepository.removeCollections(address)
-        analTracker.log(AnalTag.REMOVE_COLLECTIONS)
+        analTracker.log(AnalTag.REMOVE_COLLECTIONS.s())
     }
 }

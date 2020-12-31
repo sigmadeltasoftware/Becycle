@@ -33,7 +33,7 @@ class BaseHeadersViewModel(
                         )
                     )
                     Napier.d("Positive response: ${it.body}")
-                    analTracker.log(AnalTag.GET_BASE_HEADERS){
+                    analTracker.log(AnalTag.GET_BASE_HEADERS.s()){
                         param("secret", it.body.secret)
                         param("consumer", it.body.consumer)
                     }
@@ -41,7 +41,7 @@ class BaseHeadersViewModel(
                 is Response.Error -> {
                     baseHeadersViewState.value = BaseHeadersViewState.Error(it.error)
                     Napier.e("Error occurred: ${it.error}")
-                    analTracker.log(AnalTag.GET_BASE_HEADERS) {
+                    analTracker.log(AnalTag.GET_BASE_HEADERS.s()) {
                         param("error", it.error?.message ?: "")
                     }
                 }

@@ -7,10 +7,11 @@ import be.sigmadelta.becycle.common.analytics.AnalyticsTracker
 import be.sigmadelta.becycle.common.analytics.UserProps
 import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.becycle.common.ui.util.toViewState
-import be.sigmadelta.common.address.Address
-import be.sigmadelta.common.address.AddressDao
-import be.sigmadelta.common.address.RecAppAddressDao
-import be.sigmadelta.common.address.AddressRepository
+import be.sigmadelta.common.Faction
+import be.sigmadelta.common.address.*
+import be.sigmadelta.common.address.limnet.LimNetHouseNumberDao
+import be.sigmadelta.common.address.limnet.LimNetMunicipalityDao
+import be.sigmadelta.common.address.limnet.LimNetStreetDao
 import be.sigmadelta.common.address.recapp.RecAppStreetDao
 import be.sigmadelta.common.address.recapp.RecAppZipCodeItemDao
 import be.sigmadelta.common.notifications.NotificationRepo
@@ -31,29 +32,33 @@ class AddressViewModel(
 ) : ViewModel() {
 
     val addressesViewState = MutableStateFlow<ListViewState<Address>>(ListViewState.Empty())
-    val zipCodeItemsViewState = MutableStateFlow<ListViewState<RecAppZipCodeItemDao>>(ListViewState.Empty())
-    val streetsViewState = MutableStateFlow<ListViewState<RecAppStreetDao>>(ListViewState.Empty())
-    val validationViewState = MutableStateFlow<ValidationViewState>(ValidationViewState.Empty)
+    val recAppZipCodeItemsViewState = MutableStateFlow<ListViewState<RecAppZipCodeItemDao>>(ListViewState.Empty())
+    val recAppStreetsViewState = MutableStateFlow<ListViewState<RecAppStreetDao>>(ListViewState.Empty())
+    val recAppValidationViewState = MutableStateFlow<ValidationViewState>(ValidationViewState.Empty)
+
+    val limNetMunicipalityViewState = MutableStateFlow<ListViewState<LimNetMunicipalityDao>>(ListViewState.Empty())
+    val limNetStreetViewState = MutableStateFlow<ListViewState<LimNetStreetDao>>(ListViewState.Empty())
+    val limNetHouseNumberViewState = MutableStateFlow<ListViewState<LimNetHouseNumberDao>>(ListViewState.Empty())
 
     init {
         loadSavedAddresses()
     }
 
-    fun saveAddress(address: RecAppAddressDao) = viewModelScope.launch {
-        val addressExists = addressRepository.getAddresses().map { it.id }.contains(address.id)
+    fun saveAddress(address: AddressDao) = viewModelScope.launch {
+        val generic = address.asGeneric()
+        val addressExists = addressRepository.getAddresses().map { it.id }.contains(generic.id)
 
         if (addressExists) {
             // TODO: Check if address update still works properly after removing the separate addressId
             addressRepository.updateAddress(address)
         } else {
             addressRepository.insertAddress(address)
-            createDefaultNotificationSettings(address.asGeneric())
+            createDefaultNotificationSettings(generic)
         }
 
-        analTracker.userProp(UserProps.ZIPCODE, address.zipCodeItem.code)
-        analTracker.log(AnalTag.SAVE_ADDRESS) {
+        analTracker.log(
+            if (generic.faction == Faction.RECAPP) AnalTag.SAVE_ADDRESS.s() else AnalTag.SAVE_ADDRESS_LIMNET.s()) {
             param("type", if (addressExists) "updateAddress" else "saveAddress")
-            param("zipcode", address.zipCodeItem.code)
         }
 
         loadSavedAddresses()
@@ -62,7 +67,7 @@ class AddressViewModel(
     fun loadSavedAddresses() = viewModelScope.launch {
         val addresses = addressRepository.getAddresses()
         Napier.d("loadSavedAddresses(): $addresses")
-        analTracker.log(AnalTag.LOAD_SAVED_ADDRESSES) {
+        analTracker.log(AnalTag.LOAD_SAVED_ADDRESSES.s()) {
             param("address_count", addresses.size.toString())
         }
         addressesViewState.value = ListViewState.Success(addresses)
@@ -70,20 +75,29 @@ class AddressViewModel(
 
     fun clearAllAddresses() = viewModelScope.launch {
 //        addressRepository.removeAddresses()
-        analTracker.log(AnalTag.CLEAR_ALL_ADDRESSES)
+        analTracker.log(AnalTag.CLEAR_ALL_ADDRESSES.s())
         loadSavedAddresses()
     }
 
     fun removeAddress(address: Address) = viewModelScope.launch {
         addressRepository.removeAddress(address)
-        analTracker.log(AnalTag.REMOVE_ADDRESS)
+        analTracker.log(AnalTag.REMOVE_ADDRESS.s())
         loadSavedAddresses()
     }
 
     fun searchZipCode(searchQuery: String) = viewModelScope.launch {
         addressRepository.searchRecAppZipCodes(searchQuery).collect {
-            zipCodeItemsViewState.value = it.toViewState()
-            analTracker.log(AnalTag.SEARCH_ZIP_CODE) {
+            recAppZipCodeItemsViewState.value = it.toViewState()
+            analTracker.log(AnalTag.SEARCH_ZIP_CODE.s()) {
+                param("query", searchQuery)
+            }
+        }
+    }
+
+    fun searchMunicipality(searchQuery: String) = viewModelScope.launch {
+        addressRepository.searchLimNetMunicipalities(searchQuery).collect {
+            limNetMunicipalityViewState.value = it.toViewState()
+            analTracker.log(AnalTag.SEARCH_MUNICIPALITY_LIMNET.s()) {
                 param("query", searchQuery)
             }
         }
@@ -91,25 +105,45 @@ class AddressViewModel(
 
     fun searchStreets(searchQuery: String, zipCodeItem: RecAppZipCodeItemDao) = viewModelScope.launch {
         addressRepository.searchRecAppStreets(searchQuery, zipCodeItem).collect {
-            analTracker.log(AnalTag.SEARCH_STREETS) {
+            analTracker.log(AnalTag.SEARCH_STREETS.s()) {
                 param("query", searchQuery)
                 param("zipcode", zipCodeItem.code)
             }
-            streetsViewState.value = it.toViewState()
+            recAppStreetsViewState.value = it.toViewState()
+        }
+    }
+
+    fun searchStreets(searchQuery: String, municipality: LimNetMunicipalityDao) = viewModelScope.launch {
+        addressRepository.searchLimNetStreets(searchQuery, municipality).collect {
+            analTracker.log(AnalTag.SEARCH_STREETS_LIMNET.s()) {
+                param("query", searchQuery)
+                param("municipality", municipality.naam)
+            }
+            limNetStreetViewState.value = it.toViewState()
+        }
+    }
+
+    fun searchHouseNumbers(searchQuery: String, street: LimNetStreetDao) = viewModelScope.launch {
+        addressRepository.searchLimNetHouseNumbers(searchQuery, street).collect {
+            analTracker.log(AnalTag.SEARCH_HOUSENUMBERS_LIMNET.s()) {
+                param("query", searchQuery)
+                param("street", street.naam)
+            }
+            limNetHouseNumberViewState.value = it.toViewState()
         }
     }
 
     fun validateAddress(zipCodeItem: RecAppZipCodeItemDao, street: RecAppStreetDao, houseNumber: Int) = viewModelScope.launch {
         if (addressRepository.getAddresses().map { it.fullAddress }.contains(RecAppAddressDao(zipCodeItem, street, houseNumber).asGeneric().fullAddress)){
-            validationViewState.value = ValidationViewState.DuplicateAddressEntry
+            recAppValidationViewState.value = ValidationViewState.DuplicateAddressEntry
             return@launch
         }
 
         addressRepository.validateRecAppAddress(zipCodeItem, street, houseNumber).collect {
-            validationViewState.value = when (it) {
+            recAppValidationViewState.value = when (it) {
                 is Response.Loading -> ValidationViewState.Loading
                 is Response.Success -> {
-                    analTracker.log(AnalTag.VALIDATE_ADDRESS){
+                    analTracker.log(AnalTag.VALIDATE_ADDRESS.s()){
                         param("zipcode", zipCodeItem.code)
                         param("street", street.names.nl)
                         param("houseNumber", houseNumber.toString())
@@ -117,7 +151,7 @@ class AddressViewModel(
                     ValidationViewState.Success(it.body)
                 }
                 is Response.Error -> {
-                    analTracker.log(AnalTag.VALIDATE_ADDRESS) {
+                    analTracker.log(AnalTag.VALIDATE_ADDRESS.s()) {
                         param("error", it.error?.localizedMessage ?: "")
                     }
                     when (it.error) {
@@ -132,16 +166,16 @@ class AddressViewModel(
 
     fun validateExistingRecAppAddress(address: RecAppAddressDao) = viewModelScope.launch {
         addressRepository.validateExistingRecAppAddress(address).collect {
-            validationViewState.value = when (it) {
+            recAppValidationViewState.value = when (it) {
                 is Response.Loading -> ValidationViewState.Loading
                 is Response.Success -> {
-                    analTracker.log(AnalTag.VALIDATE_EXISTING_ADDRESS) {
+                    analTracker.log(AnalTag.VALIDATE_EXISTING_ADDRESS.s()) {
                         param("address", address.asGeneric().fullAddress)
                     }
                     ValidationViewState.Success(it.body)
                 }
                 is Response.Error -> {
-                    analTracker.log(AnalTag.VALIDATE_EXISTING_ADDRESS) {
+                    analTracker.log(AnalTag.VALIDATE_EXISTING_ADDRESS.s()) {
                         param("error", it.error?.localizedMessage ?: "")
                     }
                     when (it.error) {
@@ -155,20 +189,23 @@ class AddressViewModel(
     }
 
     fun resetAll() {
-        validationViewState.value = ValidationViewState.Empty
-        zipCodeItemsViewState.value = ListViewState.Empty()
-        streetsViewState.value = ListViewState.Empty()
-        analTracker.log(AnalTag.RESET_ALL)
+        recAppValidationViewState.value = ValidationViewState.Empty
+        recAppZipCodeItemsViewState.value = ListViewState.Empty()
+        recAppStreetsViewState.value = ListViewState.Empty()
+        limNetMunicipalityViewState.value = ListViewState.Empty()
+        limNetStreetViewState.value = ListViewState.Empty()
+        limNetHouseNumberViewState.value = ListViewState.Empty()
+        analTracker.log(AnalTag.RESET_ALL.s())
     }
 
     fun resetValidation() {
-        validationViewState.value = ValidationViewState.Empty
-        analTracker.log(AnalTag.RESET_VALIDATION)
+        recAppValidationViewState.value = ValidationViewState.Empty
+        analTracker.log(AnalTag.RESET_VALIDATION.s())
     }
 
     private fun createDefaultNotificationSettings(address: Address) {
         notificationRepo.insertDefaultNotificationProps(address)
-        analTracker.log(AnalTag.CREATE_DEFAULT_NOTIFICATION_SETTINGS)
+        analTracker.log(AnalTag.CREATE_DEFAULT_NOTIFICATION_SETTINGS.s())
     }
 }
 

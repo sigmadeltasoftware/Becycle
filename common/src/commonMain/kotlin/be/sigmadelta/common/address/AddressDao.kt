@@ -1,6 +1,9 @@
 package be.sigmadelta.common.address
 
 import be.sigmadelta.common.Faction
+import be.sigmadelta.common.address.limnet.LimNetHouseNumberDao
+import be.sigmadelta.common.address.limnet.LimNetMunicipalityDao
+import be.sigmadelta.common.address.limnet.LimNetStreetDao
 import be.sigmadelta.common.address.recapp.RecAppStreetDao
 import be.sigmadelta.common.address.recapp.RecAppZipCodeItemDao
 import kotlinx.serialization.Serializable
@@ -29,3 +32,20 @@ data class RecAppAddressDao(
     )
 }
 
+@Serializable
+data class LimNetAddressDao(
+    val municipality: LimNetMunicipalityDao,
+    val street: LimNetStreetDao,
+    val houseNumber: LimNetHouseNumberDao,
+    override val id: String = UUID.randomUUID().toString()
+) : AddressDao(), Metadata {
+
+    override fun asGeneric(): Address = Address(
+        zipCode = municipality.naam, // TODO
+        municipality = municipality.naam,
+        street = street.naam,
+        houseNumber = houseNumber.huisNummer,
+        faction = Faction.LIMNET,
+        id = id
+    )
+}

@@ -1,4 +1,4 @@
-package be.sigmadelta.becycle.address
+package be.sigmadelta.becycle.settings.recapp
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.ExperimentalMaterialApi
@@ -9,8 +9,6 @@ import be.sigmadelta.becycle.common.ui.theme.errorColor
 import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.becycle.common.util.AmbientAddress
 import be.sigmadelta.becycle.common.util.str
-import be.sigmadelta.becycle.settings.SettingsAddressManipulation
-import be.sigmadelta.becycle.settings.SettingsAddressManipulationActions
 import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.address.RecAppAddressDao
 import be.sigmadelta.common.address.recapp.RecAppStreetDao
@@ -22,7 +20,7 @@ fun SettingsRecAppAddressEditRemoval(
     addressId: String,
     zipCodeItemViewState: ListViewState<RecAppZipCodeItemDao>,
     streetsViewState: ListViewState<RecAppStreetDao>,
-    actions: SettingsAddressEditRemovalActions
+    actions: SettingsRecAppAddressEditRemovalActions
 ) {
 
     when (val addresses = AmbientAddress.current) {
@@ -31,14 +29,14 @@ fun SettingsRecAppAddressEditRemoval(
         is ListViewState.Success -> {
             addresses.payload.firstOrNull { it.id == addressId }?.let {
                 Column {
-                    SettingsAddressManipulation(
+                    SettingsRecAppAddressManipulation(
                         zipCodeItemsViewState = zipCodeItemViewState,
                         streetsViewState = streetsViewState,
-                        SettingsAddressManipulationActions(
-                            onSearchZipCode = actions.onSearchZipCode,
-                            onSearchStreet = actions.onSearchStreet,
+                        SettingsRecAppAddressManipulationActions(
+                            onSearchRecAppZipCode = actions.onSearchZipCode,
+                            onSearchRecAppStreet = actions.onSearchStreet,
                             onHouseNumberValueChanged = actions.onHouseNumberValueChanged,
-                            onValidateAddress = { zipCodeItem, street, houseNumber ->
+                            onValidateRecAppAddress = { zipCodeItem, street, houseNumber ->
                                 actions.onAddressChanged(
                                     RecAppAddressDao(
                                         id = it.id,
@@ -48,8 +46,10 @@ fun SettingsRecAppAddressEditRemoval(
                                     )
                                 )
                             },
+                            onLimNetZipCodeEntered = actions.onLimNetZipCodeEntered,
+                            onExit = actions.onExit,
                             onAddressRemove = actions.onAddressRemove,
-                            onBackClicked = actions.onBackClicked
+                            onBackClicked = actions.onBackClicked,
                         ),
                         R.string.edit_address.str(),
                         it,
@@ -60,11 +60,13 @@ fun SettingsRecAppAddressEditRemoval(
     }
 }
 
-data class SettingsAddressEditRemovalActions (
+data class SettingsRecAppAddressEditRemovalActions (
     val onSearchZipCode: (String) -> Unit,
     val onSearchStreet: (String, RecAppZipCodeItemDao) -> Unit,
     val onAddressChanged: (RecAppAddressDao) -> Unit,
     val onAddressRemove: (Address) -> Unit,
     val onHouseNumberValueChanged: () -> Unit,
-    val onBackClicked: () -> Unit
+    val onLimNetZipCodeEntered: () -> Unit,
+    val onBackClicked: () -> Unit,
+    val onExit: () -> Unit
 )

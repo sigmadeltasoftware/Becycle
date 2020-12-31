@@ -11,9 +11,9 @@ sealed class ApiResponse<T> {
     data class Error<T>(val error: Throwable? = null) : ApiResponse<T>()
 }
 
-fun <T> ApiResponse<SearchQueryResult<T>>.apiSearchRequestToFlow() = flow {
+fun <T> ApiResponse<SearchQueryResult<T>>.apiSearchQueryRequestToFlow() = flow {
     emit(Response.Loading())
-    emit(when (val response = this@apiSearchRequestToFlow) {
+    emit(when (val response = this@apiSearchQueryRequestToFlow) {
         is ApiResponse.Success -> Response.Success(response.body.items)
         is ApiResponse.Error -> Response.Error(response.error)
     })

@@ -8,6 +8,7 @@
     <string name="remove_address">Remove Address</string>
     <string name="add_address">Add Address</string>
     <string name="zipcode">Zipcode</string>
+    <string name="municipality">Municipality</string>
     <string name="street">Street</string>
     <string name="house_number">House Number</string>
     <string name="today">Today</string>

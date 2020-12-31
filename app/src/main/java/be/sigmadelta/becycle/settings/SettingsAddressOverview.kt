@@ -19,6 +19,7 @@ import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.becycle.common.ui.widgets.BecycleProgressIndicator
 import be.sigmadelta.becycle.common.util.AmbientAddress
 import be.sigmadelta.becycle.common.util.str
+import be.sigmadelta.common.Faction
 import be.sigmadelta.common.address.Address
 
 @Composable
@@ -74,7 +75,7 @@ fun SettingsAddressOverview(
                             }
                         }
                     }
-                    AddAddressItem(onAddAddressClicked = actions.onAddAddressClicked)
+                    AddAddressItem(onAddAddressClicked = { actions.onAddAddressClicked(Faction.RECAPP) })
                 }
                 is ListViewState.Error -> Text(text = "ERROR: ${addresses.error?.localizedMessage}")
             }
@@ -116,9 +117,9 @@ fun SettingsAddressOverviewItem(
 }
 
 @Composable
-fun AddAddressItem(onAddAddressClicked: () -> Unit) {
+fun AddAddressItem(onAddAddressClicked: (Faction) -> Unit) {
     Button(
-        onClick = onAddAddressClicked,
+        onClick = { onAddAddressClicked(Faction.RECAPP) },
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
     ) {
         Spacer(modifier = Modifier.weight(1f))
@@ -136,6 +137,6 @@ fun AddAddressItem(onAddAddressClicked: () -> Unit) {
 
 data class AddressOverviewActions(
     val onEditAddressClicked: (Address) -> Unit,
-    val onAddAddressClicked: () -> Unit,
+    val onAddAddressClicked: (Faction) -> Unit,
     val onBackClicked: () -> Unit
 )
