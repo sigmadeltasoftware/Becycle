@@ -2,6 +2,7 @@ package be.sigmadelta.common.collections.recapp
 
 import be.sigmadelta.common.address.RecAppAddressDao
 import be.sigmadelta.common.collections.CollectionException
+import be.sigmadelta.common.collections.RecAppCollectionDao
 import be.sigmadelta.common.util.ApiResponse
 import be.sigmadelta.common.util.SearchQueryResult
 import be.sigmadelta.common.util.SessionStorage
@@ -32,7 +33,7 @@ class RecAppCollectionsApi(
         fromDateYyyyMmDd: String,
         untilDateYyyyMmDd: String,
         size: Int
-    ): ApiResponse<SearchQueryResult<RecAppCollectionDao>> = try {
+    ): ApiResponse<List<RecAppCollectionDao>> = try {
         val response = client.get<HttpResponse> {
             url("$baseUrl/$COLLECTIONS_API")
             sessionStorage.attachHeaders(this)
@@ -69,17 +70,8 @@ class RecAppCollectionsApi(
         val collectionsMapped = collections.map { it.toCollection(address) }
         Napier.v("collections = $collections")
         Napier.v("collectionsMapped = $collectionsMapped")
-        val result = SearchQueryResult(
-            collectionsMapped,
-            surrogate.total,
-            surrogate.pages,
-            surrogate.size,
-            surrogate.self,
-            surrogate.first,
-            surrogate.last
-        )
 
-        ApiResponse.Success(result)
+        ApiResponse.Success(collectionsMapped)
     } catch (e: Throwable) {
         Napier.e("${e.message}\n${e.stackTraceToString()}")
         ApiResponse.Error(e)

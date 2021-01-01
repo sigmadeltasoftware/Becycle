@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import be.sigmadelta.becycle.common.analytics.AnalTag
 import be.sigmadelta.becycle.common.analytics.AnalyticsTracker
-import be.sigmadelta.becycle.common.analytics.UserProps
 import be.sigmadelta.becycle.common.ui.util.ListViewState
 import be.sigmadelta.becycle.common.ui.util.toViewState
 import be.sigmadelta.common.Faction
@@ -34,7 +33,7 @@ class AddressViewModel(
     val addressesViewState = MutableStateFlow<ListViewState<Address>>(ListViewState.Empty())
     val recAppZipCodeItemsViewState = MutableStateFlow<ListViewState<RecAppZipCodeItemDao>>(ListViewState.Empty())
     val recAppStreetsViewState = MutableStateFlow<ListViewState<RecAppStreetDao>>(ListViewState.Empty())
-    val recAppValidationViewState = MutableStateFlow<ValidationViewState>(ValidationViewState.Empty)
+    val validationViewState = MutableStateFlow<ValidationViewState>(ValidationViewState.Empty)
 
     val limNetMunicipalityViewState = MutableStateFlow<ListViewState<LimNetMunicipalityDao>>(ListViewState.Empty())
     val limNetStreetViewState = MutableStateFlow<ListViewState<LimNetStreetDao>>(ListViewState.Empty())
@@ -135,12 +134,12 @@ class AddressViewModel(
 
     fun validateAddress(zipCodeItem: RecAppZipCodeItemDao, street: RecAppStreetDao, houseNumber: Int) = viewModelScope.launch {
         if (addressRepository.getAddresses().map { it.fullAddress }.contains(RecAppAddressDao(zipCodeItem, street, houseNumber).asGeneric().fullAddress)){
-            recAppValidationViewState.value = ValidationViewState.DuplicateAddressEntry
+            validationViewState.value = ValidationViewState.DuplicateAddressEntry
             return@launch
         }
 
         addressRepository.validateRecAppAddress(zipCodeItem, street, houseNumber).collect {
-            recAppValidationViewState.value = when (it) {
+            validationViewState.value = when (it) {
                 is Response.Loading -> ValidationViewState.Loading
                 is Response.Success -> {
                     analTracker.log(AnalTag.VALIDATE_ADDRESS.s()){
@@ -166,7 +165,7 @@ class AddressViewModel(
 
     fun validateExistingRecAppAddress(address: RecAppAddressDao) = viewModelScope.launch {
         addressRepository.validateExistingRecAppAddress(address).collect {
-            recAppValidationViewState.value = when (it) {
+            validationViewState.value = when (it) {
                 is Response.Loading -> ValidationViewState.Loading
                 is Response.Success -> {
                     analTracker.log(AnalTag.VALIDATE_EXISTING_ADDRESS.s()) {
@@ -188,8 +187,15 @@ class AddressViewModel(
         }
     }
 
+    fun validateLimNetAddress(address: LimNetAddressDao) = viewModelScope.launch {
+        analTracker.log(AnalTag.VALIDATE_EXISTING_ADDRESS.s()) {
+            param("address", address.asGeneric().fullAddress)
+        }
+        validationViewState.value = ValidationViewState.Success(address)
+    }
+
     fun resetAll() {
-        recAppValidationViewState.value = ValidationViewState.Empty
+        validationViewState.value = ValidationViewState.Empty
         recAppZipCodeItemsViewState.value = ListViewState.Empty()
         recAppStreetsViewState.value = ListViewState.Empty()
         limNetMunicipalityViewState.value = ListViewState.Empty()
@@ -199,7 +205,7 @@ class AddressViewModel(
     }
 
     fun resetValidation() {
-        recAppValidationViewState.value = ValidationViewState.Empty
+        validationViewState.value = ValidationViewState.Empty
         analTracker.log(AnalTag.RESET_VALIDATION.s())
     }
 
@@ -212,7 +218,7 @@ class AddressViewModel(
 sealed class ValidationViewState {
     object Empty: ValidationViewState()
     object Loading: ValidationViewState()
-    data class Success(val address: RecAppAddressDao): ValidationViewState()
+    data class Success(val address: AddressDao): ValidationViewState()
     object InvalidCombination: ValidationViewState()
     object InvalidAddressSpecified: ValidationViewState()
     object NetworkError: ValidationViewState()

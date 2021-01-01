@@ -21,6 +21,7 @@ import be.sigmadelta.common.accesstoken.AccessTokenRepository
 import be.sigmadelta.common.address.limnet.LimNetAddressApi
 import be.sigmadelta.common.collections.recapp.RecAppCollectionsApi
 import be.sigmadelta.common.collections.CollectionsRepository
+import be.sigmadelta.common.collections.limnet.LimNetCollectionsApi
 import be.sigmadelta.common.notifications.NotificationRepo
 import be.sigmadelta.common.util.AuthorizationKeyExpiredException
 import be.sigmadelta.common.util.DBManager
@@ -64,6 +65,7 @@ val recycleModule = module {
     single { AccessTokenApi(RECYCLE_BASE_URL, get(), get()) }
     single { RecAppAddressApi(RECYCLE_BASE_URL, get(), get()) }
     single { LimNetAddressApi(LIMNET_BASE_URL, get()) }
+    single { LimNetCollectionsApi(LIMNET_BASE_URL, get()) }
     single { AccessTokenRepository(get()) }
     single { AddressRepository(get(), get(), get(), get()) }
     viewModel { AddressViewModel(get(), get(), get()) }
@@ -72,7 +74,7 @@ val recycleModule = module {
 
 val collectionsModule = module {
     single { RecAppCollectionsApi(RECYCLE_BASE_URL, get(), get()) }
-    single { CollectionsRepository(get(), get()) }
+    single { CollectionsRepository(get(), get(), get()) }
     viewModel { CollectionsViewModel(get(), get()) }
 }
 

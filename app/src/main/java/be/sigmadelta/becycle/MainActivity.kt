@@ -239,7 +239,7 @@ fun Main(
     val collectionOverview by collectionsViewModel.collectionsViewState.collectAsState()
     val recAppZipCodeItemsViewState by addressViewModel.recAppZipCodeItemsViewState.collectAsState()
     val recAppStreetsViewState by addressViewModel.recAppStreetsViewState.collectAsState()
-    val recAppValidation by addressViewModel.recAppValidationViewState.collectAsState()
+    val recAppValidation by addressViewModel.validationViewState.collectAsState()
     val limNetMunicipalityViewState by addressViewModel.limNetMunicipalityViewState.collectAsState()
     val limNetStreetViewState by addressViewModel.limNetStreetViewState.collectAsState()
     val limNetHouseNumberViewState by addressViewModel.limNetHouseNumberViewState.collectAsState()
@@ -388,7 +388,7 @@ fun Main(
                     onExit = addressViewModel::resetAll,
                     onBackClicked = { actions.pressOnBack() },
                     onSaveLimNetAddress = { municipality, street, houseNumber ->
-                        addressViewModel.saveAddress(LimNetAddressDao(municipality, street, houseNumber))
+                        addressViewModel.validateLimNetAddress(LimNetAddressDao(municipality, street, houseNumber))
                     },
                 )
             )

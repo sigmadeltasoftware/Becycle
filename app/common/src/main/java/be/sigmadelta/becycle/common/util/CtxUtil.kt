@@ -11,11 +11,11 @@ import be.sigmadelta.common.collections.CollectionType
 fun CollectionType.name(ctx: Context) = ctx.getString(when (this) {
     CollectionType.GFT -> R.string.collectiontype__GFT
     CollectionType.GFT_DIFTAR -> R.string.collectiontype__GFT_DIFTAR
-    CollectionType.RESIDUAL_HOUSEHOLD_WASTE -> R.string.collectiontype__RESIDUAL_HOUSEHOLD_WASTE
-    CollectionType.RESIDUAL_HOUSEHOLD_WASTE_DIFTAR -> R.string.collectiontype__RESIDUAL_HOUSEHOLD_WASTE_DIFTAR
+    CollectionType.GENERAL_HOUSEHOLD_WASTE -> R.string.collectiontype__RESIDUAL_HOUSEHOLD_WASTE
+    CollectionType.GENERAL_HOUSEHOLD_WASTE_DIFTAR -> R.string.collectiontype__RESIDUAL_HOUSEHOLD_WASTE_DIFTAR
     CollectionType.GROF_HUISVUIL -> R.string.collectiontype__GROF_HUISVUIL
     CollectionType.GROF_HUISVUIL_APPOINTMENT -> R.string.collectiontype__GROF_HUISVUIL_APPOINTMENT
-    CollectionType.PAPER_CARTON -> R.string.collectiontype__PAPER_CARTON
+    CollectionType.PAPER_CARDBOARD -> R.string.collectiontype__PAPER_CARTON
     CollectionType.PMD -> R.string.collectiontype__PMD
     CollectionType.TEXTILE -> R.string.collectiontype__TEXTILE
     CollectionType.LARGE_HOUSEHOLD_WASTE_APPOINTMENT -> R.string.collectiontype__LARGE_HOUSEHOLD_WASTE_APPOINTMENT

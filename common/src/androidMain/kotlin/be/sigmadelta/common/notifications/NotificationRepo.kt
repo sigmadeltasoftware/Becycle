@@ -13,15 +13,12 @@ import be.sigmadelta.common.Faction
 import be.sigmadelta.common.Preferences
 import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.address.AddressRepository
+import be.sigmadelta.common.collections.*
 import be.sigmadelta.common.collections.Collection
-import be.sigmadelta.common.collections.recapp.RecAppCollectionDao
-import be.sigmadelta.common.collections.CollectionType
-import be.sigmadelta.common.collections.CollectionsRepository
 import be.sigmadelta.common.date.Time
 import be.sigmadelta.common.db.appCtx
 import be.sigmadelta.common.util.DBManager
 import be.sigmadelta.common.util.Response
-import be.sigmadelta.common.util.TranslationContainer
 import be.sigmadelta.common.util.toTime
 import com.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.collect
@@ -225,10 +222,10 @@ actual class NotificationRepo(
     }
 }
 
-private fun List<RecAppCollectionDao>.filterByEnabledNotifications(props: NotificationProps) =
+private fun List<Collection>.filterByEnabledNotifications(props: NotificationProps) =
     filter { collection -> // Are notifications enabled for this collection type
         props.collectionSettings
-            .firstOrNull { it.type == collection.collectionType() }
+            .firstOrNull { it.type == collection.type }
             ?.enabled == true
     }.apply {
         Napier.d("filterByEnabledNotifications(): $this")

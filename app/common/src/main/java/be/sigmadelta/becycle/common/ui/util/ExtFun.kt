@@ -6,11 +6,11 @@ import be.sigmadelta.common.collections.CollectionType
 fun CollectionType.iconRef() = when (this) {
     CollectionType.GFT -> R.drawable.ic_gft
     CollectionType.GFT_DIFTAR -> R.drawable.ic_gft
-    CollectionType.RESIDUAL_HOUSEHOLD_WASTE -> R.drawable.ic_general_household_waste
-    CollectionType.RESIDUAL_HOUSEHOLD_WASTE_DIFTAR -> R.drawable.ic_general_household_waste
+    CollectionType.GENERAL_HOUSEHOLD_WASTE -> R.drawable.ic_general_household_waste
+    CollectionType.GENERAL_HOUSEHOLD_WASTE_DIFTAR -> R.drawable.ic_general_household_waste
     CollectionType.GROF_HUISVUIL -> R.drawable.ic_grof_huisvuil
     CollectionType.GROF_HUISVUIL_APPOINTMENT -> R.drawable.ic_grof_huisvuil
-    CollectionType.PAPER_CARTON -> R.drawable.ic_paper_cardboard
+    CollectionType.PAPER_CARDBOARD -> R.drawable.ic_paper_cardboard
     CollectionType.PMD -> R.drawable.ic_pmd
     CollectionType.TEXTILE -> R.drawable.ic_textiles
     CollectionType.LARGE_HOUSEHOLD_WASTE_APPOINTMENT -> R.drawable.ic_general_household_waste

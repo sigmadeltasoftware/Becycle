@@ -35,7 +35,6 @@ import be.sigmadelta.calpose.widgets.DefaultHeader
 import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.collections.Collection
 import be.sigmadelta.common.collections.CollectionException
-import be.sigmadelta.common.collections.recapp.RecAppCollectionDao
 import be.sigmadelta.common.collections.CollectionOverview
 import com.github.aakira.napier.Napier
 import kotlinx.coroutines.ExperimentalCoroutinesApi

@@ -5,8 +5,10 @@ import kotlinx.datetime.*
 
 fun addLeadingZeroBelow10(value: Int) = if (value < 10) "0$value" else value
 
+fun LocalDateTime.toYyyyMm() = "${year}-${addLeadingZeroBelow10(monthNumber)}"
+
 fun LocalDateTime.toYyyyMmDd() =
-    "${year}-${addLeadingZeroBelow10(monthNumber)}-${addLeadingZeroBelow10(dayOfMonth)}"
+    "${toYyyyMm()}-${addLeadingZeroBelow10(dayOfMonth)}"
 
 fun LocalDateTime.isToday(): Boolean {
     val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
@@ -26,4 +28,11 @@ fun LocalDateTime.toTime() = Time(this.hour, this.minute)
 fun Time.toLocalDateTime(): LocalDateTime {
     val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
     return LocalDateTime(now.year, now.month, now.dayOfMonth, hours, mins)
+}
+
+fun String.parseYyyyMmDdToLocalDateTime(): LocalDateTime {
+    val yyyy = substringBefore('-').toInt()
+    val mm = substringAfter('-').substringBefore('-').toInt()
+    val dd = substringAfter('-').substringAfter('-').substringBefore('T').toInt()
+    return LocalDateTime(yyyy, mm, dd, 1, 1)
 }

@@ -1,22 +1,20 @@
 package be.sigmadelta.common.collections
 
-import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.Faction
+import be.sigmadelta.common.address.Address
+import be.sigmadelta.common.address.LimNetAddressDao
 import be.sigmadelta.common.address.RecAppAddressDao
-import be.sigmadelta.common.collections.recapp.RecAppCollectionDao
+import be.sigmadelta.common.collections.limnet.LimNetCollectionsApi
 import be.sigmadelta.common.collections.recapp.RecAppCollectionsApi
 import be.sigmadelta.common.util.*
 import com.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.*
-import org.kodein.db.DB
-import org.kodein.db.deleteAll
-import org.kodein.db.find
-import org.kodein.db.useModels
 
 class CollectionsRepository(
     private val dbMan: DBManager,
-    private val collectionsApi: RecAppCollectionsApi
+    private val recAppCollectionsApi: RecAppCollectionsApi,
+    private val limNetCollectionsApi: LimNetCollectionsApi
 ) {
 
     suspend fun searchUpcomingCollections(
@@ -73,7 +71,7 @@ class CollectionsRepository(
             )
         },
         fetch = {
-            val date = referenceDate.toLocalDateTime(TimeZone.currentSystemDefault()).toYyyyMmDd()
+            val date = referenceDate.toLocalDateTime(TimeZone.currentSystemDefault())
             val datePlus2Months =
                 referenceDate.plus(DateTimePeriod(months = 2), TimeZone.currentSystemDefault())
                     .toLocalDateTime(TimeZone.currentSystemDefault())
@@ -85,18 +83,24 @@ class CollectionsRepository(
             ).toYyyyMmDd()
 
             when (address.faction) {
-                Faction.LIMNET, // TODO
+                // Convert generic address to specific type addres to retrieve necessary parameters
+                Faction.LIMNET -> {
+                    dbMan.findAll<LimNetAddressDao>(address.faction)
+                        .firstOrNull { it.id == address.id }?.let {
+                            limNetCollectionsApi.getCollections(it, date.toYyyyMm())
+                        }
+                }
                 Faction.RECAPP -> {
                     dbMan.findAll<RecAppAddressDao>(address.faction)
                         .firstOrNull { it.id == address.id }?.let {
-                            collectionsApi.getCollections(it, date, untilDate, 40)
+                            recAppCollectionsApi.getCollections(it, date.toYyyyMmDd(), untilDate, 40)
                         }
                 }
             }
         },
         saveFetchResult = { result ->
             when (result) {
-                is ApiResponse.Success -> storeCollections(result.body.items, address)
+                is ApiResponse.Success -> storeCollections(result.body, address)
                 is ApiResponse.Error -> Response.Error<List<RecAppCollectionDao>>(result.error)
             }
         }
@@ -106,10 +110,10 @@ class CollectionsRepository(
         dbMan.deleteAllCollectionsByAddress(address)
     }
 
-    private fun storeCollections(collection: List<RecAppCollectionDao>, address: Address) {
+    private fun storeCollections(collection: List<CollectionDao>, address: Address) {
         // TODO: Find a more efficient way to store collection without having to delete all prior ones before
         dbMan.deleteAllCollectionsByAddress(address)
-        dbMan.storeAll(collection, address.faction)
+        dbMan.storeCollections(collection)
     }
 
     private fun <T> List<T>.nullOnEmpty() = if (isEmpty()) null else this
