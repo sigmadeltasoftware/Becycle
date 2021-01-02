@@ -40,6 +40,9 @@ Would you like disable the battery optimisations for this app to make sure the r
 
                             Should your notification reminder be set to 09:00, the latest you can expect your notification
                             to be triggered is 09:15 (worst case).</string>
+    <string name="notifications_notification__title">Collection tomorrow!</string>
+    <string name="notifications_notification__text_single_collection">You have a %1$s collection tomorrow!</string>
+    <string name="notifications_notification__text_multiple_collections">You have multiple collections tomorrow!</string>
 
     <string name="validation__address_validated">Address Validated!</string>
     <string name="validation__error_invalid_address">Something went wrong, invalid Address combination. Please reselect your zipcode and street, and try again.</string>

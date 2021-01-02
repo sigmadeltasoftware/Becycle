@@ -8,7 +8,9 @@ import android.content.Context
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import androidx.work.*
+import be.sigmadelta.Becycle.common.R
 import be.sigmadelta.common.Faction
 import be.sigmadelta.common.Preferences
 import be.sigmadelta.common.address.Address
@@ -130,10 +132,10 @@ actual class NotificationRepo(
                     collectionRepo.searchUpcomingCollections(addr, shouldNotFetch = true).collect { response ->
                         when (response) {
                             is Response.Success -> {
-                                Napier.d("searchUpcomingCollections(): ${response.body}")
+                                Napier.v("searchUpcomingCollections(): ${response.body}")
 
                                 val tomorrowNotifications = response.body.tomorrow
-                                Napier.d("tomorrow = ${tomorrowNotifications?.map { it.type }}")
+                                Napier.v("tomorrow = ${tomorrowNotifications?.map { it.type }}")
 
                                 tomorrowNotifications?.let {
                                     createTomorrowNotifications(
@@ -166,8 +168,8 @@ actual class NotificationRepo(
 
             val (text, hasCollectionTomorrow) =  when (collections.size) {
                 0 -> "" to false // Do nothing when empty
-                1 -> "You have a ${collections.first().type.name(ctx)} collection tomorrow" to true
-                else -> "You have multiple collections tomorrow" to true
+                1 -> appCtx.getString(R.string.notifications_notification__text_single_collection, collections.first().type.name(ctx)) to true
+                else -> appCtx.getString(R.string.notifications_notification__text_multiple_collections) to true
             }
 
             val notificationId = address.id.hashCode()
@@ -175,7 +177,7 @@ actual class NotificationRepo(
             val notificationIdLabel = createNotificationIdLabel(today, notificationId, props.genericTomorrowAlarmTime)
             val notificationWasntTriggeredBefore = idList.map{ it.id }.contains(notificationIdLabel).not()
 
-            Napier.d("""
+            Napier.v("""
                 createTomorrowNotifications(): 
                 hasCollectionTomorrow = $hasCollectionTomorrow
                 now.hasPassed(props.genericTomorrowAlarmTime) = ${now.hasPassed(props.genericTomorrowAlarmTime)}
@@ -195,7 +197,7 @@ actual class NotificationRepo(
 
                 with(NotificationManagerCompat.from(appCtx)) {
                     val builder = NotificationCompat.Builder(appCtx, notif_chan_id)
-                        .setContentTitle("Collection Tomorrow!")
+                        .setContentTitle(appCtx.getString(R.string.notifications_notification__title))
                         .setSmallIcon(preferences.androidNotificationIconRef)
                         .setPriority(NotificationCompat.PRIORITY_HIGH)
                         .setStyle(

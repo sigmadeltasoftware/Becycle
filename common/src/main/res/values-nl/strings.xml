@@ -38,6 +38,9 @@ Wil je de batterij-optimalisaties voor Becycle uitschakelen, om er voor te zorge
                             een maximale foutmarge van 15 minuten bestaat voor de tijd die je geselecteerd hebt.\n\n
 
         Stel dat je je herinnering om 09:00 instelt, dan zou de herinnering in het slechtste geval te laatste om 09:15 verstuurd mogen worden.</string>
+    <string name="notifications_notification__title">Ophaling morgen!</string>
+    <string name="notifications_notification__text_single_collection">Je hebt een %1$s ophaling morgen!</string>
+    <string name="notifications_notification__text_multiple_collections">Er vinden morgen meerdere ophalingen plaats!</string>
 
     <string name="validation__address_validated">Adres Gevalideerd!</string>
     <string name="validation__error_invalid_address">Er ging iets mis, ongeldige adres combinatie. Gelieve uw postcode en straat te selecteren en opnieuw te proberen.</string>
