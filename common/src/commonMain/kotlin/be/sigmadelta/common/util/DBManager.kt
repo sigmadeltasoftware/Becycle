@@ -6,20 +6,19 @@ import be.sigmadelta.common.address.AddressDao
 import be.sigmadelta.common.address.LimNetAddressDao
 import be.sigmadelta.common.address.RecAppAddressDao
 import be.sigmadelta.common.address.recapp.legacy.LegacyRecappAddress
-import be.sigmadelta.common.collections.Collection
-import be.sigmadelta.common.collections.CollectionDao
-import be.sigmadelta.common.collections.LimNetCollectionDao
-import be.sigmadelta.common.collections.RecAppCollectionDao
+import be.sigmadelta.common.collections.*
+import be.sigmadelta.common.collections.Collection as TrashCollection
 import be.sigmadelta.common.db.getApplicationFilesDirectoryPath
 import be.sigmadelta.common.notifications.LegacyNotificationProps
 import be.sigmadelta.common.notifications.NotificationLabel
 import be.sigmadelta.common.notifications.NotificationProps
+import be.sigmadelta.common.util.unknownitem.UnknownItemRepository
 import com.github.aakira.napier.Napier
 import org.kodein.db.*
 import org.kodein.db.impl.factory
 import org.kodein.memory.use
 
-class DBManager {
+class DBManager(private val unknownItemRepository: UnknownItemRepository) {
 
     inline fun <reified T : Any> findAll(faction: Faction): List<T> = getDb(faction).find<T>()
         .all().use {
@@ -77,9 +76,21 @@ class DBManager {
         return addresses
     }
 
-    fun findAllCollectionsByAddress(address: Address): List<Collection> = when (address.faction) {
-        Faction.LIMNET -> innerFindAllCollectionsByAddress<LimNetCollectionDao>(address).map { it.asGeneric() }
-        Faction.RECAPP -> innerFindAllCollectionsByAddress<RecAppCollectionDao>(address).map { it.asGeneric() }
+    fun findAllCollectionsByAddress(address: Address): List<TrashCollection> = when (address.faction) {
+        Faction.LIMNET -> innerFindAllCollectionsByAddress<LimNetCollectionDao>(address).map {
+            it.asGeneric().apply {
+                if (type == CollectionType.UNKNOWN) {
+                    unknownItemRepository.postUnknownCollection(address, it)
+                }
+            }
+        }
+        Faction.RECAPP -> innerFindAllCollectionsByAddress<RecAppCollectionDao>(address).map {
+            it.asGeneric().apply {
+                if (type == CollectionType.UNKNOWN) {
+                    unknownItemRepository.postUnknownCollection(address, it)
+                }
+            }
+        }
     }
 
     private inline fun <reified T : Any> innerFindAllCollectionsByAddress(address: Address): List<T> {

@@ -23,12 +23,13 @@ import androidx.compose.ui.viewinterop.AndroidView
 import be.sigmadelta.becycle.R
 import be.sigmadelta.becycle.common.ui.theme.*
 import be.sigmadelta.becycle.common.ui.util.iconRef
-import be.sigmadelta.becycle.common.util.name
 import be.sigmadelta.becycle.common.util.str
 import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.collections.Collection
 import be.sigmadelta.common.collections.CollectionException
 import be.sigmadelta.common.collections.CollectionOverview
+import be.sigmadelta.common.util.addLeadingZeroBelow10
+import be.sigmadelta.common.util.name
 import kotlinx.datetime.*
 
 @ExperimentalMaterialApi
@@ -209,7 +210,7 @@ fun UpcomingCollectionItem(
             }
             Spacer(modifier = Modifier.weight(1f))
             Text(
-                text = "${collection.date.dayOfMonth}/${collection.date.monthNumber}",
+                text = "${addLeadingZeroBelow10(collection.date.dayOfMonth)}-${addLeadingZeroBelow10(collection.date.monthNumber)}",
                 fontSize = subTextFontSize,
                 color = textSecondary
             )

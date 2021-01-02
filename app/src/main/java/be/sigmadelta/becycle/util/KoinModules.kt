@@ -27,6 +27,8 @@ import be.sigmadelta.common.util.AuthorizationKeyExpiredException
 import be.sigmadelta.common.util.DBManager
 import be.sigmadelta.common.util.InvalidAddressException
 import be.sigmadelta.common.util.SessionStorage
+import be.sigmadelta.common.util.unknownitem.UnknownItemApi
+import be.sigmadelta.common.util.unknownitem.UnknownItemRepository
 import com.google.firebase.analytics.FirebaseAnalytics
 import io.ktor.client.*
 import io.ktor.client.features.*
@@ -42,7 +44,10 @@ private const val LIMNET_BASE_URL = "https://limburg.net/api-proxy/public"
 
 @ExperimentalMaterialApi
 val coreModule = module {
-    single { DBManager() }
+    single { client }
+    single { UnknownItemApi(get()) }
+    single { UnknownItemRepository(get()) }
+    single { DBManager(get()) }
     single { Preferences() }
     single { PendingIntent.getActivity(androidContext(), 0, Intent(androidContext(), SplashScreenActivity::class.java), 0) }
     single { NotificationRepo(androidContext(), get()) }
@@ -52,7 +57,6 @@ val coreModule = module {
 
 val sessionStorage = module {
     single { SessionStorage() }
-    single { client }
 }
 
 val baseHeadersModule = module {

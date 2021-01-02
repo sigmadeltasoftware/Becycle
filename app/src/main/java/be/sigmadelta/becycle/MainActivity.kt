@@ -474,7 +474,7 @@ fun Main(
         }
     }
 
-    ValidationSnackbar(recAppValidation, addressViewModel) {
+    ValidationSnackbar(recAppValidation, addressViewModel, collectionsViewModel) {
         if (preferences.isFirstRun) {
             act.startActivity(Intent(act, SplashScreenActivity::class.java))
             act.finish()
@@ -508,6 +508,7 @@ private fun showCollectionExceptionDialog(ctx: Context, ex: CollectionException)
 fun ValidationSnackbar(
     validationViewState: ValidationViewState,
     addressViewModel: AddressViewModel,
+    collectionsViewModel: CollectionsViewModel,
     onValidationSuccesful: () -> Unit
 ) {
     when (validationViewState) {
@@ -527,6 +528,7 @@ fun ValidationSnackbar(
             MainScope().launch {
                 (validationViewState as? ValidationViewState.Success)?.let { success ->
                     addressViewModel.saveAddress(success.address)
+                    collectionsViewModel.searchCollections(success.address.asGeneric())
                     onValidationSuccesful()
                     delay(1000)
                     resetViewStates(addressViewModel)

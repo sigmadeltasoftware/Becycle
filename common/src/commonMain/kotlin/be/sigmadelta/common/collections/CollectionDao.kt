@@ -60,12 +60,17 @@ data class LimNetCollectionDao(
     )
 
     private fun toCollectionType(): CollectionType = when(category.trim().toUpperCase()) {
-        "PMD" -> CollectionType.PMD
+        //TODO Look into limburgnet and get the other types of possible events and add them here
         "GFT",
         "GROENAFVAL" -> CollectionType.GFT
-        "PAPIER & KARTON" -> CollectionType.PAPER_CARDBOARD
+        "GROFVUIL" -> CollectionType.GROF_HUISVUIL
         "HUISVUIL" -> CollectionType.GENERAL_HOUSEHOLD_WASTE
         "KERSTBOOM" -> CollectionType.CHRISTMAS_TREES
+        "METAAL" -> CollectionType.OLD_METALS
+        "PAPIER & KARTON" -> CollectionType.PAPER_CARDBOARD
+        "PLASTICS" -> CollectionType.SOFT_PLASTICS
+        "PMD" -> CollectionType.PMD
+        "TEXTIEL" -> CollectionType.TEXTILE
         else -> CollectionType.UNKNOWN
     }
 }

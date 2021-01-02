@@ -3,6 +3,7 @@ package be.sigmadelta.common.address
 import be.sigmadelta.common.Faction
 import be.sigmadelta.common.address.limnet.LimNetHouseNumberDao
 import be.sigmadelta.common.address.limnet.LimNetMunicipalityDao
+import be.sigmadelta.common.address.limnet.LimNetNisToZipcodeUtil
 import be.sigmadelta.common.address.limnet.LimNetStreetDao
 import be.sigmadelta.common.address.recapp.RecAppStreetDao
 import be.sigmadelta.common.address.recapp.RecAppZipCodeItemDao
@@ -41,7 +42,7 @@ data class LimNetAddressDao(
 ) : AddressDao(), Metadata {
 
     override fun asGeneric(): Address = Address(
-        zipCode = municipality.naam, // TODO
+        zipCode = LimNetNisToZipcodeUtil.findZipcodeByNis(municipality.nisCode),
         municipality = municipality.naam,
         street = street.naam,
         houseNumber = houseNumber.huisNummer,

@@ -37,7 +37,8 @@ data class CollectionFractionLogoDao(val id: String) {
         "5d610b86162c063cc0400112" -> CollectionType.GENERAL_HOUSEHOLD_WASTE
         "5d610b86162c063cc0400105" -> CollectionType.IJZER
         "5d610b86162c063cc0400102" -> CollectionType.CHRISTMAS_TREES
-        "5d610b86162c063cc0400114" -> CollectionType.HOUSEHOLD_HAZARDEOUS_WASTE_KGA
+        "5d610b86162c063cc0400114", // TODO: KGA Mobiel
+        "5d610b86162c063cc0400115" -> CollectionType.HOUSEHOLD_HAZARDEOUS_WASTE_KGA
         "5d610b86162c063cc0400131" -> CollectionType.TEXTILE
         else -> CollectionType.UNKNOWN
     }

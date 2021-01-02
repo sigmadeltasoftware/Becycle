@@ -67,16 +67,10 @@ fun SettingsLimNetAddressManipulation(
             )
         },
         bodyContent = {
-
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 AndroidView(viewBlock = {
                     ImageView(it).apply {
-                        setImageDrawable(
-                            ContextCompat.getDrawable(
-                                it,
-                                R.drawable.ic_limburgnet
-                            )
-                        )
+                        setImageDrawable(ContextCompat.getDrawable(it, R.drawable.ic_limburgnet))
                     }
                 },
                     modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp, horizontal = 32.dp),

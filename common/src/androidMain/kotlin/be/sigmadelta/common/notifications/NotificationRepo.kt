@@ -19,6 +19,7 @@ import be.sigmadelta.common.date.Time
 import be.sigmadelta.common.db.appCtx
 import be.sigmadelta.common.util.DBManager
 import be.sigmadelta.common.util.Response
+import be.sigmadelta.common.util.name
 import be.sigmadelta.common.util.toTime
 import com.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.collect
@@ -109,7 +110,7 @@ actual class NotificationRepo(
     }
 
     class NotificationWorker(
-        appCtx: Context,
+        private val appCtx: Context,
         workerParams: WorkerParameters
     ) : CoroutineWorker(appCtx, workerParams), KoinComponent {
 
@@ -137,7 +138,8 @@ actual class NotificationRepo(
                                 tomorrowNotifications?.let {
                                     createTomorrowNotifications(
                                         it,
-                                        addr
+                                        addr,
+                                        appCtx
                                     )
                                 }
                             }
@@ -155,7 +157,8 @@ actual class NotificationRepo(
 
         private fun createTomorrowNotifications(
             collections: List<Collection>,
-            address: Address
+            address: Address,
+            ctx: Context
         ) {
             val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
             val now = today.toTime()
@@ -163,8 +166,7 @@ actual class NotificationRepo(
 
             val (text, hasCollectionTomorrow) =  when (collections.size) {
                 0 -> "" to false // Do nothing when empty
-                // TODO: Look into better way to extract names (maybe through strings?)
-                1 -> "You have a ${collections.first().type.name} collection tomorrow" to true
+                1 -> "You have a ${collections.first().type.name(ctx)} collection tomorrow" to true
                 else -> "You have multiple collections tomorrow" to true
             }
 
