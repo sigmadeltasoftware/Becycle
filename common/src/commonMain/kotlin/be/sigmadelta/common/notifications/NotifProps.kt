@@ -9,7 +9,7 @@ import org.kodein.db.model.orm.Metadata
 import org.kodein.memory.util.UUID
 
 @Serializable
-data class NotificationProps (
+data class NotifProps (
     override val id: String = UUID.randomUUID().toString(),
     val addressId: String,
     val zipCode: String,

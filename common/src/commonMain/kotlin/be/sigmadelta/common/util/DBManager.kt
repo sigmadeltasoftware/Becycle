@@ -5,17 +5,20 @@ import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.address.AddressDao
 import be.sigmadelta.common.address.LimNetAddressDao
 import be.sigmadelta.common.address.RecAppAddressDao
-import be.sigmadelta.common.address.recapp.legacy.LegacyRecappAddress
-import be.sigmadelta.common.collections.*
+import be.sigmadelta.common.collections.CollectionDao
+import be.sigmadelta.common.collections.CollectionType
+import be.sigmadelta.common.collections.LimNetCollectionDao
+import be.sigmadelta.common.collections.RecAppCollectionDao
+import be.sigmadelta.common.address.recapp.legacy.Address as LegacyAddress
 import be.sigmadelta.common.collections.Collection as TrashCollection
 import be.sigmadelta.common.db.getApplicationFilesDirectoryPath
-import be.sigmadelta.common.notifications.LegacyNotificationProps
 import be.sigmadelta.common.notifications.NotificationLabel
-import be.sigmadelta.common.notifications.NotificationProps
+import be.sigmadelta.common.notifications.legacy.NotificationProps
 import be.sigmadelta.common.util.unknownitem.UnknownItemRepository
 import com.github.aakira.napier.Napier
 import org.kodein.db.*
 import org.kodein.db.impl.factory
+import org.kodein.db.ldb.LevelDBOptions
 import org.kodein.memory.use
 
 class DBManager(private val unknownItemRepository: UnknownItemRepository) {
@@ -130,15 +133,15 @@ class DBManager(private val unknownItemRepository: UnknownItemRepository) {
     }
 
     fun findNotificationPropsByAddress(address: Address) = getDb(address.faction)
-        .find<NotificationProps>()
+        .find<be.sigmadelta.common.notifications.NotifProps>()
         .byIndex("addressId", address.id)
         .use {
             it.model()
         }
 
-    fun saveNotificationProps(newProps: NotificationProps, address: Address) {
+    fun saveNotificationProps(newProps: be.sigmadelta.common.notifications.NotifProps, address: Address) {
         val db = getDb(address.faction)
-        db.find<NotificationProps>().byIndex("addressId", address.id).use {
+        db.find<be.sigmadelta.common.notifications.NotifProps>().byIndex("addressId", address.id).use {
             if (it.isValid()) {
                 db.delete(it.key())
             }
@@ -147,10 +150,10 @@ class DBManager(private val unknownItemRepository: UnknownItemRepository) {
     }
 
     fun markNotificationTriggered(notificationLabel: NotificationLabel) {
-        notificationDb.put(notificationLabel)
+        notificationLabelDb.put(notificationLabel)
     }
 
-    fun getTriggeredNotificationLabels() = notificationDb.find<NotificationLabel>().all().use {
+    fun getTriggeredNotificationLabels() = notificationLabelDb.find<NotificationLabel>().all().use {
         it.useModels { it.toList() }
     }
 
@@ -160,18 +163,28 @@ class DBManager(private val unknownItemRepository: UnknownItemRepository) {
     }
 
     fun migrate() {
+
         Napier.d("Migrating legacy data")
-        legacyRecappDb.find<LegacyRecappAddress>().all().use { addr ->
+        legacyRecappDb.find<LegacyAddress>().all().use { addr ->
             addr.useModels { it.toList() }.forEach {
                 Napier.d("Migrating RecApp address: $it")
                 storeAddress(it.toRecappAddressDao())
             }
         }
 
-        legacyNotificationDb.find<LegacyNotificationProps>().all().use { props ->
-            props.useModels { it.toList() }.forEach {
+        legacyRecappDb.find<NotificationProps>().all().use { props ->
+            Napier.d("is valid: ${props.isValid()}")
+
+            props.useModels { it.toList() }.apply { Napier.d("size = $size") }.forEach {
                 Napier.d("Migrating RecApp notification props: $it")
                 recAppDb.put(it.toNotificationProps())
+            }
+        }
+
+        legacyNotificationDb.find<NotificationLabel>().all().use { labels ->
+            labels.useModels { it.toList() }.forEach {
+                Napier.d("Migrating notification label: $it")
+                notificationLabelDb.put(it)
             }
         }
     }
@@ -180,16 +193,16 @@ class DBManager(private val unknownItemRepository: UnknownItemRepository) {
         .inDir(getApplicationFilesDirectoryPath())
         .open("bc_recapp_db", TypeTable {
             root<RecAppAddressDao>()
-            root<NotificationProps>()
+            root<be.sigmadelta.common.notifications.NotifProps>()
         }, org.kodein.db.orm.kotlinx.KotlinxSerializer())
 
     private val limNetDb = DB.factory
         .inDir(getApplicationFilesDirectoryPath())
         .open("bc_limnet_db", TypeTable(), org.kodein.db.orm.kotlinx.KotlinxSerializer())
 
-    private val notificationDb = DB.factory
+    private val notificationLabelDb = DB.factory
         .inDir(getApplicationFilesDirectoryPath())
-        .open("bc_notif_db", TypeTable {
+        .open("bc_notif_label_db", TypeTable {
             root<NotificationLabel>()
         }, org.kodein.db.orm.kotlinx.KotlinxSerializer())
 
@@ -197,8 +210,8 @@ class DBManager(private val unknownItemRepository: UnknownItemRepository) {
         .inDir(getApplicationFilesDirectoryPath())
         .open("becycle_db", TypeTable {
             root<RecAppAddressDao>()
-            root<NotificationProps>()
-        }, org.kodein.db.orm.kotlinx.KotlinxSerializer())
+            root<be.sigmadelta.common.notifications.NotifProps>()
+        }, org.kodein.db.orm.kotlinx.KotlinxSerializer()) //TODO: Add for debugging ',LevelDBOptions.PrintLogs(true))'
 
     private val legacyNotificationDb = DB.factory
         .inDir(getApplicationFilesDirectoryPath())

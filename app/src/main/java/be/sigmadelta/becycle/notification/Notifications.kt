@@ -24,12 +24,12 @@ import be.sigmadelta.becycle.common.util.AmbientTabIndex
 import be.sigmadelta.becycle.common.util.str
 import be.sigmadelta.common.address.Address
 import be.sigmadelta.common.date.Time
-import be.sigmadelta.common.notifications.NotificationProps
+import be.sigmadelta.common.notifications.NotifProps
 import be.sigmadelta.common.notifications.NotificationRepo
 
 @Composable
 fun SettingsNotificationsOverview(
-    notificationProps: ListViewState<NotificationProps>,
+    notificationProps: ListViewState<NotifProps>,
     actions: SettingsNotificationsActions
 ) {
     Scaffold(
@@ -53,7 +53,7 @@ fun SettingsNotificationsOverview(
 
 @Composable
 fun SettingsNotifications(
-    notificationProps: ListViewState<NotificationProps>,
+    notificationProps: ListViewState<NotifProps>,
     actions: SettingsNotificationsActions
 ) {
     val selectedTabIx = AmbientTabIndex.current
@@ -110,7 +110,7 @@ fun SettingsNotifications(
 
 @Composable
 fun NotificationSettings(
-    notificationProps: NotificationProps,
+    notificationProps: NotifProps,
     onTomorrowAlarmTimeSelected: (Time) -> Unit
 ) {
     var notificationTimeToday by remember { mutableStateOf(notificationProps.genericTodayAlarmTime) }

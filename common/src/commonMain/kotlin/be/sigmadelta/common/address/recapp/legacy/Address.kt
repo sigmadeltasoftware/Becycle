@@ -11,7 +11,7 @@ import org.kodein.db.model.orm.Metadata
 import org.kodein.memory.util.UUID
 
 @Serializable
-data class LegacyRecappAddress(
+data class Address(
     val zipCodeItem: LegacyRecappZipCodeItem,
     val street: LegacyRecapStreet,
     val houseNumber: Int,

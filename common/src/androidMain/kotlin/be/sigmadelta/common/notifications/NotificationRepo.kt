@@ -54,7 +54,7 @@ actual class NotificationRepo(
     }
 
     fun insertDefaultNotificationProps(address: Address) {
-        val notificationProps = NotificationProps(
+        val notificationProps = NotifProps(
             UUID.randomUUID().toString(),
             address.id,
             address.zipCode,
@@ -77,10 +77,10 @@ actual class NotificationRepo(
 
     fun getNotificationProps(address: Address) = dbMan.findNotificationPropsByAddress(address)
 
-    fun getAllNotificationProps(): List<NotificationProps> {
-        val propList = mutableListOf<NotificationProps>()
+    fun getAllNotificationProps(): List<NotifProps> {
+        val propList = mutableListOf<NotifProps>()
         Faction.values().forEach {
-            propList.addAll(dbMan.findAll<NotificationProps>(it))
+            propList.addAll(dbMan.findAll(it))
         }
         return propList
     }
@@ -225,7 +225,7 @@ actual class NotificationRepo(
     }
 }
 
-private fun List<Collection>.filterByEnabledNotifications(props: NotificationProps) =
+private fun List<Collection>.filterByEnabledNotifications(props: NotifProps) =
     filter { collection -> // Are notifications enabled for this collection type
         props.collectionSettings
             .firstOrNull { it.type == collection.type }
