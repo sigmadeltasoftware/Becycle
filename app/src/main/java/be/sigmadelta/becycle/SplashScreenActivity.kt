@@ -113,11 +113,11 @@ class SplashScreenActivity : AppCompatActivity(), CoroutineScope by MainScope() 
             prefs.androidNotificationIconRef = R.drawable.ic_becycle
         }
 
-        Napier.e("hasMigrated = ${prefs.hasMigrated}")
+        Napier.d("hasMigrated = ${prefs.hasMigrated}")
         if (prefs.hasMigrated.not()) {
             dbMan.migrate()
             prefs.hasMigrated = true
-            Napier.e("Migrated successfully!")
+            Napier.d("Migrated successfully!")
         }
 
         baseHeadersViewModel.getBaseHeaders()

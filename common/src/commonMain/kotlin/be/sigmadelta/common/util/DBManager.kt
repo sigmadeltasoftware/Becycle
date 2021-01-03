@@ -160,14 +160,17 @@ class DBManager(private val unknownItemRepository: UnknownItemRepository) {
     }
 
     fun migrate() {
+        Napier.d("Migrating legacy data")
         legacyRecappDb.find<LegacyRecappAddress>().all().use { addr ->
             addr.useModels { it.toList() }.forEach {
+                Napier.d("Migrating RecApp address: $it")
                 storeAddress(it.toRecappAddressDao())
             }
         }
 
         legacyNotificationDb.find<LegacyNotificationProps>().all().use { props ->
             props.useModels { it.toList() }.forEach {
+                Napier.d("Migrating RecApp notification props: $it")
                 recAppDb.put(it.toNotificationProps())
             }
         }

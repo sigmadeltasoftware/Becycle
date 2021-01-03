@@ -8,7 +8,6 @@ import android.content.Context
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
 import androidx.work.*
 import be.sigmadelta.Becycle.common.R
 import be.sigmadelta.common.Faction
