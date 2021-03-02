@@ -1,0 +1,40 @@
+package be.sigmadelta.becycle.common.analytics
+
+enum class AnalTag {
+    // Access token
+    GET_ACCESS_TOKEN,
+
+    // Address
+    SAVE_ADDRESS,
+    LOAD_SAVED_ADDRESSES,
+    CLEAR_ALL_ADDRESSES,
+    REMOVE_ADDRESS,
+    SEARCH_ZIP_CODE,
+    SEARCH_STREETS,
+
+    VALIDATE_ADDRESS,
+    VALIDATE_EXISTING_ADDRESS,
+    RESET_ALL,
+    RESET_VALIDATION,
+    CREATE_DEFAULT_NOTIFICATION_SETTINGS,
+
+    // LimNet
+    SAVE_ADDRESS_LIMNET,
+    SEARCH_MUNICIPALITY_LIMNET,
+    SEARCH_STREETS_LIMNET,
+    SEARCH_HOUSENUMBERS_LIMNET,
+
+    // Base Headers
+    GET_BASE_HEADERS,
+
+    // Collections
+    SEARCH_COLLECTIONS,
+    REMOVE_COLLECTIONS,
+
+    // Notifications
+    LOAD_NOTIFICATION_PROPS,
+    SET_TOMORROW_ALARM_TIME,
+    SCHEDULE_WORKER;
+
+    fun s() = name.toLowerCase()
+}

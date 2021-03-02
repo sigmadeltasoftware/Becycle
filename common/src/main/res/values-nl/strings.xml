@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="send_feedback">Feedback Versturen</string>
+    <string name="more_information">Meer informatie</string>
+    <string name="create_address">Adres Aanmaken</string>
+    <string name="save_address">Adres Opslaan</string>
+    <string name="edit_address">Adres Wijzigen</string>
+    <string name="remove_address">Adres verwijderen</string>
+    <string name="add_address">Adres Toevoegen</string>
+    <string name="zipcode">Postcode</string>
+    <string name="municipality">Gemeente</string>
+    <string name="street">Straat</string>
+    <string name="house_number">Huisnummer</string>
+    <string name="today">Vandaag</string>
+    <string name="tomorrow">Morgen</string>
+    <string name="notifications">Notificatie</string>
+    <string name="version">Versie</string>
+    <string name="created_by">Gemaakt door</string>
+    <string name="retry_connecting">Opnieuw verbinden</string>
+
+    <string name="recycle_website__go_to">Naar de Recycle App website gaan?</string>
+    <string name="recycle_website__more_info">Wil je de Recycle App website bezoeken voor meer informatie?</string>
+
+    <string name="battery_optimisations__title">Batterij optimalisaties</string>
+    <string name="battery_optimisations__text">Mede door de aggressieve batterij-optimalisaties in Android, kan het zijn dat notificaties niet goed doorkomen op je toestel.\n\n
+Wil je de batterij-optimalisaties voor Becycle uitschakelen, om er voor te zorgen dat het versturen van notificaties niet verhindert wordt?</string>
+    <string name="battery_optimisations__go_to_settings">Ga naar de Instellingen</string>
+    <string name="battery_optimisations__turn_off_reminders">Notificaties uitschakelen</string>
+    <string name="battery_optimisations_disable__title">Batterij-optimalisaties Uitschakelen</string>
+    <string name="battery_optimisations_disable__text">Android zal het batterij-leven proberen verbeteren door in slaapstand te gaan. Deze slaapstand wordt \'Doze\' genoemd en kan het versturen van notificaties verhinderen.
+        \n\nOm er voor te zorgen dat notificaties nog kunnen doorkomen voor Becycle, moet de app ge-whitelist worden. Dit zal de app toestaan om ook herinneringen te versturen wanneer je toestel zich in \'Doze\' toestand bevindt.</string>
+
+    <string name="notifications__schedule">Notificaties Inplannen</string>
+    <string name="notifications__schedule_tomorrow_text">Notificaties voor de ophaling van morgen</string>
+    <string name="notifications_info__title">Notificatie Info</string>
+    <string name="notifications_info__text">Door enkele beperkingen opgelegd door het besturingssysteem voor de batterij-besparend \'Doze\' modus,
+                            is het alleen mogelijk om om de 15 min te checken of een notificatie verstuurd moet worden. Dit betekent dat er dus
+                            een maximale foutmarge van 15 minuten bestaat voor de tijd die je geselecteerd hebt.\n\n
+
+        Stel dat je je herinnering om 09:00 instelt, dan zou de herinnering in het slechtste geval te laatste om 09:15 verstuurd mogen worden.</string>
+    <string name="notifications_notification__title">Ophaling morgen!</string>
+    <string name="notifications_notification__text_single_collection">Je hebt een %1$s ophaling morgen!</string>
+    <string name="notifications_notification__text_multiple_collections">Er vinden morgen meerdere ophalingen plaats!</string>
+
+    <string name="validation__address_validated">Adres Gevalideerd!</string>
+    <string name="validation__error_invalid_address">Er ging iets mis, ongeldige adres combinatie. Gelieve uw postcode en straat te selecteren en opnieuw te proberen.</string>
+    <string name="validation__error_bad_network_response">Er ging iets mis, ongeldig antwoord van de server. Kijk uw verbinding na of probeer laten opnieuw.</string>
+    <string name="validation__error_invalid_address_specified">Ongeldig adres gespecifieerd. Kijk uw huisnummer na en probeer opnieuw.</string>
+    <string name="validation__error_duplicate_address_entry">Geen uniek adres. Voer aub een uniek adres in en probeer opnieuw.</string>
+
+    <string name="retrieve_addresses__error">Probleem bij het ophalen van de addressen!</string>
+    <string name="remove_address__text">Ben je zeker dat je dit adres wilt verwijderen?</string>
+
+    <string name="collections__upcoming">Komende ophalingen</string>
+    <string name="collections__no_scheduled">Geen geplande ophalingen</string>
+    <string name="collections__no_available_for">Geen ophalingen beschikbaar voor </string>
+
+    <string name="settings__address">Adres-instellingen</string>
+    <string name="settings__notifications">Notificatie-instellingen</string>
+    <string name="settings__addresses">Adressen</string>
+    <string name="settings__addresses_text">Beheer uw adressen hier</string>
+    <string name="settings__addressmanipulation_limnet_intercommunal">Limburg Intercommunale</string>
+    <string name="settings__disable_battery_optimisations">BATTERIJ-OPTIMALISATIES UITSCHAKELEN</string>
+    <string name="settings__give_higher_prio">HOGERE PRIORITEIT GEVEN</string>
+    <string name="settings__notifications_text">Beheer en maak notificaties aan</string>
+    <string name="settings__send_feedback_text">Mail ons omtrent een bug of geef ons uw mening en/of suggesties.</string>
+    <string name="settings_switch__modify_settings">Schakelaar aanzetten om instellingen te wijzigen</string>
+
+    <string name="splash_screen__error_check_connection">Kijk uw verbinding na en start de app opnieuw op</string>
+
+    <string name="collectiontype__GFT">GFT</string>
+    <string name="collectiontype__GFT_DIFTAR">GFT DIFTAR</string>
+    <string name="collectiontype__RESIDUAL_HOUSEHOLD_WASTE">Huisvuil</string>
+    <string name="collectiontype__RESIDUAL_HOUSEHOLD_WASTE_DIFTAR">Huisvuil DIFTAR</string>
+    <string name="collectiontype__GROF_HUISVUIL">Grof Huisvuil</string>
+    <string name="collectiontype__GROF_HUISVUIL_APPOINTMENT">Grof Huisvuil (Afspraak)</string>
+    <string name="collectiontype__PAPER_CARTON">Papier &amp; Karton</string>
+    <string name="collectiontype__PMD">PMD</string>
+    <string name="collectiontype__TEXTILE">Textiel</string>
+    <string name="collectiontype__LARGE_HOUSEHOLD_WASTE_APPOINTMENT">Groot Huisvuil (Afspraak)</string>
+    <string name="collectiontype__SOFT_PLASTICS">Zacht Plastic</string>
+    <string name="collectiontype__BATTERIES">Batterijen</string>
+    <string name="collectiontype__GLASS">Glas</string>
+    <string name="collectiontype__SNOEIHOUT">Snoeihout</string>
+    <string name="collectiontype__SNOEIHOUT_APPOINTMENT">Snoeihout (Afspraak)</string>
+    <string name="collectiontype__OLD_METALS">Oud Metaal</string>
+    <string name="collectiontype__RE_USE_CENTER">Kringloopwinkel</string>
+    <string name="collectiontype__IJZER">Ijzer</string>
+    <string name="collectiontype__CHRISTMAS_TREES">Kerstbomen</string>
+    <string name="collectiontype__HOUSEHOLD_HAZARDEOUS_WASTE_KGA">KGA</string>
+    <string name="collectiontype__STONE_RUBBLE">Steenpuin</string>
+    <string name="collectiontype__WOOD">Houtafval</string>
+    <string name="collectiontype__UNKNOWN">Onbekend</string>
+
+    <string name="goodbye_message">
+        Beste Gebruiker,\n\n
+
+        Becycle was een hobby-project gecreëerd vanuit het idee om afvalophalingen en bijhorende diensten te vergemakkelijken voor zowel gebruikers als dienstverleners.\n\n
+        Een deel van deze visie was ook het decentraliseren hiervan, om individuen meer inzicht en eigenaarschap te geven over de bijhorende processen en zo uiteindelijk het leven gemakkelijker te maken voor de
+        eindgebruikers alsook de organisaties hierachter. Jammer genoeg strookt dit laatste niet met de huidige visie van de betrokken partijen, en is er adhv informele communicatie een akkoord bereikt om dit
+        project stop te zetten om verdere escalatie te vermijden.\n\n
+
+        Doorgaan met dit project zou onbedoeld als een uitdaging naar de andere partijen toe geïnterpreteerd kunnen worden, en de operationele aspecten van dit project in leven te houden zouden enorm veel tijd en geld,
+        kunnen kosten verre van hetgene waar ik toe bereid ben om te investeren in een hobby-project.\n\n
+
+        Indien er bepaalde functionaliteiten zijn die je graag terugziet in andere afvalophalings-apps, raad ik sterk aan om deze aan te vragen via hun support-kanalen. De codebase van deze app zal als open source worden vrijgegeven,
+        waardoor alle geinteresseerde partijen vrij gebruik kunnen maken van alles wat in Becycle aangeboden werd.\n\n
+
+        Graag zou ik iedereen willen bedanken voor hun vertrouwen in dit project, en hoop ik dat jullie snel een geschikt alternatief zullen vinden.\n\n
+
+        Hoogachtend,\n
+        Bojan Belic\n
+        Sigma Delta Software Solutions
+    </string>
+
+    <string name="collectionexception__text">Deze ophaling wordt uitzonderlijk aangeboden ter compensatie van degene die normaal gezien op %1$s plaatsvond.</string>
+</resources>

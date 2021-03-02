@@ -1,0 +1,69 @@
+{
+  "project_info": {
+    "project_number": "426923129819",
+    "firebase_url": "https://sigmadelta-becycle.firebaseio.com",
+    "project_id": "sigmadelta-becycle",
+    "storage_bucket": "sigmadelta-becycle.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:426923129819:android:48d2a449b5c9582660c5fe",
+        "android_client_info": {
+          "package_name": "be.sigmadelta.becycle"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "426923129819-hi9gc2a9vrnpfnas6djh32u9ghhftd1b.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDXxKG2rIAhz8eKfABmZhvpcycizjjpYH8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "426923129819-hi9gc2a9vrnpfnas6djh32u9ghhftd1b.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:426923129819:android:ece8d499fe7f0e6a60c5fe",
+        "android_client_info": {
+          "package_name": "be.sigmadelta.becycle.debug"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "426923129819-hi9gc2a9vrnpfnas6djh32u9ghhftd1b.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDXxKG2rIAhz8eKfABmZhvpcycizjjpYH8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "426923129819-hi9gc2a9vrnpfnas6djh32u9ghhftd1b.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

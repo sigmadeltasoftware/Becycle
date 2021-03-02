@@ -1,0 +1,28 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Theme.Becycle" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <!-- Dark statusbar icons -->
+        <item name="android:windowLightStatusBar" tools:targetApi="l">true</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor" tools:targetApi="l">@color/white</item>
+        <item name="android:navigationBarColor">#A0A0A0</item>
+    </style>
+
+    <style name="Theme.Becycle.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="Theme.Becycle.SplashScreen" parent="Theme.Becycle.NoActionBar">
+        <item name="android:windowBackground">@drawable/splash_window_bg</item>
+        <item name="background">@drawable/splash_window_bg</item>
+    </style>
+
+    <style name="timePickerTheme" parent="@style/ThemeOverlay.MaterialComponents.Dialog">
+        <item name="colorControlActivated">#13DC98</item>
+        <item name="colorAccent">#13DC98</item>
+    </style>
+
+    <style name="Theme.MyApplication.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="Theme.MyApplication.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+</resources>

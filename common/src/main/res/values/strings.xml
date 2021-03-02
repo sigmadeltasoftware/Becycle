@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="send_feedback">Send Feedback</string>
+    <string name="more_information">More information</string>
+    <string name="create_address">Create Address</string>
+    <string name="save_address">Save Address</string>
+    <string name="edit_address">Edit Address</string>
+    <string name="remove_address">Remove Address</string>
+    <string name="add_address">Add Address</string>
+    <string name="zipcode">Zipcode</string>
+    <string name="municipality">Municipality</string>
+    <string name="street">Street</string>
+    <string name="house_number">House Number</string>
+    <string name="today">Today</string>
+    <string name="tomorrow">Tomorrow</string>
+    <string name="notifications">Notifications</string>
+    <string name="version">Version</string>
+    <string name="created_by">Created by</string>
+    <string name="retry_connecting">Retry connecting</string>
+
+    <string name="recycle_website__go_to">Go to Recycle App website?</string>
+    <string name="recycle_website__more_info">Would you like to visit the Recycle App website for additional information?</string>
+
+    <string name="battery_optimisations__title">Battery Optimisations</string>
+    <string name="battery_optimisations__text">Due to Android\'s aggressive battery optimisations, notification reminders might not work on your device.\n\n
+Would you like disable the battery optimisations for this app to make sure the reminders are allowed to trigger?</string>
+    <string name="battery_optimisations__go_to_settings">Go to Settings</string>
+    <string name="battery_optimisations__turn_off_reminders">Turn off notification reminders</string>
+    <string name="battery_optimisations_disable__title">Disable Battery Optimisations</string>
+    <string name="battery_optimisations_disable__text">Android will try to extend its battery life by letting the system go to sleep. This mode is called \'Doze\' and might prevent the apps from acting when necessary such as in the case of firing a reminder notification.\n\n
+        To disable this, Becycle needs to be whitelisted by disabling battery optimizations. This will allow the app to send reminders even when the system is in Doze mode.</string>
+
+    <string name="notifications__schedule">Schedule Notifications</string>
+    <string name="notifications__schedule_tomorrow_text">Notification for tomorrow\'s collection</string>
+    <string name="notifications_info__title">Notification Info</string>
+    <string name="notifications_info__text">Due to constraints set by the Android operating system for the power-saving \'Doze\' mode,
+                            we are only able to check whether a notification should be triggered every 15 minutes.
+                            This also implies that there is a 15 minute error margin window for the notification time
+                            you have selected.\n\n
+
+                            Should your notification reminder be set to 09:00, the latest you can expect your notification
+                            to be triggered is 09:15 (worst case).</string>
+    <string name="notifications_notification__title">Collection tomorrow!</string>
+    <string name="notifications_notification__text_single_collection">You have a %1$s collection tomorrow!</string>
+    <string name="notifications_notification__text_multiple_collections">You have multiple collections tomorrow!</string>
+
+    <string name="validation__address_validated">Address Validated!</string>
+    <string name="validation__error_invalid_address">Something went wrong, invalid Address combination. Please reselect your zipcode and street, and try again.</string>
+    <string name="validation__error_bad_network_response">Something went wrong, bad network response. Please check your connection or try again later.</string>
+    <string name="validation__error_invalid_address_specified">Invalid address specified. Please check your house number and try again</string>
+    <string name="validation__error_duplicate_address_entry">Duplicate address Entry. Please enter a unique address and try again</string>
+
+    <string name="retrieve_addresses__error">Failed to retrieve addresses!</string>
+    <string name="remove_address__text">Are you sure you want to remove this address?</string>
+
+    <string name="collections__upcoming">Upcoming Collections</string>
+    <string name="collections__no_scheduled">No scheduled collections</string>
+    <string name="collections__no_available_for">No collections available for </string>
+    
+    <string name="settings__address">Address Settings</string>
+    <string name="settings__notifications">Notification Settings</string>
+    <string name="settings__addresses">Address(es)</string>
+    <string name="settings__addresses_text">Manage your address(es) here</string>
+    <string name="settings__addressmanipulation_limnet_intercommunal">Limburg Intercommunal</string>
+    <string name="settings__disable_battery_optimisations">DISABLE BATTERY OPTIMISATIONS</string>
+    <string name="settings__give_higher_prio">GIVE HIGHER PRIORITY</string>
+    <string name="settings__notifications_text">Create and manage your notifications</string>
+    <string name="settings__send_feedback_text">Mail us any feedback such as bugs and/or feature requests</string>
+    <string name="settings_switch__modify_settings">Enable switch to modify settings</string>
+
+    <string name="splash_screen__error_check_connection">Please check your connection and try launching the app again</string>
+
+    <string name="collectiontype__GFT">GFT</string>
+    <string name="collectiontype__GFT_DIFTAR">GFT DIFTAR</string>
+    <string name="collectiontype__RESIDUAL_HOUSEHOLD_WASTE">Household Waste</string>
+    <string name="collectiontype__RESIDUAL_HOUSEHOLD_WASTE_DIFTAR">Household Waste DIFTAR</string>
+    <string name="collectiontype__GROF_HUISVUIL">Bulky Household Waste</string>
+    <string name="collectiontype__GROF_HUISVUIL_APPOINTMENT">Bulky Household Waste (Appointment)</string>
+    <string name="collectiontype__PAPER_CARTON">Paper, Cardboard,…</string>
+    <string name="collectiontype__PMD">Plastic/Carton Bottles</string>
+    <string name="collectiontype__TEXTILE">Textile</string>
+    <string name="collectiontype__LARGE_HOUSEHOLD_WASTE_APPOINTMENT">Large Household Waste (Appointment)</string>
+    <string name="collectiontype__SOFT_PLASTICS">Soft Plastics</string>
+    <string name="collectiontype__BATTERIES">Batteries</string>
+    <string name="collectiontype__GLASS">Glass</string>
+    <string name="collectiontype__SNOEIHOUT">Prunings</string>
+    <string name="collectiontype__SNOEIHOUT_APPOINTMENT">Prunings (Appointment)</string>
+    <string name="collectiontype__OLD_METALS">Old Metals</string>
+    <string name="collectiontype__RE_USE_CENTER">Reuse-Center Collection</string>
+    <string name="collectiontype__IJZER">Iron</string>
+    <string name="collectiontype__CHRISTMAS_TREES">Christmas Trees</string>
+    <string name="collectiontype__HOUSEHOLD_HAZARDEOUS_WASTE_KGA">Household Hazardeous Waste</string>
+    <string name="collectiontype__STONE_RUBBLE">Stone Rubble</string>
+    <string name="collectiontype__WOOD">Wood</string>
+    <string name="collectiontype__UNKNOWN">Unknown</string>
+
+    <string name="collectionexception__text">Collection is offered exceptionally in lieu of the one which normally took place on %1$s.</string>
+
+    <string name="goodbye_message">
+        Dear User,\n\n
+
+        Becycle was a pet project created from an effort to streamline and facilitate garbage collection services, and make life easier for both end users as the collective powers currently offering these services.\n\n
+        A part of this vision was also decentralization, granting individuals more insight and ownership of the processes involved. Sadly, the latter part doesn\'t correspond with the current vision of the involved organisations,
+        and through informal communication an agreement was reached to halt the project to prevent further escalation. \n\n
+
+        Pushing the project onwards could either be perceived as a hostile action against the organisations in charge, and/or the operational aspects of keeping this project running would become hugely resource-intensive,
+        far beyond the time &amp; money I intended to invest in it.\n\n
+
+        If there are certain features and/or aspects of this app you\'ve enjoyed and would like to see in other garbage collection apps, I would strongly advise you to contact their support department and make a feature request.
+        I\'m going to release the codebase for this app as open-source, allowing any-and-all other parties to freely make use of what was offered in Becycle.\n\n
+
+        As a small project, I would like to thank all of you for the trust and kind words you have shared with me, and I hope you will find a suitable alternative soon!\n\n
+
+        Kind regards,\n
+        Bojan Belic\n
+        Sigma Delta Software Solutions
+    </string>
+</resources>

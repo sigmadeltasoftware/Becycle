@@ -1,0 +1,5 @@
+enableFeaturePreview('GRADLE_METADATA')
+
+include ':app', ':common'
+rootProject.name='Becycle'
+include ':app:common'

@@ -1,0 +1,24 @@
+buildscript {
+    repositories {
+        google()
+        jcenter()
+    }
+    dependencies {
+        classpath("com.android.tools.build:gradle:${Versions.gradleTools}")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${Versions.kotlin}")
+        classpath("org.jetbrains.kotlin:kotlin-serialization:${Versions.kotlin}")
+        classpath("org.jetbrains.kotlin:kotlin-android-extensions-runtime:${Versions.kotlin}")
+        classpath("com.google.gms:google-services:${Versions.google_gms}")
+        classpath("com.google.firebase:firebase-crashlytics-gradle:${Versions.firebase_crashlytics_gradle}")
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        jcenter()
+        maven { url = "https://dl.bintray.com/ekito/koin" }
+        maven { url = "https://kotlin.bintray.com/kotlinx/" }
+        maven { url = "https://jitpack.io" }
+    }
+}
